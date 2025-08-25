@@ -31,7 +31,6 @@
 	
 	<!-- Additional SEO -->
 	<meta name="theme-color" content="#ff3e00" />
-	<link rel="alternate" type="application/rss+xml" title="Svelte Animate Icons Updates" href="/rss.xml" />
 	
 	<!-- Structured Data -->
 	<script type="application/ld+json">
