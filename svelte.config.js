@@ -8,6 +8,14 @@ const config = {
 	compilerOptions: {
 		runes: true
 	},
+	
+	onwarn: (warning, handler) => {
+		// Ignore a11y warnings during build
+		if (warning.code.startsWith('a11y-')) {
+			return;
+		}
+		handler(warning);
+	},
 
 	kit: {
 		// GitHub Pages static adapter

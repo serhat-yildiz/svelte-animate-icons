@@ -12,5 +12,18 @@ export default defineConfig({
 				'./dist'
 			]
 		}
+	},
+	build: {
+		rollupOptions: {
+			onwarn(warning, warn) {
+				// Suppress a11y warnings during build
+				if (warning.code === 'a11y-click-events-have-key-events' || 
+				    warning.code === 'a11y-no-static-element-interactions' ||
+				    warning.code === 'a11y-consider-explicit-label') {
+					return;
+				}
+				warn(warning);
+			}
+		}
 	}
 });
