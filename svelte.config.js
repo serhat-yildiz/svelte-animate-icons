@@ -31,7 +31,14 @@ const config = {
 		},
 		prerender: {
 			handleMissingId: 'warn',
-			entries: ['*']
+			entries: ['*'],
+			handleHttpError: ({ path, referrer, message }) => {
+				// Ignore favicon 404 errors
+				if (path.includes('favicon')) {
+					return;
+				}
+				throw new Error(message);
+			}
 		},
 		alias: {
 			'$lib': 'src/lib'
