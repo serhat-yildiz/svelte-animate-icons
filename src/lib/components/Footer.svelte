@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { getTotalIconCount } from '../registry/iconRegistry.js';
-	import { BicepsFlexedIcon, GithubIcon, HeartIcon, LinkedinIcon, XIcon } from 'svelte-animate-icons';
-	
+	import { BicepsFlexedIcon, GithubIcon, HeartIcon, LinkedinIcon, XIcon } from '$lib';
 	const currentYear = new Date().getFullYear();
 	const totalIcons = $derived(() => getTotalIconCount());
 </script>
