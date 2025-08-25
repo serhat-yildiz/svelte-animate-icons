@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { BicepsFlexedIcon, BlocksIcon, BoltIcon, CircleChevronRightIcon, CopyIcon } from 'svelte-animate-icons'
 	import { getAvailableIcons } from '../registry/iconRegistry.js';
-  import { CircleCheckBigIcon } from '$lib'
+  import { BicepsFlexedIcon, BlocksIcon, BoltIcon, CircleChevronRightIcon, CopyIcon, CircleCheckBigIcon } from '$lib';
 	
 	type TabType = 'npm' | 'pnpm' | 'bun';
 	

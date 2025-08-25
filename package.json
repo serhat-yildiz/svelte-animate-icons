@@ -58,8 +58,7 @@
 	},
 	"dependencies": {
 		"@fontsource/inter": "^5.2.6",
-		"clsx": "^2.1.1",
-		"svelte-animate-icons": "^1.0.0"
+		"clsx": "^2.1.1"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^6.1.0",

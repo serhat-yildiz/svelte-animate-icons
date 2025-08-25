@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { getTotalIconCount } from '../registry/iconRegistry.js';
-	import { BicepsFlexedIcon, HeartIcon } from 'svelte-animate-icons';
-	import GithubIcon from '../icons/GithubIcon.svelte';
+	import { BicepsFlexedIcon, HeartIcon, GithubIcon } from '$lib';
 	
 	let totalIcons = $derived(() => getTotalIconCount());
 	let mobileMenuOpen = $state(false);

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getTotalIconCount } from '../registry/iconRegistry.js';
-	import { HeartIcon, BellRingIcon, LoaderCircleIcon, ActivityIcon, SearchIcon, GithubIcon } from 'svelte-animate-icons';
+	import { HeartIcon, BellRingIcon, LoaderCircleIcon, ActivityIcon, SearchIcon, GithubIcon } from '$lib';
 	
 	let totalIcons = $derived(() => getTotalIconCount());
 	

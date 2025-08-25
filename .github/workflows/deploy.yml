@@ -18,9 +18,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: |
-          npm ci
-          npm ls svelte-animate-icons
+        run: npm ci
 
       - name: Build
         env:

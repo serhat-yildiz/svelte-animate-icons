@@ -1,16 +1,8 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
-	import { 
-		getAvailableIcons, 
-		getTotalIconCount, 
-		HeartIcon, 
-		BellIcon,
-		BoltIcon,
-		ActivityIcon,
-		BlocksIcon,
-		CodeIcon
-	} from 'svelte-animate-icons';
+	import { getAvailableIcons, getTotalIconCount } from '$lib/registry/iconRegistry.js';
+	import { HeartIcon, BellIcon, BoltIcon, ActivityIcon, BlocksIcon, CodeIcon } from '$lib';
 	
 	const totalIcons = getTotalIconCount();
 	const allIcons = getAvailableIcons();
