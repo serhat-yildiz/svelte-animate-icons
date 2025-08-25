@@ -3,6 +3,7 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import { getAvailableIcons, getTotalIconCount } from '$lib/registry/iconRegistry.js';
 	import { HeartIcon, BellIcon, BoltIcon, ActivityIcon, BlocksIcon, CodeIcon } from '$lib';
+	import { base } from '$app/paths';
 	
 	const totalIcons = getTotalIconCount();
 	const allIcons = getAvailableIcons();
@@ -144,7 +145,7 @@
 		<section class="browse-section">
 			<h2>Browse {totalIcons} Icons</h2>
 			<div class="browse-actions">
-				<a href="/#gallery" class="btn-primary">View All Icons</a>
+				<a href="{base}/#gallery" class="btn-primary">View All Icons</a>
 				<a href="https://github.com/serhat-yildiz/svelte-animate-icons" target="_blank" class="btn-secondary">
 					GitHub
 				</a>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getTotalIconCount } from '../registry/iconRegistry.js';
 	import { BicepsFlexedIcon, GithubIcon, HeartIcon, LinkedinIcon, XIcon } from '$lib';
+	import { base } from '$app/paths';
 	const currentYear = new Date().getFullYear();
 	const totalIcons = $derived(() => getTotalIconCount());
 </script>
@@ -38,8 +39,8 @@
 			<div class="footer-section">
 				<h4>Quick Start</h4>
 				<ul class="footer-links">
-					<li><a href="#install">Installation</a></li>
-					<li><a href="#gallery">Icon Gallery</a></li>
+					<li><a href="{base}/#install">Installation</a></li>
+					<li><a href="{base}/#gallery">Icon Gallery</a></li>
 					<li><a href="https://github.com/serhat-yildiz/svelte-animate-icons#usage" target="_blank">Usage Guide</a></li>
 				</ul>
 			</div>

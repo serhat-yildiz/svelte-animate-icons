@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getTotalIconCount } from '../registry/iconRegistry.js';
 	import { BicepsFlexedIcon, HeartIcon, GithubIcon } from '$lib';
+	import { base } from '$app/paths';
 	
 	let totalIcons = $derived(() => getTotalIconCount());
 	let mobileMenuOpen = $state(false);
@@ -41,8 +42,8 @@
 <header class="header">
 	<div class="container">
 		<div class="header-content">
-			<!-- Logo -->
-			<a href="/" class="logo">
+					<!-- Logo -->
+		<a href="{base}/" class="logo">
 				<div class="logo-icon">
 					<BicepsFlexedIcon size={32} />
 				</div>
@@ -54,13 +55,13 @@
 			
 			<!-- Desktop Navigation -->
 			<nav class="nav hide-mobile">
-				<a href="/docs" class="nav-link">
+				<a href="{base}/docs" class="nav-link">
 					Docs
 				</a>
-				<a href="/#gallery" class="nav-link">
+				<a href="{base}/#gallery" class="nav-link">
 					Gallery
 				</a>
-				<a href="/#install" class="nav-link">
+				<a href="{base}/#install" class="nav-link">
 					Install
 				</a>
 			</nav>
