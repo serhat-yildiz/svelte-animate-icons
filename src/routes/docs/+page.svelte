@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getAvailableIcons, getTotalIconCount } from '$lib/registry/iconRegistry.js';
+	import { getAvailableIcons, getTotalIconCount } from '$lib/registry/iconRegistry';
 	
 	const totalIcons = getTotalIconCount();
 	const allIcons = getAvailableIcons();
@@ -10,204 +10,105 @@
 
 <svelte:head>
 	<title>Docs - Svelte Animate Icons</title>
-	<meta name="description" content="Documentation for Svelte Animate Icons - Beautiful animated SVG icons for Svelte 5 applications" />
+	<meta name="description" content="Quick and simple animated SVG icons for Svelte 5 applications" />
 </svelte:head>
 
 <div class="docs-page">
 	<div class="container">
 		<!-- Header -->
 		<div class="docs-header">
-			<h1>Documentation</h1>
-			<p class="lead">
-				Learn how to use Svelte Animate Icons in your projects. 
-				Get started with installation, explore component API, and see examples.
-			</p>
+			<h1>Quick Start</h1>
+			<p class="lead">Simple. Fast. Beautiful animated icons for Svelte 5.</p>
 		</div>
 
-		<!-- Navigation -->
-		<nav class="docs-nav">
-			<a href="#installation" class="nav-link">Installation</a>
-			<a href="#basic-usage" class="nav-link">Basic Usage</a>
-			<a href="#component-api" class="nav-link">Component API</a>
-			<a href="#examples" class="nav-link">Examples</a>
-			<a href="#customization" class="nav-link">Customization</a>
-			<a href="#typescript" class="nav-link">TypeScript</a>
-		</nav>
+		<!-- Quick Install -->
+		<section class="install-section">
+			<h2>1. Install</h2>
+			<div class="code-block">
+				<code>npm install svelte-animate-icons</code>
+			</div>
+		</section>
 
-		<!-- Content -->
-		<div class="docs-content">
-			<!-- Installation -->
-			<section id="installation" class="docs-section">
-				<h2>Installation</h2>
-				<p>Install Svelte Animate Icons using your preferred package manager:</p>
-				
-				<div class="code-tabs">
-					<div class="tab-header">
-						<button class="tab-btn active">npm</button>
-						<button class="tab-btn">pnpm</button>
-						<button class="tab-btn">bun</button>
-					</div>
-					<div class="code-block">
-						<code>npm install svelte-animate-icons</code>
-					</div>
-				</div>
-			</section>
-
-			<!-- Basic Usage -->
-			<section id="basic-usage" class="docs-section">
-				<h2>Basic Usage</h2>
-				<p>Import and use icons in your Svelte components:</p>
-				
-				<div class="code-block">
-					<pre><code>{`<script>
-  import { HeartIcon, BellIcon, SearchIcon } from 'svelte-animate-icons';
+		<!-- Quick Usage -->
+		<section class="usage-section">
+			<h2>2. Use</h2>
+			<div class="code-block">
+				<pre><code>{`<script>
+  import { HeartIcon, BellIcon } from 'svelte-animate-icons';
 </script>
 
 <HeartIcon size={24} />
-<BellIcon size={32} class="text-blue-500" />
-<SearchIcon size={20} />`}</code></pre>
-				</div>
-
-				<div class="example-preview">
-					<h3>Live Preview</h3>
-					<div class="icon-examples">
-						{#each sampleIcons as icon}
-							<div class="icon-example">
-								<svelte:component this={icon.component} size={32} />
-								<span>{icon.name}</span>
-							</div>
-						{/each}
-					</div>
-				</div>
-			</section>
-
-			<!-- Component API -->
-			<section id="component-api" class="docs-section">
-				<h2>Component API</h2>
-				<p>All icon components accept the following props:</p>
-				
-				<div class="api-table">
-					<table>
-						<thead>
-							<tr>
-								<th>Prop</th>
-								<th>Type</th>
-								<th>Default</th>
-								<th>Description</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr>
-								<td><code>size</code></td>
-								<td><code>number</code></td>
-								<td><code>28</code></td>
-								<td>Icon size in pixels</td>
-							</tr>
-							<tr>
-								<td><code>class</code></td>
-								<td><code>string</code></td>
-								<td><code>""</code></td>
-								<td>CSS classes to apply</td>
-							</tr>
-							<tr>
-								<td><code>...restProps</code></td>
-								<td><code>any</code></td>
-								<td>-</td>
-								<td>Any additional HTML attributes</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-			</section>
-
-			<!-- Examples -->
-			<section id="examples" class="docs-section">
-				<h2>Examples</h2>
-				
-				<div class="example-group">
-					<h3>Size Variations</h3>
-					<div class="code-block">
-						<pre><code>{`<HeartIcon size={16} />  <!-- Small -->
-<HeartIcon size={24} />  <!-- Medium -->
-<HeartIcon size={32} />  <!-- Large -->
-<HeartIcon size={48} />  <!-- Extra Large -->`}</code></pre>
-					</div>
-				</div>
-
-				<div class="example-group">
-					<h3>With CSS Classes</h3>
-					<div class="code-block">
-						<pre><code>{`<BellIcon class="text-red-500 hover:text-red-700" />
-<SearchIcon class="opacity-75 transition-opacity" />
-<HeartIcon class="animate-pulse text-pink-500" />`}</code></pre>
-					</div>
-				</div>
-
-				<div class="example-group">
-					<h3>Event Handlers</h3>
-					<div class="code-block">
-						<pre><code>{`<script>
-  function handleClick() {
-    console.log('Icon clicked!');
-  }
-</script>
-
-<BellIcon onclick={handleClick} />
-<HeartIcon on:mouseenter={() => console.log('Hovered!')} />`}</code></pre>
-					</div>
-				</div>
-			</section>
-
-			<!-- Customization -->
-			<section id="customization" class="docs-section">
-				<h2>Customization</h2>
-				<p>Icons inherit color from their parent element and can be styled with CSS:</p>
-				
-				<div class="code-block">
-					<pre><code>{`.my-icon {
-  color: #3b82f6;
-  transition: color 0.2s ease;
-}
-
-.my-icon:hover {
-  color: #1d4ed8;
-  transform: scale(1.1);
-}`}</code></pre>
-				</div>
-			</section>
-
-			<!-- TypeScript -->
-			<section id="typescript" class="docs-section">
-				<h2>TypeScript Support</h2>
-				<p>Svelte Animate Icons is built with TypeScript and provides full type definitions:</p>
-				
-				<div class="code-block">
-					<pre><code>{`import type { ComponentType } from 'svelte';
-import { HeartIcon } from 'svelte-animate-icons';
-
-interface IconProps {
-  size?: number;
-  class?: string;
-  [key: string]: any;
-}
-
-const MyIcon: ComponentType<IconProps> = HeartIcon;`}</code></pre>
-				</div>
-			</section>
-
-			<!-- Footer -->
-			<div class="docs-footer">
-				<p>
-					Found an issue or want to contribute? 
-					<a href="https://github.com/serhat-yildiz/svelte-animate-icons" target="_blank" rel="noopener">
-						Visit our GitHub repository
-					</a>
-				</p>
-				<p class="stats">
-					📚 {totalIcons} animated icons available
-				</p>
+<BellIcon size={32} class="text-red-500" />`}</code></pre>
 			</div>
-		</div>
+			
+			<div class="live-demo">
+				<h3>Live Demo</h3>
+				<div class="icon-showcase">
+					{#each sampleIcons.slice(0, 4) as icon}
+						<div class="demo-icon">
+							<svelte:component this={icon.component} size={48} />
+						</div>
+					{/each}
+				</div>
+				<p class="demo-note">Hover to see animations</p>
+			</div>
+		</section>
+
+		<!-- Quick Reference -->
+		<section class="reference-section">
+			<h2>3. Customize</h2>
+			<div class="quick-props">
+				<div class="prop-item">
+					<code>size={24}</code>
+					<span>Icon size in pixels</span>
+				</div>
+				<div class="prop-item">
+					<code>class="my-style"</code>
+					<span>CSS classes for styling</span>
+				</div>
+				<div class="prop-item">
+					<code>onclick={() => {}}</code>
+					<span>Event handlers</span>
+				</div>
+			</div>
+		</section>
+
+		<!-- Features -->
+		<section class="features-section">
+			<div class="feature-grid">
+				<div class="feature">
+					<div class="feature-icon">⚡</div>
+					<h3>Lightning Fast</h3>
+					<p>Web Animations API for 60fps performance</p>
+				</div>
+				<div class="feature">
+					<div class="feature-icon">🎯</div>
+					<h3>Svelte 5 Ready</h3>
+					<p>Built with modern runes and reactivity</p>
+				</div>
+				<div class="feature">
+					<div class="feature-icon">📦</div>
+					<h3>Tiny Bundle</h3>
+					<p>Tree-shakeable, import only what you need</p>
+				</div>
+				<div class="feature">
+					<div class="feature-icon">🎨</div>
+					<h3>Easy Styling</h3>
+					<p>CSS-friendly, no complex configurations</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- Browse Icons -->
+		<section class="browse-section">
+			<h2>Browse {totalIcons} Icons</h2>
+			<div class="browse-actions">
+				<a href="/#gallery" class="btn-primary">View All Icons</a>
+				<a href="https://github.com/serhat-yildiz/svelte-animate-icons" target="_blank" class="btn-secondary">
+					GitHub
+				</a>
+			</div>
+		</section>
 	</div>
 </div>
 
@@ -215,7 +116,13 @@ const MyIcon: ComponentType<IconProps> = HeartIcon;`}</code></pre>
 	.docs-page {
 		min-height: 100vh;
 		background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-		padding: var(--space-3xl) 0;
+		padding: var(--space-2xl) 0;
+	}
+
+	.container {
+		max-width: 800px;
+		margin: 0 auto;
+		padding: 0 var(--space-lg);
 	}
 
 	.docs-header {
@@ -224,9 +131,9 @@ const MyIcon: ComponentType<IconProps> = HeartIcon;`}</code></pre>
 	}
 
 	.docs-header h1 {
-		font-size: clamp(2.5rem, 5vw, 3rem);
+		font-size: clamp(2.5rem, 6vw, 3.5rem);
 		font-weight: 800;
-		margin: 0 0 var(--space-lg);
+		margin: 0 0 var(--space-md);
 		background: linear-gradient(135deg, var(--svelte-primary), var(--svelte-secondary));
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
@@ -234,109 +141,47 @@ const MyIcon: ComponentType<IconProps> = HeartIcon;`}</code></pre>
 	}
 
 	.lead {
-		font-size: 1.125rem;
+		font-size: 1.25rem;
 		color: var(--text-secondary);
-		max-width: 600px;
-		margin: 0 auto;
-		line-height: 1.6;
+		margin: 0;
+		line-height: 1.5;
 	}
 
-	.docs-nav {
-		display: flex;
-		gap: var(--space-lg);
-		justify-content: center;
-		margin-bottom: var(--space-3xl);
-		flex-wrap: wrap;
-	}
-
-	.nav-link {
-		padding: var(--space-sm) var(--space-lg);
-		border-radius: var(--radius-lg);
-		background: var(--glass-bg);
-		border: 1px solid var(--glass-border);
-		color: var(--text-secondary);
-		text-decoration: none;
-		font-weight: 500;
-		transition: all var(--transition-normal);
-		backdrop-filter: blur(12px);
-	}
-
-	.nav-link:hover {
-		background: rgba(255, 62, 0, 0.1);
-		border-color: rgba(255, 62, 0, 0.3);
-		color: var(--svelte-primary);
-	}
-
-	.docs-content {
-		max-width: 800px;
-		margin: 0 auto;
-	}
-
-	.docs-section {
-		margin-bottom: var(--space-3xl);
-		padding: var(--space-2xl);
+	/* Sections */
+	section {
+		margin-bottom: var(--space-2xl);
+		padding: var(--space-xl);
 		background: var(--glass-bg);
 		border: 1px solid var(--glass-border);
 		border-radius: var(--radius-xl);
 		backdrop-filter: blur(12px);
 	}
 
-	.docs-section h2 {
-		font-size: 1.875rem;
+	section h2 {
+		font-size: 1.5rem;
 		font-weight: 700;
 		margin: 0 0 var(--space-lg);
 		color: var(--text-primary);
-	}
-
-	.docs-section h3 {
-		font-size: 1.25rem;
-		font-weight: 600;
-		margin: var(--space-xl) 0 var(--space-md);
-		color: var(--text-primary);
-	}
-
-	.docs-section p {
-		color: var(--text-secondary);
-		line-height: 1.6;
-		margin-bottom: var(--space-lg);
-	}
-
-	.code-tabs {
-		margin: var(--space-lg) 0;
-	}
-
-	.tab-header {
 		display: flex;
-		gap: 4px;
-		margin-bottom: 0;
+		align-items: center;
+		gap: var(--space-sm);
 	}
 
-	.tab-btn {
-		padding: var(--space-sm) var(--space-lg);
-		background: rgba(255, 255, 255, 0.05);
-		border: 1px solid var(--glass-border);
-		border-bottom: none;
-		border-radius: var(--radius-md) var(--radius-md) 0 0;
-		color: var(--text-secondary);
-		font-weight: 500;
-		cursor: pointer;
-		transition: all var(--transition-normal);
-	}
-
-	.tab-btn.active {
-		background: rgba(0, 0, 0, 0.2);
+	section h3 {
+		font-size: 1.125rem;
+		font-weight: 600;
+		margin: var(--space-lg) 0 var(--space-md);
 		color: var(--text-primary);
-		border-color: var(--glass-border);
 	}
 
+	/* Code blocks */
 	.code-block {
-		background: rgba(0, 0, 0, 0.2);
+		background: rgba(0, 0, 0, 0.3);
 		border: 1px solid var(--glass-border);
 		border-radius: var(--radius-lg);
 		padding: var(--space-lg);
 		overflow-x: auto;
 		font-family: 'Monaco', 'Menlo', monospace;
-		margin: var(--space-lg) 0;
 	}
 
 	.code-block code {
@@ -347,131 +192,189 @@ const MyIcon: ComponentType<IconProps> = HeartIcon;`}</code></pre>
 
 	.code-block pre {
 		margin: 0;
-		white-space: pre-wrap;
 	}
 
-	.example-preview {
-		margin: var(--space-xl) 0;
+	/* Live demo */
+	.live-demo {
+		margin-top: var(--space-xl);
+		text-align: center;
+	}
+
+	.icon-showcase {
+		display: flex;
+		gap: var(--space-lg);
+		justify-content: center;
+		margin: var(--space-lg) 0;
 		padding: var(--space-lg);
 		background: rgba(255, 255, 255, 0.02);
-		border: 1px solid var(--glass-border);
 		border-radius: var(--radius-lg);
+		border: 1px solid var(--glass-border);
 	}
 
-	.icon-examples {
-		display: flex;
-		gap: var(--space-xl);
-		align-items: center;
-		justify-content: center;
-		flex-wrap: wrap;
+	.demo-icon {
+		padding: var(--space-md);
+		border-radius: var(--radius-md);
+		transition: transform var(--transition-normal);
 	}
 
-	.icon-example {
+	.demo-icon:hover {
+		transform: scale(1.1);
+	}
+
+	.demo-note {
+		font-size: 0.875rem;
+		color: var(--text-tertiary);
+		font-style: italic;
+		margin: 0;
+	}
+
+	/* Quick props */
+	.quick-props {
 		display: flex;
 		flex-direction: column;
+		gap: var(--space-md);
+	}
+
+	.prop-item {
+		display: flex;
+		align-items: center;
+		gap: var(--space-md);
+		padding: var(--space-md);
+		background: rgba(255, 255, 255, 0.02);
+		border-radius: var(--radius-md);
+		border: 1px solid var(--glass-border);
+	}
+
+	.prop-item code {
+		background: rgba(255, 62, 0, 0.1);
+		color: var(--svelte-primary);
+		padding: 0.3em 0.6em;
+		border-radius: var(--radius-sm);
+		font-family: monospace;
+		font-weight: 600;
+		flex-shrink: 0;
+	}
+
+	.prop-item span {
+		color: var(--text-secondary);
+		font-size: 0.875rem;
+	}
+
+	/* Features */
+	.feature-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+		gap: var(--space-lg);
+		margin-top: var(--space-lg);
+	}
+
+	.feature {
+		text-align: center;
+		padding: var(--space-lg);
+		background: rgba(255, 255, 255, 0.02);
+		border-radius: var(--radius-lg);
+		border: 1px solid var(--glass-border);
+	}
+
+	.feature-icon {
+		font-size: 2rem;
+		margin-bottom: var(--space-md);
+	}
+
+	.feature h3 {
+		font-size: 1rem;
+		font-weight: 600;
+		margin: 0 0 var(--space-sm);
+		color: var(--text-primary);
+	}
+
+	.feature p {
+		font-size: 0.875rem;
+		color: var(--text-secondary);
+		margin: 0;
+		line-height: 1.4;
+	}
+
+	/* Browse section */
+	.browse-section {
+		text-align: center;
+	}
+
+	.browse-actions {
+		display: flex;
+		gap: var(--space-md);
+		justify-content: center;
+		margin-top: var(--space-lg);
+	}
+
+	.btn-primary, .btn-secondary {
+		padding: var(--space-md) var(--space-xl);
+		border-radius: var(--radius-lg);
+		text-decoration: none;
+		font-weight: 600;
+		transition: all var(--transition-normal);
+		display: inline-flex;
 		align-items: center;
 		gap: var(--space-sm);
 	}
 
-	.icon-example span {
-		font-size: 0.75rem;
-		color: var(--text-tertiary);
-		font-family: monospace;
+	.btn-primary {
+		background: var(--svelte-primary);
+		color: white;
+		border: 1px solid var(--svelte-primary);
 	}
 
-	.api-table {
-		overflow-x: auto;
-		margin: var(--space-lg) 0;
+	.btn-primary:hover {
+		background: var(--svelte-secondary);
+		transform: translateY(-2px);
+		box-shadow: 0 8px 25px rgba(255, 62, 0, 0.3);
 	}
 
-	.api-table table {
-		width: 100%;
-		border-collapse: collapse;
-		font-size: 0.875rem;
-	}
-
-	.api-table th,
-	.api-table td {
-		padding: var(--space-md);
-		text-align: left;
-		border-bottom: 1px solid var(--glass-border);
-	}
-
-	.api-table th {
-		background: rgba(255, 255, 255, 0.05);
-		font-weight: 600;
-		color: var(--text-primary);
-	}
-
-	.api-table td {
+	.btn-secondary {
+		background: transparent;
 		color: var(--text-secondary);
+		border: 1px solid var(--glass-border);
 	}
 
-	.api-table code {
-		background: rgba(255, 255, 255, 0.1);
-		padding: 0.2em 0.4em;
-		border-radius: 4px;
-		font-family: monospace;
-		color: var(--svelte-primary);
+	.btn-secondary:hover {
+		background: rgba(255, 255, 255, 0.05);
+		color: var(--text-primary);
+		border-color: rgba(255, 62, 0, 0.3);
 	}
 
-	.example-group {
-		margin: var(--space-xl) 0;
-	}
-
-	.docs-footer {
-		text-align: center;
-		margin-top: var(--space-3xl);
-		padding: var(--space-xl);
-		border-top: 1px solid var(--glass-border);
-	}
-
-	.docs-footer p {
-		margin: var(--space-sm) 0;
-		color: var(--text-tertiary);
-	}
-
-	.docs-footer a {
-		color: var(--svelte-primary);
-		text-decoration: none;
-		transition: color var(--transition-normal);
-	}
-
-	.docs-footer a:hover {
-		color: var(--svelte-secondary);
-	}
-
-	.stats {
-		font-size: 0.875rem;
-		font-weight: 600;
-		color: var(--svelte-primary);
-	}
-
+	/* Mobile */
 	@media (max-width: 768px) {
-		.docs-nav {
-			gap: var(--space-sm);
+		.container {
+			padding: 0 var(--space-md);
 		}
 
-		.nav-link {
-			padding: var(--space-xs) var(--space-md);
-			font-size: 0.875rem;
-		}
-
-		.docs-section {
+		section {
 			padding: var(--space-lg);
 		}
 
-		.icon-examples {
-			gap: var(--space-lg);
+		.icon-showcase {
+			flex-wrap: wrap;
+			gap: var(--space-md);
 		}
 
-		.api-table {
-			font-size: 0.75rem;
+		.feature-grid {
+			grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+			gap: var(--space-md);
 		}
 
-		.api-table th,
-		.api-table td {
-			padding: var(--space-sm);
+		.browse-actions {
+			flex-direction: column;
+			align-items: center;
+		}
+
+		.quick-props {
+			gap: var(--space-sm);
+		}
+
+		.prop-item {
+			flex-direction: column;
+			text-align: center;
+			gap: var(--space-sm);
 		}
 	}
 </style>

@@ -1,29 +1,19 @@
-# 🎨 Svelte Animate Icons
+# 🎯 Svelte Animate Icons
 
-> Beautiful, performant animated SVG icons built specifically for Svelte 5 with runes
+Beautiful, performant animated SVG icons for Svelte 5 with runes.
 
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
-[![Svelte 5](https://img.shields.io/badge/Svelte-5.0-ff3e00.svg)](https://svelte.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![npm version](https://badge.fury.io/js/svelte-animate-icons.svg)](https://badge.fury.io/js/svelte-animate-icons)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## ✨ Features
 
-- 🚀 **Built for Svelte 5** - Leverages the new runes system (`$state`, `$derived`, `$effect`)
-- ⚡ **High Performance** - Uses native Web Animations API instead of heavy frameworks
-- 📦 **Lightweight** - ~80% smaller bundle size compared to React alternatives
-- 🎯 **Developer Friendly** - Copy-paste ready code with multiple import options
-- 📱 **Mobile First** - Touch-optimized and responsive design
-- 🎨 **Professional UI** - Modern Svelte-inspired design language
-- 🔧 **TypeScript** - Full type safety and IntelliSense support
-
-## 🎯 Performance Goals
-
-| Metric | Target | React Alternative |
-|--------|--------|-------------------|
-| Bundle Size | ~12KB | ~45KB |
-| Runtime | Native WAAPI | JavaScript engine |
-| Initialization | <5ms | Variable |
-| Animation | 60fps | 60fps |
+- 🎯 **130+ animated icons** - Beautiful SVG icons with smooth hover animations
+- ⚡ **Lightning fast** - Built with Web Animations API for 60fps performance
+- 🎨 **Svelte 5 ready** - Modern runes system and reactivity
+- 📦 **Tiny bundle** - Tree-shakeable, import only what you need
+- 🎛️ **Easy styling** - CSS-friendly, no complex configurations
+- 🔧 **TypeScript** - Full type safety included
+- 📱 **Responsive** - Works perfectly on all devices
 
 ## 🚀 Quick Start
 
@@ -37,131 +27,171 @@ npm install svelte-animate-icons
 
 ```svelte
 <script>
-  import { BellIcon } from 'svelte-animate-icons';
-  
-  let bellRef;
+  import { HeartIcon, BellIcon, ActivityIcon } from 'svelte-animate-icons';
 </script>
 
-<!-- Auto animation on hover -->
-<BellIcon size={32} />
+<!-- Simple usage -->
+<HeartIcon size={24} />
 
-<!-- Programmatic control -->
-<button on:click={() => bellRef.startAnimation()}>
-  Animate
-</button>
-<BellIcon bind:this={bellRef} size={32} />
+<!-- With styling -->
+<BellIcon size={32} class="text-red-500" />
+
+<!-- All props -->
+<ActivityIcon 
+  size={28} 
+  class="text-blue-600 hover:text-blue-800" 
+  onclick={() => console.log('clicked!')}
+/>
 ```
 
-## 📚 Available Icons
+## 📋 Available Props
 
-Currently available icons with animations:
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `size` | `number` | `28` | Icon size in pixels |
+| `class` | `string` | `""` | CSS classes for styling |
+| All HTML attributes | | | Standard HTML attributes |
 
-- ✅ **BellIcon** - Ringing animation with clapper motion
-
-*More icons are being added regularly! Each icon is hand-crafted with smooth, performant animations.*
-
-## 🛠️ API Reference
-
-### Icon Props
-
-```typescript
-interface IconProps {
-  size?: number;           // Icon size in pixels (default: 24)
-  class?: string;          // CSS classes
-  // All standard HTML div props
-}
-```
-
-### Icon Methods
-
-```typescript
-interface IconHandle {
-  startAnimation(): void;  // Start the animation
-  stopAnimation(): void;   // Stop the animation
-  isAnimating(): boolean;  // Check if currently animating
-}
-```
-
-### Example
+## 🎨 Styling Examples
 
 ```svelte
 <script>
-  import { BellIcon } from 'svelte-animate-icons';
-  
-  let iconRef;
-  let isPlaying = $state(false);
-  
-  function toggleAnimation() {
-    if (iconRef.isAnimating()) {
-      iconRef.stopAnimation();
-      isPlaying = false;
-    } else {
-      iconRef.startAnimation();
-      isPlaying = true;
-    }
-  }
+  import { HeartIcon, StarIcon, CheckIcon } from 'svelte-animate-icons';
 </script>
 
-<BellIcon 
-  bind:this={iconRef}
-  size={48}
-  class="text-blue-500"
+<!-- Tailwind CSS -->
+<HeartIcon class="text-red-500 hover:text-red-600" size={32} />
+
+<!-- Custom CSS -->
+<StarIcon class="my-star-icon" size={24} />
+
+<!-- Inline styles -->
+<CheckIcon 
+  size={20} 
+  style="color: green; transform: rotate(15deg);"
 />
 
-<button on:click={toggleAnimation}>
-  {isPlaying ? 'Stop' : 'Play'} Animation
-</button>
+<style>
+  :global(.my-star-icon) {
+    color: gold;
+    transition: all 0.3s ease;
+  }
+  
+  :global(.my-star-icon:hover) {
+    color: orange;
+    transform: scale(1.1);
+  }
+</style>
 ```
 
-## 🎨 Design System
+## 🎯 Animation Behavior
 
-The project follows Svelte's official design language with:
+All icons come with built-in hover animations:
+- **Automatic**: Animations trigger on mouse hover
+- **Smooth**: 60fps performance using Web Animations API
+- **Accessible**: Respects `prefers-reduced-motion`
 
-- **Color Palette**: Svelte Orange (#ff3e00) as primary
-- **Typography**: Inter font family
-- **Spacing**: Consistent scale system
-- **Glass Effects**: Backdrop blur and transparency
-- **Mobile-First**: Touch-friendly interactions
+## 📚 Available Icons
 
-## 🏗️ Architecture
+Browse all 130+ icons at: [Icon Gallery](https://svelte-animate-icons.vercel.app/#gallery)
 
-Built with modern web standards:
+### Popular Icons
 
-- **Svelte 5 Runes** - Reactive state management
-- **Web Animations API** - Native browser animations
-- **TypeScript** - Type safety and DX
-- **Vite** - Fast build system
-- **CSS Custom Properties** - Theme system
+```svelte
+<!-- UI Icons -->
+<CheckIcon />
+<XIcon />
+<MenuIcon />
+<SearchIcon />
 
-## 🤝 Contributing
+<!-- Communication -->
+<HeartIcon />
+<BellIcon />
+<MailsIcon />
+<MessageCircleIcon />
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+<!-- Actions -->
+<DownloadIcon />
+<UploadIcon />
+<CopyIcon />
+<TrashIcon />
 
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+<!-- Currency -->
+<DollarSignIcon />
+<EuroIcon />
+<BitcoinIcon />
+
+<!-- Social -->
+<GithubIcon />
+<TwitterIcon />
+<LinkedinIcon />
+<FacebookIcon />
+```
+
+## 🛠️ Framework Integration
+
+### SvelteKit
+
+```svelte
+<!-- +page.svelte -->
+<script>
+  import { ActivityIcon, BellIcon } from 'svelte-animate-icons';
+</script>
+
+<div class="icon-grid">
+  <ActivityIcon size={32} />
+  <BellIcon size={32} />
+</div>
+```
+
+### With Tailwind CSS
+
+```svelte
+<script>
+  import { HeartIcon } from 'svelte-animate-icons';
+</script>
+
+<HeartIcon 
+  class="text-red-500 hover:text-red-600 transition-colors duration-200" 
+  size={24} 
+/>
+```
+
+## 📦 Bundle Size
+
+- **Individual icon**: ~2KB gzipped
+- **Core runtime**: ~5KB gzipped
+- **Tree-shakeable**: Only import what you use
+
+## 🎭 Performance
+
+- **60fps** smooth animations
+- **Web Animations API** for optimal performance
+- **No runtime dependencies** (except Svelte)
+- **Minimal memory footprint**
+
+## 🌐 Browser Support
+
+Modern browsers that support:
+- Svelte 5
+- Web Animations API
+- ES2020+
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT © [Serhat YILDIZ](https://github.com/serhat-yildiz)
 
-## 👨‍💻 Author
+## 🤝 Contributing
 
-**Serhat YILDIZ**
-- Frontend Developer
-- 📧 [serhatgulcanyldz04@gmail.com](mailto:serhatgulcanyldz04@gmail.com)
-- 💼 [LinkedIn](https://www.linkedin.com/in/serhat-yldz/)
-- 🐙 [GitHub](https://github.com/serhat-yildiz)
-- 🐦 [X (Twitter)](https://x.com/themedess)
+Contributions welcome! Please read our [contributing guide](CONTRIBUTING.md) first.
 
-## 🙏 Acknowledgments
+## 🔗 Links
 
-- Inspired by [Lucide Icons](https://lucide.dev/) and [React Icons](https://react-icons.github.io/react-icons/)
-- Built on the shoulders of the amazing Svelte team
-- Thanks to the open-source community
+- [Documentation](https://svelte-animate-icons.vercel.app/docs)
+- [Icon Gallery](https://svelte-animate-icons.vercel.app/#gallery) 
+- [GitHub](https://github.com/serhat-yildiz/svelte-animate-icons)
+- [npm](https://www.npmjs.com/package/svelte-animate-icons)
 
 ---
 
-*Made with ❤️ for the Svelte community*
+Built with ❤️ for the Svelte community.

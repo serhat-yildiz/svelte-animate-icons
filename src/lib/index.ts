@@ -143,4 +143,4 @@ export { default as XIcon } from './icons/XIcon.svelte';
 export { default as YenYuanIcon } from './icons/YenYuanIcon.svelte';
 
 // Version info
-export const version = '0.0.1';
+export const version = '1.0.0';

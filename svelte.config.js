@@ -10,6 +10,7 @@ const config = {
 	},
 
 	kit: {
+		// adapter for development/demo site
 		adapter: adapter(),
 		alias: {
 			'$lib': 'src/lib'
