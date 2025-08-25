@@ -33,8 +33,8 @@ const config = {
 			handleMissingId: 'warn',
 			entries: ['*'],
 			handleHttpError: ({ path, referrer, message }) => {
-				// Ignore favicon 404 errors
-				if (path.includes('favicon')) {
+				// Ignore favicon and manifest 404 errors
+				if (path.includes('favicon') || path.includes('manifest')) {
 					return;
 				}
 				throw new Error(message);
