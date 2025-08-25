@@ -24,10 +24,14 @@ const config = {
 			assets: 'build',
 			fallback: undefined,
 			precompress: false,
-			strict: true
+			strict: false
 		}),
 		paths: {
 			base: process.env.NODE_ENV === 'production' ? '/svelte-animate-icons' : ''
+		},
+		prerender: {
+			handleMissingId: 'warn',
+			entries: ['*']
 		},
 		alias: {
 			'$lib': 'src/lib'
