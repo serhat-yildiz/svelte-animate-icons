@@ -1,9 +1,30 @@
 <script lang="ts">
 	import { getTotalIconCount } from '../registry/iconRegistry.js';
+	import { BicepsFlexedIcon, HeartIcon } from 'svelte-animate-icons';
 	import GithubIcon from '../icons/GithubIcon.svelte';
 	
 	let totalIcons = $derived(() => getTotalIconCount());
 	let mobileMenuOpen = $state(false);
+	let starCount = $state(0);
+	
+	// GitHub API'den gerçek yıldız sayısını al
+	async function fetchStarCount() {
+		try {
+			const response = await fetch('https://api.github.com/repos/serhat-yildiz/svelte-animate-icons');
+			const data = await response.json();
+			starCount = data.stargazers_count || 0;
+			console.log('GitHub stars:', starCount); // Debug için
+		} catch (error) {
+			console.log('Star count fetch failed:', error);
+			// Geçici olarak test değeri atalım
+			starCount = 1;
+		}
+	}
+	
+	// Component mount olduğunda yıldız sayısını al
+	$effect(() => {
+		fetchStarCount();
+	});
 	
 	function toggleMobileMenu() {
 		mobileMenuOpen = !mobileMenuOpen;
@@ -24,9 +45,7 @@
 			<!-- Logo -->
 			<a href="/" class="logo">
 				<div class="logo-icon">
-					<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>
-					</svg>
+					<BicepsFlexedIcon size={32} />
 				</div>
 				<div class="logo-text">
 					<h1>AnimateIcons</h1>
@@ -49,13 +68,6 @@
 			
 			<!-- Action Buttons -->
 			<div class="actions">
-				<div class="star-count glass">
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="star-icon">
-						<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-					</svg>
-					<span>{totalIcons()}</span>
-				</div>
-				
 				<a 
 					href="https://github.com/serhat-yildiz/svelte-animate-icons" 
 					target="_blank" 
@@ -64,6 +76,10 @@
 				>
 					<GithubIcon size={20} />
 					<span class="hide-mobile">GitHub</span>
+					<div class="star-count">
+						<HeartIcon size={14} />
+						<span>{starCount}</span>
+					</div>
 				</a>
 				
 				<!-- Mobile Menu Button -->
@@ -82,13 +98,13 @@
 			<div class="mobile-menu animate-fade-in">
 				<nav class="mobile-nav">
 					<button class="mobile-nav-link" onclick={() => scrollToSection('docs')}>
-						📚 Docs
+						Docs
 					</button>
 					<button class="mobile-nav-link" onclick={() => scrollToSection('gallery')}>
-						🎨 Gallery
+						Gallery
 					</button>
 					<button class="mobile-nav-link" onclick={() => scrollToSection('install')}>
-						📦 Install
+						Install
 					</button>
 				</nav>
 			</div>
@@ -192,20 +208,17 @@
 	.star-count {
 		display: flex;
 		align-items: center;
-		gap: var(--space-sm);
-		padding: var(--space-sm) var(--space-md);
-		border-radius: var(--radius-md);
-		font-size: 0.875rem;
+		gap: 4px;
+		margin-left: var(--space-sm);
+		padding: 2px 6px;
+		background: rgba(255, 255, 255, 0.1);
+		border-radius: 12px;
+		font-size: 0.75rem;
 		font-weight: 600;
 		color: var(--text-primary);
 	}
 	
-	.star-icon {
-		color: var(--svelte-primary);
-		margin-right: var(--space-xs);
-		flex-shrink: 0;
-		animation: pulse 2s ease-in-out infinite;
-	}
+
 	
 	.github-link {
 		display: flex;

@@ -1,5 +1,16 @@
 <script lang="ts">
-	import { getAvailableIcons, getTotalIconCount } from '$lib/registry/iconRegistry';
+	import Header from '$lib/components/Header.svelte';
+	import Footer from '$lib/components/Footer.svelte';
+	import { 
+		getAvailableIcons, 
+		getTotalIconCount, 
+		HeartIcon, 
+		BellIcon,
+		BoltIcon,
+		ActivityIcon,
+		BlocksIcon,
+		CodeIcon
+	} from 'svelte-animate-icons';
 	
 	const totalIcons = getTotalIconCount();
 	const allIcons = getAvailableIcons();
@@ -13,12 +24,19 @@
 	<meta name="description" content="Quick and simple animated SVG icons for Svelte 5 applications" />
 </svelte:head>
 
-<div class="docs-page">
+<Header />
+
+<main class="docs-page">
 	<div class="container">
-		<!-- Header -->
-		<div class="docs-header">
-			<h1>Quick Start</h1>
+		<!-- Hero Section -->
+		<div class="docs-hero">
+			<h1>Documentation</h1>
 			<p class="lead">Simple. Fast. Beautiful animated icons for Svelte 5.</p>
+			<div class="hero-badges">
+				<span class="badge">{totalIcons} Icons</span>
+				<span class="badge">Svelte 5</span>
+				<span class="badge">TypeScript</span>
+			</div>
 		</div>
 
 		<!-- Quick Install -->
@@ -44,9 +62,16 @@
 			<div class="live-demo">
 				<h3>Live Demo</h3>
 				<div class="icon-showcase">
-					{#each sampleIcons.slice(0, 4) as icon}
+					<div class="demo-icon">
+						<HeartIcon size={48} />
+					</div>
+					<div class="demo-icon">
+						<BellIcon size={48} />
+					</div>
+					{#each sampleIcons.slice(2, 4) as icon}
+						{@const IconComponent = icon.component}
 						<div class="demo-icon">
-							<svelte:component this={icon.component} size={48} />
+							<IconComponent size={48} />
 						</div>
 					{/each}
 				</div>
@@ -77,22 +102,30 @@
 		<section class="features-section">
 			<div class="feature-grid">
 				<div class="feature">
-					<div class="feature-icon">⚡</div>
+					<div class="feature-icon">
+						<BoltIcon size={32} />
+					</div>
 					<h3>Lightning Fast</h3>
 					<p>Web Animations API for 60fps performance</p>
 				</div>
 				<div class="feature">
-					<div class="feature-icon">🎯</div>
+					<div class="feature-icon">
+						<ActivityIcon size={32} />
+					</div>
 					<h3>Svelte 5 Ready</h3>
 					<p>Built with modern runes and reactivity</p>
 				</div>
 				<div class="feature">
-					<div class="feature-icon">📦</div>
+					<div class="feature-icon">
+						<BlocksIcon size={32} />
+					</div>
 					<h3>Tiny Bundle</h3>
 					<p>Tree-shakeable, import only what you need</p>
 				</div>
 				<div class="feature">
-					<div class="feature-icon">🎨</div>
+					<div class="feature-icon">
+						<CodeIcon size={32} />
+					</div>
 					<h3>Easy Styling</h3>
 					<p>CSS-friendly, no complex configurations</p>
 				</div>
@@ -110,34 +143,72 @@
 			</div>
 		</section>
 	</div>
-</div>
+</main>
+
+<Footer />
 
 <style>
 	.docs-page {
-		min-height: 100vh;
+		min-height: calc(100vh - 120px);
 		background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-		padding: var(--space-2xl) 0;
+		padding: var(--space-3xl) 0;
 	}
 
 	.container {
-		max-width: 800px;
+		max-width: 1200px;
 		margin: 0 auto;
-		padding: 0 var(--space-lg);
+		padding: 0 var(--space-xl);
 	}
 
-	.docs-header {
+	.docs-hero {
 		text-align: center;
 		margin-bottom: var(--space-3xl);
+		padding: var(--space-3xl) 0;
+		background: var(--glass-bg);
+		border: 1px solid var(--glass-border);
+		border-radius: var(--radius-2xl);
+		backdrop-filter: blur(12px);
+		position: relative;
+		overflow: hidden;
 	}
 
-	.docs-header h1 {
-		font-size: clamp(2.5rem, 6vw, 3.5rem);
+	.docs-hero::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 2px;
+		background: linear-gradient(90deg, transparent, var(--svelte-primary), transparent);
+		opacity: 0.8;
+	}
+
+	.docs-hero h1 {
+		font-size: clamp(2.5rem, 6vw, 4rem);
 		font-weight: 800;
-		margin: 0 0 var(--space-md);
-		background: linear-gradient(135deg, var(--svelte-primary), var(--svelte-secondary));
+		margin: 0 0 var(--space-lg);
+		background: linear-gradient(135deg, var(--svelte-primary), #ff8a00);
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
 		background-clip: text;
+	}
+
+	.hero-badges {
+		display: flex;
+		justify-content: center;
+		gap: var(--space-md);
+		margin-top: var(--space-xl);
+		flex-wrap: wrap;
+	}
+
+	.badge {
+		background: rgba(255, 62, 0, 0.1);
+		color: var(--svelte-primary);
+		padding: var(--space-sm) var(--space-md);
+		border-radius: var(--radius-full);
+		font-size: 0.875rem;
+		font-weight: 600;
+		border: 1px solid rgba(255, 62, 0, 0.2);
 	}
 
 	.lead {
@@ -150,11 +221,19 @@
 	/* Sections */
 	section {
 		margin-bottom: var(--space-2xl);
-		padding: var(--space-xl);
+		padding: var(--space-2xl);
 		background: var(--glass-bg);
 		border: 1px solid var(--glass-border);
-		border-radius: var(--radius-xl);
+		border-radius: var(--radius-2xl);
 		backdrop-filter: blur(12px);
+		position: relative;
+		transition: all var(--transition-normal);
+	}
+
+	section:hover {
+		border-color: rgba(255, 62, 0, 0.3);
+		transform: translateY(-2px);
+		box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 	}
 
 	section h2 {
@@ -277,8 +356,11 @@
 	}
 
 	.feature-icon {
-		font-size: 2rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		margin-bottom: var(--space-md);
+		color: var(--svelte-primary);
 	}
 
 	.feature h3 {

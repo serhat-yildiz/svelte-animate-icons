@@ -1,9 +1,11 @@
 <script lang="ts">
 	import '../app.css';
+	
+	let { children } = $props();
 </script>
 
 <div class="app">
-	<slot />
+	{@render children()}
 </div>
 
 <style>

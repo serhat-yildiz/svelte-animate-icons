@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { BicepsFlexedIcon, BlocksIcon, BoltIcon, CircleChevronRightIcon, CopyIcon } from 'svelte-animate-icons'
 	import { getAvailableIcons } from '../registry/iconRegistry.js';
+  import { CircleCheckBigIcon } from '$lib'
 	
 	type TabType = 'npm' | 'pnpm' | 'bun';
 	
@@ -45,12 +47,9 @@
 	<div class="container">
 		<div class="section-header">
 			<h2 class="section-title">
-				<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="title-icon">
-					<line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/>
-					<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-					<polyline points="3.27,6.96 12,12.01 20.73,6.96"/>
-					<line x1="12" y1="22.08" x2="12" y2="12"/>
-				</svg>
+				<div class="title-icon">
+					<BicepsFlexedIcon size={32} />
+				</div>
 				<span class="text-gradient">Quick Start</span>
 			</h2>
 			<p class="section-description">
@@ -99,14 +98,9 @@
 								aria-label="Copy command"
 							>
 								{#if copied}
-									<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-										<polyline points="20,6 9,17 4,12"/>
-									</svg>
+									<CopyIcon size={16} />
 								{:else}
-									<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-										<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-										<path d="m5,15-4,-4 4,-4"/>
-									</svg>
+									<CopyIcon size={16} />
 								{/if}
 							</button>
 						</div>
@@ -125,14 +119,9 @@
 						aria-label="Copy usage example"
 					>
 						{#if copied}
-							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<polyline points="20,6 9,17 4,12"/>
-							</svg>
+							<CopyIcon size={16} />
 						{:else}
-							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-								<path d="m5,15-4,-4 4,-4"/>
-							</svg>
+							<CopyIcon size={16} />
 						{/if}
 					</button>
 				</div>
@@ -143,11 +132,7 @@
 		<div class="features-grid">
 			<div class="feature-card glass">
 				<div class="feature-icon">
-					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<circle cx="12" cy="12" r="10"/>
-						<circle cx="12" cy="12" r="6"/>
-						<circle cx="12" cy="12" r="2"/>
-					</svg>
+					<BoltIcon size={24} />
 				</div>
 				<h4>Purposeful Motion</h4>
 				<p>Smooth, meaningful animations that enhance user experience without distraction.</p>
@@ -155,9 +140,7 @@
 			
 			<div class="feature-card glass">
 				<div class="feature-icon">
-					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<polygon points="13,2 3,14 12,14 11,22 21,10 12,10 13,2"/>
-					</svg>
+					<CircleCheckBigIcon size={24} />
 				</div>
 				<h4>Lightweight & Fast</h4>
 				<p>Built on Web Animations API for optimal performance and minimal bundle size.</p>
@@ -165,9 +148,7 @@
 			
 			<div class="feature-card glass">
 				<div class="feature-icon">
-					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-					</svg>
+					<BlocksIcon size={24} />
 				</div>
 				<h4>130+ Icons</h4>
 				<p>Comprehensive icon library covering all common use cases and design needs.</p>
@@ -175,9 +156,7 @@
 			
 			<div class="feature-card glass">
 				<div class="feature-icon">
-					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-					</svg>
+					<CircleChevronRightIcon size={24} />
 				</div>
 				<h4>Svelte 5 Ready</h4>
 				<p>Built specifically for Svelte 5 with runes and modern patterns.</p>
@@ -207,10 +186,15 @@
 		margin: 0 0 var(--space-lg);
 		line-height: 1.2;
 	}
-	
+
 	.title-icon {
+		background: linear-gradient(135deg, var(--svelte-primary), #ff8a00);
+		background-clip: text;
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
 		color: var(--svelte-primary);
-		flex-shrink: 0;
+		display: flex;
+		align-items: center;
 	}
 	
 	.section-description {
@@ -295,6 +279,12 @@
 		font-weight: 500;
 		background: none;
 		padding: 0;
+	}
+
+	.code-example {
+  		display: flex;
+  		align-items: center; 
+  		justify-content: space-between; 
 	}
 	
 	.copy-btn {
