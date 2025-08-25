@@ -93,7 +93,7 @@ All icons come with built-in hover animations:
 
 ## 📚 Available Icons
 
-Browse all 130+ icons at: [Icon Gallery](https://svelte-animate-icons.vercel.app/#gallery)
+Browse all 130+ icons at: [Icon Gallery](https://serhat-yildiz.github.io/svelte-animate-icons/#gallery)
 
 ### Popular Icons
 
@@ -187,8 +187,8 @@ Contributions welcome! Please read our [contributing guide](CONTRIBUTING.md) fir
 
 ## 🔗 Links
 
-- [Documentation](https://svelte-animate-icons.vercel.app/docs)
-- [Icon Gallery](https://svelte-animate-icons.vercel.app/#gallery) 
+- [Documentation](https://serhat-yildiz.github.io/svelte-animate-icons/docs)
+- [Icon Gallery](https://serhat-yildiz.github.io/svelte-animate-icons/#gallery) 
 - [GitHub](https://github.com/serhat-yildiz/svelte-animate-icons)
 - [npm](https://www.npmjs.com/package/svelte-animate-icons)
 
