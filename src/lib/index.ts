@@ -1,0 +1,146 @@
+// Export types
+export type { 
+	AnimationDefinition, 
+	AnimationVariants, 
+	IconHandle, 
+	IconProps, 
+	IconMetadata 
+} from './types/index.js';
+
+// Export registry
+export * from './registry/iconRegistry.js';
+
+// Export all icons
+export { default as ActivityIcon } from './icons/ActivityIcon.svelte';
+export { default as AtomIcon } from './icons/AtomIcon.svelte';
+export { default as AudioLinesIcon } from './icons/AudioLinesIcon.svelte';
+export { default as BatteryFullIcon } from './icons/BatteryFullIcon.svelte';
+export { default as BatteryIcon } from './icons/BatteryIcon.svelte';
+export { default as BellIcon } from './icons/BellIcon.svelte';
+export { default as BellMinusIcon } from './icons/BellMinusIcon.svelte';
+export { default as BellPlusIcon } from './icons/BellPlusIcon.svelte';
+export { default as BellRingIcon } from './icons/BellRingIcon.svelte';
+export { default as BicepsFlexedIcon } from './icons/BicepsFlexedIcon.svelte';
+export { default as BitcoinIcon } from './icons/BitcoinIcon.svelte';
+export { default as BlendIcon } from './icons/BlendIcon.svelte';
+export { default as BlocksIcon } from './icons/BlocksIcon.svelte';
+export { default as BoltIcon } from './icons/BoltIcon.svelte';
+export { default as BookmarkCheckIcon } from './icons/BookmarkCheckIcon.svelte';
+export { default as BookmarkIcon } from './icons/BookmarkIcon.svelte';
+export { default as BookmarkMinusIcon } from './icons/BookmarkMinusIcon.svelte';
+export { default as BookmarkPlusIcon } from './icons/BookmarkPlusIcon.svelte';
+export { default as BookmarkXIcon } from './icons/BookmarkXIcon.svelte';
+export { default as BrainIcon } from './icons/BrainIcon.svelte';
+export { default as BringToFrontIcon } from './icons/BringToFrontIcon.svelte';
+export { default as CheckCheckIcon } from './icons/CheckCheckIcon.svelte';
+export { default as CheckIcon } from './icons/CheckIcon.svelte';
+export { default as ChevronDownIcon } from './icons/ChevronDownIcon.svelte';
+export { default as ChevronLeftIcon } from './icons/ChevronLeftIcon.svelte';
+export { default as ChevronRightIcon } from './icons/ChevronRightIcon.svelte';
+export { default as ChevronUpIcon } from './icons/ChevronUpIcon.svelte';
+export { default as ChevronsLeftIcon } from './icons/ChevronsLeftIcon.svelte';
+export { default as ChevronsLeftRightEllipsisIcon } from './icons/ChevronsLeftRightEllipsisIcon.svelte';
+export { default as ChevronsLeftRightIcon } from './icons/ChevronsLeftRightIcon.svelte';
+export { default as ChevronsRightIcon } from './icons/ChevronsRightIcon.svelte';
+export { default as ChevronsRightLeftIcon } from './icons/ChevronsRightLeftIcon.svelte';
+export { default as ChromeIcon } from './icons/ChromeIcon.svelte';
+export { default as CircleCheckBigIcon } from './icons/CircleCheckBigIcon.svelte';
+export { default as CircleCheckIcon } from './icons/CircleCheckIcon.svelte';
+export { default as CircleChevronDownIcon } from './icons/CircleChevronDownIcon.svelte';
+export { default as CircleChevronLeftIcon } from './icons/CircleChevronLeftIcon.svelte';
+export { default as CircleChevronRightIcon } from './icons/CircleChevronRightIcon.svelte';
+export { default as CircleChevronUpIcon } from './icons/CircleChevronUpIcon.svelte';
+export { default as CirclePlusIcon } from './icons/CirclePlusIcon.svelte';
+export { default as CloudUploadIcon } from './icons/CloudUploadIcon.svelte';
+export { default as CodeIcon } from './icons/CodeIcon.svelte';
+export { default as CodeXmlIcon } from './icons/CodeXmlIcon.svelte';
+export { default as ContactIcon } from './icons/ContactIcon.svelte';
+export { default as ContactRoundIcon } from './icons/ContactRoundIcon.svelte';
+export { default as CopyIcon } from './icons/CopyIcon.svelte';
+export { default as CreditCardIcon } from './icons/CreditCardIcon.svelte';
+export { default as DashboardIcon } from './icons/DashboardIcon.svelte';
+export { default as DollarSignIcon } from './icons/DollarSignIcon.svelte';
+export { default as DownloadIcon } from './icons/DownloadIcon.svelte';
+export { default as EllipsisIcon } from './icons/EllipsisIcon.svelte';
+export { default as EllipsisVerticalIcon } from './icons/EllipsisVerticalIcon.svelte';
+export { default as EuroIcon } from './icons/EuroIcon.svelte';
+export { default as ExternalLinkIcon } from './icons/ExternalLinkIcon.svelte';
+export { default as FacebookIcon } from './icons/FacebookIcon.svelte';
+export { default as FigmaIcon } from './icons/FigmaIcon.svelte';
+export { default as FramerIcon } from './icons/FramerIcon.svelte';
+export { default as GeorgianLariIcon } from './icons/GeorgianLariIcon.svelte';
+export { default as GithubIcon } from './icons/GithubIcon.svelte';
+export { default as GlobeIcon } from './icons/GlobeIcon.svelte';
+export { default as GlobeLockIcon } from './icons/GlobeLockIcon.svelte';
+export { default as HeadphonesIcon } from './icons/HeadphonesIcon.svelte';
+export { default as HeadphonesOffIcon } from './icons/HeadphonesOffIcon.svelte';
+export { default as HeartIcon } from './icons/HeartIcon.svelte';
+export { default as HouseIcon } from './icons/HouseIcon.svelte';
+export { default as IndianRupeeIcon } from './icons/IndianRupeeIcon.svelte';
+export { default as InfoIcon } from './icons/InfoIcon.svelte';
+export { default as InstagramIcon } from './icons/InstagramIcon.svelte';
+export { default as KeyIcon } from './icons/KeyIcon.svelte';
+export { default as KeyRoundIcon } from './icons/KeyRoundIcon.svelte';
+export { default as KeySquareIcon } from './icons/KeySquareIcon.svelte';
+export { default as LayoutGridIcon } from './icons/LayoutGridIcon.svelte';
+export { default as LinkIcon } from './icons/LinkIcon.svelte';
+export { default as LinkedinIcon } from './icons/LinkedinIcon.svelte';
+export { default as LoaderCircleIcon } from './icons/LoaderCircleIcon.svelte';
+export { default as LoaderIcon } from './icons/LoaderIcon.svelte';
+export { default as LockIcon } from './icons/LockIcon.svelte';
+export { default as MailsIcon } from './icons/MailsIcon.svelte';
+export { default as MenuIcon } from './icons/MenuIcon.svelte';
+export { default as MessageCircleIcon } from './icons/MessageCircleIcon.svelte';
+export { default as MicIcon } from './icons/MicIcon.svelte';
+export { default as MicOffIcon } from './icons/MicOffIcon.svelte';
+export { default as MinusIcon } from './icons/MinusIcon.svelte';
+export { default as MoveLeftIcon } from './icons/MoveLeftIcon.svelte';
+export { default as MoveRightIcon } from './icons/MoveRightIcon.svelte';
+export { default as PhilippinePesoIcon } from './icons/PhilippinePesoIcon.svelte';
+export { default as PhoneIcon } from './icons/PhoneIcon.svelte';
+export { default as PlusIcon } from './icons/PlusIcon.svelte';
+export { default as PoundSterlingIcon } from './icons/PoundSterlingIcon.svelte';
+export { default as RussianRubleIcon } from './icons/RussianRubleIcon.svelte';
+export { default as SaudiRiyalIcon } from './icons/SaudiRiyalIcon.svelte';
+export { default as SearchIcon } from './icons/SearchIcon.svelte';
+export { default as SendIcon } from './icons/SendIcon.svelte';
+export { default as ShieldUserIcon } from './icons/ShieldUserIcon.svelte';
+export { default as ShoppingBagIcon } from './icons/ShoppingBagIcon.svelte';
+export { default as ShoppingCartIcon } from './icons/ShoppingCartIcon.svelte';
+export { default as SignalIcon } from './icons/SignalIcon.svelte';
+export { default as SnowFlakeIcon } from './icons/SnowFlakeIcon.svelte';
+export { default as SprayCanIcon } from './icons/SprayCanIcon.svelte';
+export { default as SquareArrowOutUpRightIcon } from './icons/SquareArrowOutUpRightIcon.svelte';
+export { default as SwissFrancIcon } from './icons/SwissFrancIcon.svelte';
+export { default as SwordsIcon } from './icons/SwordsIcon.svelte';
+export { default as TerminalIcon } from './icons/TerminalIcon.svelte';
+export { default as TrashIcon } from './icons/TrashIcon.svelte';
+export { default as TurkishLiraIcon } from './icons/TurkishLiraIcon.svelte';
+export { default as TwitterIcon } from './icons/TwitterIcon.svelte';
+export { default as UnlinkIcon } from './icons/UnlinkIcon.svelte';
+export { default as UploadIcon } from './icons/UploadIcon.svelte';
+export { default as UserCheckIcon } from './icons/UserCheckIcon.svelte';
+export { default as UserCogIcon } from './icons/UserCogIcon.svelte';
+export { default as UserIcon } from './icons/UserIcon.svelte';
+export { default as UserLockIcon } from './icons/UserLockIcon.svelte';
+export { default as UserMinusIcon } from './icons/UserMinusIcon.svelte';
+export { default as UserPenIcon } from './icons/UserPenIcon.svelte';
+export { default as UserPlusIcon } from './icons/UserPlusIcon.svelte';
+export { default as UserRoundCheckIcon } from './icons/UserRoundCheckIcon.svelte';
+export { default as UserRoundCogIcon } from './icons/UserRoundCogIcon.svelte';
+export { default as UserRoundIcon } from './icons/UserRoundIcon.svelte';
+export { default as UserRoundMinusIcon } from './icons/UserRoundMinusIcon.svelte';
+export { default as UserRoundPenIcon } from './icons/UserRoundPenIcon.svelte';
+export { default as UserRoundXIcon } from './icons/UserRoundXIcon.svelte';
+export { default as UserSearchIcon } from './icons/UserSearchIcon.svelte';
+export { default as UserStarIcon } from './icons/UserStarIcon.svelte';
+export { default as UserXIcon } from './icons/UserXIcon.svelte';
+export { default as UsersIcon } from './icons/UsersIcon.svelte';
+export { default as UsersRoundIcon } from './icons/UsersRoundIcon.svelte';
+export { default as WalletIcon } from './icons/WalletIcon.svelte';
+export { default as WalletMinimalIcon } from './icons/WalletMinimalIcon.svelte';
+export { default as XIcon } from './icons/XIcon.svelte';
+export { default as YenYuanIcon } from './icons/YenYuanIcon.svelte';
+
+// Version info
+export const version = '0.0.1';
