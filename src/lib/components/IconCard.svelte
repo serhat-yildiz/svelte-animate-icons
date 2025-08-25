@@ -18,7 +18,7 @@
 	const copyOptions = [
 		{
 			label: 'Import',
-			code: `import { ${componentName} } from 'svelte-animate-icons';`,
+			code: `import { ${componentName} } from '$lib';`,
 			type: 'import' as const
 		},
 		{

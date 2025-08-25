@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { BicepsFlexedIcon } from 'svelte-animate-icons'
+  import { BicepsFlexedIcon } from '$lib';
 	import { getAvailableIcons, getCategoriesWithCounts } from '../registry/iconRegistry.js';
 	import IconCard from './IconCard.svelte';
 	import SearchInput from './SearchInput.svelte';

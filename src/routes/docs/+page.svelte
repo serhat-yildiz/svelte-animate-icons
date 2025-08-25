@@ -60,7 +60,7 @@
 			<h2>2. Use</h2>
 			<div class="code-block">
 				<pre><code>{`<script>
-  import { HeartIcon, BellIcon } from 'svelte-animate-icons';
+  import { HeartIcon, BellIcon } from '$lib';
 </script>
 
 <HeartIcon size={24} />

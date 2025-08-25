@@ -21,7 +21,7 @@
 	
 	const usageExample = `import { ${iconName.split('-').map(word => 
 		word.charAt(0).toUpperCase() + word.slice(1)
-	).join('')}Icon } from 'svelte-animate-icons';
+	).join('')}Icon } from '$lib';
 
 <${iconName.split('-').map(word => 
 	word.charAt(0).toUpperCase() + word.slice(1)
