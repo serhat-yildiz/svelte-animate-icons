@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+    <!-- Homepage -->
+    <url>
+        <loc>https://serhat-yildiz.github.io/svelte-animate-icons/</loc>
+        <lastmod>2024-12-17</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.0</priority>
+    </url>
+
+    <!-- Documentation -->
+    <url>
+        <loc>https://serhat-yildiz.github.io/svelte-animate-icons/docs</loc>
+        <lastmod>2024-12-17</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <!-- Icon Gallery (fragment, but important for UX) -->
+    <url>
+        <loc>https://serhat-yildiz.github.io/svelte-animate-icons/#gallery</loc>
+        <lastmod>2024-12-17</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+
+    <!-- Install Section -->
+    <url>
+        <loc>https://serhat-yildiz.github.io/svelte-animate-icons/#install</loc>
+        <lastmod>2024-12-17</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
+
+</urlset>

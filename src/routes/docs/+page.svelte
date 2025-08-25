@@ -20,8 +20,24 @@
 </script>
 
 <svelte:head>
-	<title>Docs - Svelte Animate Icons</title>
-	<meta name="description" content="Quick and simple animated SVG icons for Svelte 5 applications" />
+	<title>Documentation - Svelte Animate Icons | Quick Start Guide</title>
+	<meta name="description" content="Complete documentation and quick start guide for Svelte Animate Icons. Learn how to install, import, and use 130+ animated SVG icons in your Svelte 5 projects." />
+	<meta name="keywords" content="svelte animate icons documentation, svelte 5 icons tutorial, animated svg icons guide, web animations api svelte" />
+	
+	<!-- Open Graph -->
+	<meta property="og:type" content="article" />
+	<meta property="og:url" content="https://serhat-yildiz.github.io/svelte-animate-icons/docs" />
+	<meta property="og:title" content="Documentation - Svelte Animate Icons" />
+	<meta property="og:description" content="Complete documentation and quick start guide for Svelte Animate Icons. Learn how to use 130+ animated SVG icons in Svelte 5." />
+	<meta property="og:image" content="https://serhat-yildiz.github.io/svelte-animate-icons/og-docs.png" />
+	
+	<!-- Twitter -->
+	<meta property="twitter:card" content="summary_large_image" />
+	<meta property="twitter:title" content="Documentation - Svelte Animate Icons" />
+	<meta property="twitter:description" content="Complete documentation and quick start guide for Svelte Animate Icons. Learn how to use 130+ animated SVG icons in Svelte 5." />
+	
+	<!-- Canonical -->
+	<link rel="canonical" href="https://serhat-yildiz.github.io/svelte-animate-icons/docs" />
 </svelte:head>
 
 <Header />

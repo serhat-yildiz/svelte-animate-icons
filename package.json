@@ -63,6 +63,7 @@
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^6.1.0",
+		"@sveltejs/adapter-static": "^3.0.9",
 		"@sveltejs/kit": "^2.36.2",
 		"@sveltejs/package": "^2.5.0",
 		"@sveltejs/vite-plugin-svelte": "^4.0.0",

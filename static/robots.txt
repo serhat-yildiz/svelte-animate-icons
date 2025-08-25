@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://serhat-yildiz.github.io/svelte-animate-icons/sitemap.xml
+
+# Crawl delay (optional)
+Crawl-delay: 1
+
+# Block unnecessary paths
+Disallow: /api/
+Disallow: /_app/
+Disallow: /node_modules/
+Disallow: /.git/
+
+# Allow important files
+Allow: /favicon.ico
+Allow: /og-image.png
+Allow: /manifest.json
