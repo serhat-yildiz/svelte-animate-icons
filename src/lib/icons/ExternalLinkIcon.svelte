@@ -54,7 +54,7 @@
 	  isAnimating = true;
 	  onAnimationStart?.();
   
-	  // Arrow parts
+	  
 	  const arrowPaths = [
 		svgRef.querySelector('path[d*="M15 3h6v6"]'),
 		svgRef.querySelector('path[d*="M10 14 21 3"]')
@@ -78,7 +78,7 @@
 		}
 	  });
   
-	  // Box drawing
+	  
 	  const box = svgRef.querySelector('path[d*="M18 13"]');
 	  if (box) {
 		const len = box.getTotalLength();
@@ -155,7 +155,7 @@
 	  return () => stopAnimation();
 	});
   
-	// Public API
+	
 	export function start() {
 	  startAnimation();
 	}

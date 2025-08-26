@@ -37,13 +37,13 @@
   let isAnimating = $state(false);
   let currentState: AnimationState = animationState;
 
-  // --- Core animation ---
+  
   function runAnimation() {
     if (!svgRef) return;
     isAnimating = true;
     onAnimationStart?.();
 
-    // Group pulse
+    
     svgRef.animate(
       [
         { transform: 'scale(1)' },
@@ -53,7 +53,7 @@
       { duration, easing: 'ease-in-out', iterations: loop ? Infinity : 1 }
     );
 
-    // Shaft
+    
     if (shaftEl) {
       shaftEl.animate(
         [
@@ -64,7 +64,7 @@
       );
     }
 
-    // Head
+    
     if (headEl) {
       headEl.animate(
         [
@@ -81,7 +81,7 @@
       );
     }
 
-    // Tray
+    
     if (trayEl) {
       trayEl.animate(
         [
@@ -115,7 +115,7 @@
     });
   }
 
-  // --- Public API ---
+  
   export function start() {
     if (!isAnimating) {
       currentState = 'active';
@@ -139,7 +139,7 @@
     return { state: currentState, isAnimating };
   }
 
-  // --- Events ---
+  
   function handleMouseEnter() {
     if (triggers.hover && !triggers.custom) start();
   }
@@ -156,7 +156,7 @@
     if (triggers.focus) stop();
   }
 
-  // --- Reactivity ---
+  
   $effect(() => setState(animationState));
   $effect(() => {
     if (autoPlay) start();

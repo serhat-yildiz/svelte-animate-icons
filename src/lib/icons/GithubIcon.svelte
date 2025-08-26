@@ -54,7 +54,7 @@
 	  isAnimating = true;
 	  onAnimationStart?.();
   
-	  // SVG pulse/scale
+	  
 	  currentAnimations.push(
 		svgRef.animate(
 		  [
@@ -70,7 +70,7 @@
 		)
 	  );
   
-	  // Body path (draw effect)
+	  
 	  const bodyPath = svgRef.querySelector('path[d*="M15 22v-4"]') as SVGPathElement | null;
 	  if (bodyPath) {
 		const len = bodyPath.getTotalLength();
@@ -91,7 +91,7 @@
 		currentAnimations.push(anim);
 	  }
   
-	  // Hand wave animation
+	  
 	  const handPath = svgRef.querySelector('path[d*="M9 18c"]') as SVGPathElement | null;
 	  if (handPath) {
 		const anim = handPath.animate(
@@ -176,7 +176,7 @@
 	  return () => stopAnimation();
 	});
   
-	// Public API
+	
 	export function start() { startAnimation(); }
 	export function stop() { stopAnimation(); }
 	export function toggle() { toggleAnimation(); }

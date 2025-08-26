@@ -54,7 +54,7 @@
 	  isAnimating = true;
 	  onAnimationStart?.();
   
-	  // SVG wiggle
+	  
 	  const svgAnim = svgRef.animate(
 		[
 		  { transform: 'scale(1) rotate(0deg) translateY(0px)' },
@@ -66,7 +66,7 @@
 	  );
 	  currentAnimations.push(svgAnim);
   
-	  // Top stroke
+	  
 	  const topStroke = svgRef.querySelector('path[d*="M4 10h12"]:not([opacity])');
 	  if (topStroke) {
 		const len = topStroke.getTotalLength();
@@ -80,7 +80,7 @@
 		);
 	  }
   
-	  // Mid stroke
+	  
 	  const midStroke = svgRef.querySelector('path[d*="M4 14h9"]:not([opacity])');
 	  if (midStroke) {
 		const len = midStroke.getTotalLength();
@@ -94,7 +94,7 @@
 		);
 	  }
   
-	  // Curve stroke
+	  
 	  const curveStroke = svgRef.querySelector('path[d*="M19 6"]:not([opacity])');
 	  if (curveStroke) {
 		const len = curveStroke.getTotalLength();
@@ -172,7 +172,7 @@
 	  return () => stopAnimation();
 	});
   
-	// Public API
+	
 	export function start() {
 	  startAnimation();
 	}

@@ -47,7 +47,7 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// SVG rotation and scale animation
+			
 			const svgAnimation = svgRef.animate([
 				{ transform: 'rotate(0deg) scale(1)' },
 				{ transform: 'rotate(-5deg) scale(1.05)' },
@@ -62,7 +62,7 @@
 			});
 			currentAnimations.push(svgAnimation);
 			
-			// Path drawing animations
+			
 			const paths = svgRef.querySelectorAll('polyline, line') as NodeListOf<SVGPolylineElement | SVGLineElement>;
 			paths.forEach((path, index) => {
 				const length = path.getTotalLength();

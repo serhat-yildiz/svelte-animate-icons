@@ -37,7 +37,7 @@
   let containerRef: HTMLDivElement;
   let svgRef: SVGSVGElement;
 
-  // Element refs for wallet animation
+  
   let bodyEl: SVGPathElement;
   let flapGroupEl: SVGGElement;
   let swipeEl: SVGLineElement;
@@ -51,7 +51,7 @@
     isAnimating = true;
     onAnimationStart?.();
 
-    // Body drawing
+    
     if (bodyEl) {
       bodyEl.animate(
         [
@@ -62,7 +62,7 @@
       );
     }
 
-    // Flap rotation
+    
     if (flapGroupEl) {
       setTimeout(() => {
         flapGroupEl.animate(
@@ -78,7 +78,7 @@
       }, 200);
     }
 
-    // Swipe line
+    
     if (swipeEl) {
       setTimeout(() => {
         swipeEl.animate(
@@ -149,7 +149,7 @@
     return () => stopAnimation();
   });
 
-  // Public API
+  
   export function start() { startAnimation(); }
   export function stop() { stopAnimation(); }
   export function toggle() { toggleAnimation(); }

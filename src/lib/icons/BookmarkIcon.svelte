@@ -41,15 +41,15 @@
 	let currentAnimations: Animation[] = [];
 	let currentState = $state(animationState);
 	
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef && sparkRef && !isAnimating) {
-			stopAnimation(); // Clear any existing animation
+			stopAnimation(); 
 			
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// Bookmark scaling animation
+			
 			const svgAnimation = svgRef.animate([
 				{ transform: 'scale(1)' },
 				{ transform: 'scale(1.15)' },
@@ -62,7 +62,7 @@
 			});
 			currentAnimations.push(svgAnimation);
 			
-			// Spark effect animation
+			
 			const sparkSvg = sparkRef.querySelector('svg');
 			if (sparkSvg) {
 				const sparkAnimation = sparkSvg.animate([
@@ -77,7 +77,7 @@
 				currentAnimations.push(sparkAnimation);
 			}
 			
-			// Handle animation completion
+			
 			const lastAnimation = currentAnimations[currentAnimations.length - 1];
 			lastAnimation?.addEventListener('finish', () => {
 				if (!loop && !autoPlay && currentState !== 'loading') {
@@ -99,7 +99,7 @@
 		if (svgRef && sparkRef) {
 			isAnimating = false;
 			
-			// Reset to normal state
+			
 			svgRef.style.transform = 'scale(1)';
 			const sparkSvg = sparkRef.querySelector('svg');
 			if (sparkSvg) {
@@ -120,7 +120,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -135,7 +135,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -166,26 +166,26 @@
 		}
 	}
 	
-	// Reactive state changes - update animation when state prop changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

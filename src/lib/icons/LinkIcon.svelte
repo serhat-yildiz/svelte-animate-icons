@@ -40,19 +40,19 @@
 	let currentState = $state(animationState);
 	let currentAnimations: Animation[] = [];
 	
-	// Refs for animation elements
+	
 	let leftPathEl: SVGPathElement;
 	let rightPathEl: SVGPathElement;
   
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
-			stopAnimation(); // Clear any existing animation
+			stopAnimation(); 
 			
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// Left link animation
+			
 			if (leftPathEl) {
 				const leftAnimation = leftPathEl.animate([
 					{ transform: 'translate(0px, 0px) rotate(0deg)' },
@@ -66,7 +66,7 @@
 				currentAnimations.push(leftAnimation);
 			}
 			
-			// Right link animation
+			
 			if (rightPathEl) {
 				const rightAnimation = rightPathEl.animate([
 					{ transform: 'translate(0px, 0px) rotate(0deg)' },
@@ -80,7 +80,7 @@
 				currentAnimations.push(rightAnimation);
 			}
 			
-			// Handle animation completion
+			
 			const lastAnimation = currentAnimations[currentAnimations.length - 1];
 			lastAnimation?.addEventListener('finish', () => {
 				if (!loop && !autoPlay && currentState !== 'loading') {
@@ -102,7 +102,7 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			// Reset all elements to normal state
+			
 			if (leftPathEl) {
 				leftPathEl.style.transform = 'translate(0px, 0px) rotate(0deg)';
 			}
@@ -124,7 +124,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -139,7 +139,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -170,26 +170,26 @@
 		}
 	}
 	
-	// Reactive state changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

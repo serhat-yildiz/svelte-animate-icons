@@ -40,13 +40,12 @@
 	let currentAnimations: Animation[] = [];
 	let currentState = $state(animationState);
 	
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef) {
 			isAnimating = true;
-			
-			// Bookmark bounce animation
-			// React: scale: [1, 1.05, 0.95, 1], y: [0, -2, 0]
+
+
 			svgRef.animate([
 				{ transform: 'scale(1) translateY(0px)' },
 				{ transform: 'scale(1.05) translateY(-2px)' },
@@ -56,9 +55,8 @@
 				duration: 1200,
 				easing: 'ease-in-out'
 			});
-			
-			// Minus line scaling animation
-			// React: scaleX: [1, 0.7, 1.2, 1], opacity: [1, 0.6, 1]
+
+
 			const minusLine = svgRef.querySelector('line');
 			if (minusLine) {
 				minusLine.animate([
@@ -77,7 +75,7 @@
 	function stopAnimation() {
 		if (svgRef) {
 			isAnimating = false;
-			// Cancel all animations
+			
 			svgRef.getAnimations().forEach(animation => animation.cancel());
 			const minusLine = svgRef.querySelector('line');
 			if (minusLine) {
@@ -85,7 +83,7 @@
 				minusLine.style.transform = 'scaleX(1)';
 				minusLine.style.opacity = '1';
 			}
-			// Reset SVG transform
+			
 			svgRef.style.transform = 'scale(1) translateY(0px)';
 		}
 	}
@@ -101,7 +99,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -116,7 +114,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -147,26 +145,26 @@
 		}
 	}
 	
-	// Reactive state changes - update animation when state prop changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

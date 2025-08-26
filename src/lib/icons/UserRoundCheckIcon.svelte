@@ -37,7 +37,7 @@
   let containerRef: HTMLDivElement;
   let svgRef: SVGSVGElement;
 
-  // refs
+  
   let bodyEl: SVGPathElement;
   let headEl: SVGCircleElement;
   let tickEl: SVGPathElement;
@@ -51,7 +51,7 @@
     isAnimating = true;
     onAnimationStart?.();
 
-    // Head
+    
     if (headEl) {
       headEl.animate(
         [
@@ -63,7 +63,7 @@
       );
     }
 
-    // Body (delayed)
+    
     if (bodyEl) {
       setTimeout(() => {
         bodyEl.animate(
@@ -76,7 +76,7 @@
       }, 200);
     }
 
-    // Tick (delayed)
+    
     if (tickEl) {
       setTimeout(() => {
         tickEl.animate(
@@ -147,7 +147,7 @@
     return () => stopAnimation();
   });
 
-  // Public API
+  
   export function start() { startAnimation(); }
   export function stop() { stopAnimation(); }
   export function toggle() { toggleAnimation(); }

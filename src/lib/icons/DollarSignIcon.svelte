@@ -55,7 +55,7 @@
 	  isAnimating = true;
 	  onAnimationStart?.();
   
-	  // SVG wiggle
+	  
 	  currentAnimations.push(
 		svgRef.animate(
 		  [
@@ -72,7 +72,7 @@
 		)
 	  );
   
-	  // Spine line drawing
+	  
 	  const spine = svgRef.querySelector('line');
 	  if (spine) {
 		const length = spine.getTotalLength?.() ?? 20;
@@ -89,7 +89,7 @@
 		);
 	  }
   
-	  // S-curve drawing
+	  
 	  const path = svgRef.querySelector('path');
 	  if (path) {
 		const length = path.getTotalLength();
@@ -147,7 +147,7 @@
 	  }
 	}
   
-	// Event handlers
+	
 	function handleMouseEnter() {
 	  if (triggers.hover && !triggers.custom) startAnimation();
 	}
@@ -164,7 +164,7 @@
 	  if (triggers.focus) stopAnimation();
 	}
   
-	// Reactivity
+	
 	$effect(() => setAnimationState(animationState));
   
 	$effect(() => {
@@ -172,7 +172,7 @@
 	  return () => stopAnimation();
 	});
   
-	// Public API
+	
 	export function start() {
 	  startAnimation();
 	}

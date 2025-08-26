@@ -46,7 +46,7 @@
     isAnimating = true;
     onAnimationStart?.();
 
-    // Line squash
+    
     if (lineEl) {
       lineEl.animate(
         [
@@ -58,7 +58,7 @@
       );
     }
 
-    // Chevron nudge (loop if enabled or loading)
+    
     if (chevronEl) {
       chevronEl.animate(
         [
@@ -98,7 +98,7 @@
     else stopAnimation();
   }
 
-  // Event handlers
+  
   function handleMouseEnter() {
     if (triggers.hover && !triggers.custom) startAnimation();
   }
@@ -115,7 +115,7 @@
     if (triggers.focus) stopAnimation();
   }
 
-  // Reactivity
+  
   $effect(() => {
     setAnimationState(animationState);
   });
@@ -125,7 +125,7 @@
     return () => stopAnimation();
   });
 
-  // Public API
+  
   export function start() { startAnimation(); }
   export function stop() { stopAnimation(); }
   export function toggle() { toggleAnimation(); }

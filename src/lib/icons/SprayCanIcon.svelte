@@ -56,7 +56,7 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// Can shake animation
+			
 			const canAnimation = svgRef.animate([
 				{ transform: 'rotate(0deg) translateX(0px)' },
 				{ transform: 'rotate(-2deg) translateX(-1px)' },
@@ -69,7 +69,7 @@
 			});
 			currentAnimations.push(canAnimation);
 			
-			// Spray dots animation with staggered timing
+			
 			const sprayDots = svgRef.querySelectorAll('path[d*="h.01"]') as NodeListOf<SVGPathElement>;
 			sprayDots.forEach((dot, index) => {
 				setTimeout(() => {

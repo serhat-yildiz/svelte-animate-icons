@@ -45,13 +45,13 @@
   let isAnimating = $state(false);
   let currentState: AnimationState = animationState;
 
-  // ---- Core animation ----
+  
   function startAnimation() {
     if (isAnimating) return;
     isAnimating = true;
     onAnimationStart?.();
 
-    // SVG shake / pulse
+    
     if (svgEl) {
       svgEl.animate(
         [
@@ -68,7 +68,7 @@
       );
     }
 
-    // Slash + stroke draws with delays
+    
     if (topSlashEl) {
       setTimeout(() => {
         topSlashEl.animate(
@@ -133,7 +133,7 @@
     else stopAnimation();
   }
 
-  // ---- Event handlers ----
+  
   function handleMouseEnter() {
     if (triggers.hover && !triggers.custom) startAnimation();
   }
@@ -150,7 +150,7 @@
     if (triggers.focus) stopAnimation();
   }
 
-  // ---- Reactivity ----
+  
   $effect(() => {
     setAnimationState(animationState);
   });
@@ -160,7 +160,7 @@
     return () => stopAnimation();
   });
 
-  // ---- Public API ----
+  
   export function start() { startAnimation(); }
   export function stop() { stopAnimation(); }
   export function toggle() { toggleAnimation(); }

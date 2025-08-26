@@ -55,7 +55,7 @@
 		isAnimating = true;
 		onAnimationStart?.();
 
-		// Lock wiggle animation
+		
 		const lockElements = svgRef.querySelectorAll('path[d*="M20 6V4"], rect');
 		lockElements.forEach((element, i) => {
 			const anim = element.animate([
@@ -72,7 +72,7 @@
 			currentAnimations.push(anim);
 		});
 
-		// Globe draw animation
+		
 		const paths = svgRef.querySelectorAll('path[d]:not([style]), circle');
 		paths.forEach((path, i) => {
 			const len = (path as SVGGeometryElement).getTotalLength?.() ?? 60;
@@ -158,7 +158,7 @@
 		return () => stopAnimation();
 	});
 
-	// Public API
+	
 	export function start() { startAnimation(); }
 	export function stop() { stopAnimation(); }
 	export function toggle() { toggleAnimation(); }

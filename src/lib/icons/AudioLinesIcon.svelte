@@ -40,15 +40,15 @@
 	let currentAnimations: Animation[] = [];
 	let currentState = $state(animationState);
 	
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
-			stopAnimation(); // Clear any existing animation
+			stopAnimation(); 
 			
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// Audio bars animation - each bar has different delay
+			
 			const paths = svgRef.querySelectorAll('path');
 			paths.forEach((path, i) => {
 				const animation = path.animate([
@@ -65,10 +65,10 @@
 				
 				currentAnimations.push(animation);
 				
-				// Handle animation completion
+				
 				animation.addEventListener('finish', () => {
 					if (!loop && !autoPlay && currentState !== 'loading') {
-						// Only stop if this is the last animation to finish
+						
 						if (currentAnimations.every(anim => anim.playState === 'finished')) {
 							stopAnimation();
 						}
@@ -88,7 +88,7 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			// Reset to normal state
+			
 			const paths = svgRef.querySelectorAll('path');
 			paths.forEach(path => {
 				path.style.transform = 'scaleY(1)';
@@ -108,7 +108,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -123,7 +123,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -154,26 +154,26 @@
 		}
 	}
 	
-	// Reactive state changes - update animation when state prop changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

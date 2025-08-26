@@ -40,15 +40,15 @@
 	let currentAnimations: Animation[] = [];
 	let currentState = $state(animationState);
 	
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
-			stopAnimation(); // Clear any existing animation
+			stopAnimation(); 
 			
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// Battery full animation - SVG rotate and scale
+			
 			const svgAnimation = svgRef.animate([
 				{ transform: 'rotate(0deg) scale(1)' },
 				{ transform: 'rotate(-2deg) scale(1.05)' },
@@ -61,8 +61,8 @@
 			});
 			currentAnimations.push(svgAnimation);
 			
-			// Battery bars animation - each with different delay
-			const bars = svgRef.querySelectorAll('path[d*="v4"]'); // bars with "v4" pattern
+			
+			const bars = svgRef.querySelectorAll('path[d*="v4"]'); 
 			bars.forEach((bar, i) => {
 				const barAnimation = bar.animate([
 					{ opacity: '0.4', transform: 'scaleY(0.6)' },
@@ -77,9 +77,9 @@
 				currentAnimations.push(barAnimation);
 			});
 			
-			// Battery shell and tip opacity animation
+			
 			const rect = svgRef.querySelector('rect');
-			const tip = svgRef.querySelector('path[d*="22"]'); // tip path
+			const tip = svgRef.querySelector('path[d*="22"]'); 
 			
 			[rect, tip].forEach(element => {
 				if (element) {
@@ -97,7 +97,7 @@
 				}
 			});
 			
-			// Handle animation completion
+			
 			const lastAnimation = currentAnimations[currentAnimations.length - 1];
 			lastAnimation?.addEventListener('finish', () => {
 				if (!loop && !autoPlay && currentState !== 'loading') {
@@ -119,13 +119,13 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			// Reset all elements to normal state
+			
 			const allElements = svgRef.querySelectorAll('*');
 			allElements.forEach(element => {
 				element.style.transform = '';
 				element.style.opacity = '1';
 			});
-			// Reset SVG transform
+			
 			svgRef.style.transform = 'rotate(0deg) scale(1)';
 		}
 	}
@@ -141,7 +141,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -156,7 +156,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -187,26 +187,26 @@
 		}
 	}
 	
-	// Reactive state changes - update animation when state prop changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

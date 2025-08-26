@@ -40,13 +40,12 @@
 	let currentAnimations: Animation[] = [];
 	let currentState = $state(animationState);
 	
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef) {
 			isAnimating = true;
-			
-			// Bookmark shake animation
-			// React: rotate: [0, -4, 4, -2, 0], scale: [1, 1.05, 0.95, 1]
+
+
 			svgRef.animate([
 				{ transform: 'rotate(0deg) scale(1)' },
 				{ transform: 'rotate(-4deg) scale(1.05)' },
@@ -57,10 +56,9 @@
 				duration: 1000,
 				easing: 'ease-in-out'
 			});
-			
-			// X lines drawing animation
-			// React: pathLength: [0, 1], opacity: [0.8, 1]
-			const xPaths = svgRef.querySelectorAll('path[d*="m14.5 7.5"], path[d*="m9.5 7.5"]'); // X paths
+
+
+			const xPaths = svgRef.querySelectorAll('path[d*="m14.5 7.5"], path[d*="m9.5 7.5"]'); 
 			xPaths.forEach(path => {
 				const pathLength = path.getTotalLength();
 				path.style.strokeDasharray = pathLength + ' ' + pathLength;
@@ -81,7 +79,7 @@
 	function stopAnimation() {
 		if (svgRef) {
 			isAnimating = false;
-			// Cancel all animations
+			
 			svgRef.getAnimations().forEach(animation => animation.cancel());
 			const xPaths = svgRef.querySelectorAll('path[d*="m14.5 7.5"], path[d*="m9.5 7.5"]');
 			xPaths.forEach(path => {
@@ -90,7 +88,7 @@
 				path.style.strokeDashoffset = '';
 				path.style.opacity = '1';
 			});
-			// Reset SVG transform
+			
 			svgRef.style.transform = 'rotate(0deg) scale(1)';
 		}
 	}
@@ -106,7 +104,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -121,7 +119,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -152,26 +150,26 @@
 		}
 	}
 	
-	// Reactive state changes - update animation when state prop changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

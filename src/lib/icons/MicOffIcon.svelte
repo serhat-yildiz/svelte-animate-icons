@@ -44,13 +44,13 @@
   let currentState: AnimationState = animationState;
   let currentAnimation: Animation | null = null;
 
-  // ---- Core Animations ----
+  
   function startAnimation() {
     if (isAnimating) return;
     isAnimating = true;
     onAnimationStart?.();
 
-    // Microphone group wiggle
+    
     if (svgEl) {
       svgEl.animate(
         [
@@ -69,7 +69,7 @@
       );
     }
 
-    // Slash stroke animation
+    
     if (slashEl) {
       slashEl.animate(
         [
@@ -115,7 +115,7 @@
     else stopAnimation();
   }
 
-  // ---- Event handlers ----
+  
   function handleMouseEnter() {
     if (triggers.hover && !triggers.custom) startAnimation();
   }
@@ -132,7 +132,7 @@
     if (triggers.focus) stopAnimation();
   }
 
-  // ---- Lifecycle ----
+  
   $effect(() => {
     setAnimationState(animationState);
   });
@@ -142,7 +142,7 @@
     return () => stopAnimation();
   });
 
-  // ---- Public API ----
+  
   export function start() { startAnimation(); }
   export function stop() { stopAnimation(); }
   export function toggle() { toggleAnimation(); }

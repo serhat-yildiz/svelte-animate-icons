@@ -40,13 +40,12 @@
 	let currentAnimation: Animation | null = null;
 	let currentState = $state(animationState);
 	
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef) {
 			isAnimating = true;
-			
-			// SVG scale and rotate animation
-			// React: scale: [1, 1.08, 0.95, 1], rotate: [0, -2, 2, 0]
+
+
 			svgRef.animate([
 				{ transform: 'scale(1) rotate(0deg)' },
 				{ transform: 'scale(1.08) rotate(-2deg)' },
@@ -57,9 +56,8 @@
 				iterations: Infinity,
 				easing: 'ease-in-out'
 			});
-			
-			// Path drawing animation
-			// React: pathLength: [0, 1]
+
+
 			const path = svgRef.querySelector('path');
 			if (path) {
 				const pathLength = path.getTotalLength();
@@ -75,9 +73,8 @@
 					easing: 'ease-in-out'
 				});
 			}
-			
-			// Circle scaling and opacity animation
-			// React: scale: [1, 1.3, 0.9, 1], opacity: [1, 0.6, 1]
+
+
 			const circle = svgRef.querySelector('circle');
 			if (circle) {
 				circle.animate([
@@ -97,18 +94,18 @@
 	function stopAnimation() {
 		if (svgRef) {
 			isAnimating = false;
-			// Cancel all animations
+			
 			svgRef.getAnimations().forEach(animation => animation.cancel());
 			const allElements = svgRef.querySelectorAll('*');
 			allElements.forEach(element => {
 				element.getAnimations().forEach(animation => animation.cancel());
-				// Reset styles
+				
 				element.style.transform = '';
 				element.style.strokeDasharray = '';
 				element.style.strokeDashoffset = '';
 				element.style.opacity = '1';
 			});
-			// Reset SVG transform
+			
 			svgRef.style.transform = 'scale(1) rotate(0deg)';
 		}
 	}
@@ -124,7 +121,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -139,7 +136,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -170,26 +167,26 @@
 		}
 	}
 	
-	// Reactive state changes - update animation when state prop changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

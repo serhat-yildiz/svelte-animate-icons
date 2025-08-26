@@ -40,15 +40,15 @@
 	let currentState = $state(animationState);
 	let currentAnimations: Animation[] = [];
 	
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
-			stopAnimation(); // Clear any existing animation
+			stopAnimation(); 
 			
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// Search zoom animation
+			
 			const svgAnimation = svgRef.animate([
 				{ transform: 'scale(1)', opacity: '0.7' },
 				{ transform: 'scale(1.15)', opacity: '1' },
@@ -60,7 +60,7 @@
 			});
 			currentAnimations.push(svgAnimation);
 			
-			// Handle animation completion
+			
 			svgAnimation.addEventListener('finish', () => {
 				if (!loop && !autoPlay && currentState !== 'loading') {
 					stopAnimation();
@@ -79,7 +79,7 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			// Reset SVG
+			
 			svgRef.style.transform = 'scale(1)';
 			svgRef.style.opacity = '1';
 		}
@@ -96,7 +96,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -111,7 +111,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -142,26 +142,26 @@
 		}
 	}
 	
-	// Reactive state changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

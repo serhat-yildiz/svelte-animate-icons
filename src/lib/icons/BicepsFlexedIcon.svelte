@@ -40,15 +40,15 @@
 	let currentAnimation: Animation | null = null;
 	let currentState = $state(animationState);
 	
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
-			stopAnimation(); // Clear any existing animation
+			stopAnimation(); 
 			
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// Biceps flex animation
+			
 			currentAnimation = svgRef.animate([
 				{ transform: 'rotate(0deg) scale(1)' },
 				{ transform: 'rotate(-10deg) scale(1.2)' },
@@ -60,7 +60,7 @@
 				easing: 'ease-in-out'
 			});
 			
-			// Handle animation completion
+			
 			currentAnimation.addEventListener('finish', () => {
 				if (!loop && !autoPlay && currentState !== 'loading') {
 					stopAnimation();
@@ -79,7 +79,7 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			// Reset to normal state
+			
 			svgRef.style.transform = 'rotate(0deg) scale(1)';
 		}
 	}
@@ -95,7 +95,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -110,7 +110,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -141,26 +141,26 @@
 		}
 	}
 	
-	// Reactive state changes - update animation when state prop changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

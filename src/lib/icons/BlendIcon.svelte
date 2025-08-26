@@ -50,7 +50,7 @@
 	  const rightCircle = svgRef.querySelector('circle[cx="15"]');
 	  const overlapGroup = svgRef.querySelector('g g');
   
-	  // Group wobble
+	  
 	  if (group) {
 		currentAnimations.push(
 		  group.animate(
@@ -69,7 +69,7 @@
 		);
 	  }
   
-	  // Left circle
+	  
 	  if (leftCircle) {
 		currentAnimations.push(
 		  leftCircle.animate(
@@ -86,7 +86,7 @@
 		);
 	  }
   
-	  // Right circle with delay
+	  
 	  if (rightCircle) {
 		currentAnimations.push(
 		  rightCircle.animate(
@@ -104,7 +104,7 @@
 		);
 	  }
   
-	  // Overlap pulse
+	  
 	  if (overlapGroup) {
 		currentAnimations.push(
 		  overlapGroup.animate(
@@ -197,7 +197,7 @@
 	  return () => stopAnimation();
 	});
   
-	// Public API
+	
 	export function start() { startAnimation(); }
 	export function stop() { stopAnimation(); }
 	export function toggle() { toggleAnimation(); }

@@ -49,7 +49,7 @@
 	  const innerCircle = svgRef.querySelector('circle[r="4"]');
 	  const lines = svgRef.querySelectorAll('line');
   
-	  // Outer circle rotation
+	  
 	  if (outerCircle) {
 		currentAnimations.push(
 		  outerCircle.animate(
@@ -63,7 +63,7 @@
 		);
 	  }
   
-	  // Inner circle pulse
+	  
 	  if (innerCircle) {
 		currentAnimations.push(
 		  innerCircle.animate(
@@ -80,7 +80,7 @@
 		);
 	  }
   
-	  // Lines flicker
+	  
 	  lines.forEach((line, i) => {
 		currentAnimations.push(
 		  line.animate(
@@ -158,7 +158,7 @@
 	  return () => stopAnimation();
 	});
   
-	// Public API
+	
 	export function start() { startAnimation(); }
 	export function stop() { stopAnimation(); }
 	export function toggle() { toggleAnimation(); }

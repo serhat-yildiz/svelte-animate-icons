@@ -47,25 +47,23 @@
 	let isAnimating = $state(false);
 	let currentAnimation: Animation | null = null;
 	let currentState = $state(animationState);
-	
-	// Watch for prop changes - removed automatic sync
-	
-	// Animation controls
+
+
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
-			stopAnimation(); // Clear any existing animation
+			stopAnimation(); 
 			
 			isAnimating = true;
 			onAnimationStart?.();
 			
 			const path = svgRef.querySelector('path');
 			if (path) {
-				// Set initial state
+				
 				path.style.strokeDasharray = '80 80';
 				path.style.strokeDashoffset = '80';
 				path.style.opacity = '0.6';
 				
-				// Create animation
+				
 				currentAnimation = path.animate([
 					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
 					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
@@ -76,7 +74,7 @@
 					easing: 'ease-in-out'
 				});
 				
-				// Handle animation completion
+				
 				currentAnimation.addEventListener('finish', () => {
 					if (!loop && !autoPlay && currentState !== 'loading') {
 						stopAnimation();
@@ -98,7 +96,7 @@
 			
 			const path = svgRef.querySelector('path');
 			if (path) {
-				// Reset to normal state
+				
 				path.style.strokeDasharray = 'none';
 				path.style.strokeDashoffset = '';
 				path.style.opacity = '1';
@@ -117,7 +115,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -132,7 +130,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -163,26 +161,26 @@
 		}
 	}
 	
-	// Reactive state changes - update animation when state prop changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

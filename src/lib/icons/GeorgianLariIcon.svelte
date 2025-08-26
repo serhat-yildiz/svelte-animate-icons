@@ -54,7 +54,7 @@
 	  isAnimating = true;
 	  onAnimationStart?.();
   
-	  // SVG shake/scale
+	  
 	  currentAnimations.push(
 		svgRef.animate(
 		  [
@@ -71,7 +71,7 @@
 		)
 	  );
   
-	  // Animate strokes sequentially
+	  
 	  const paths = [
 		{ selector: 'path[d*="M11.5 21"]', delay: 60 },
 		{ selector: 'path[d*="M9 12V3"]', delay: 160 },
@@ -167,7 +167,7 @@
 	  return () => stopAnimation();
 	});
   
-	// Public API
+	
 	export function start() { startAnimation(); }
 	export function stop() { stopAnimation(); }
 	export function toggle() { toggleAnimation(); }

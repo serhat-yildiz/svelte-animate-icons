@@ -37,13 +37,13 @@
   let isAnimating = $state(false);
   let currentState: AnimationState = animationState;
 
-  // --- Core Animation ---
+  
   function runAnimation() {
     if (!svgRef) return;
     isAnimating = true;
     onAnimationStart?.();
 
-    // Head pulse
+    
     if (headEl) {
       headEl.animate(
         [
@@ -55,7 +55,7 @@
       );
     }
 
-    // Body draw
+    
     if (bodyEl) {
       bodyEl.animate(
         [
@@ -66,7 +66,7 @@
       );
     }
 
-    // Cog spin
+    
     if (cogGroupEl) {
       cogGroupEl.animate(
         [
@@ -96,7 +96,7 @@
     });
   }
 
-  // --- Public API ---
+  
   export function start() {
     if (!isAnimating) {
       currentState = 'active';
@@ -120,7 +120,7 @@
     return { state: currentState, isAnimating };
   }
 
-  // --- Event handlers ---
+  
   function handleMouseEnter() {
     if (triggers.hover && !triggers.custom) start();
   }
@@ -137,7 +137,7 @@
     if (triggers.focus) stop();
   }
 
-  // --- Reactivity ---
+  
   $effect(() => setState(animationState));
   $effect(() => {
     if (autoPlay) start();

@@ -38,13 +38,13 @@
   let isAnimating = $state(false);
   let currentState: AnimationState = animationState;
 
-  // --- Core animation ---
+  
   function runAnimation() {
     if (!svgRef) return;
     isAnimating = true;
     onAnimationStart?.();
 
-    // Group sway
+    
     if (groupEl) {
       groupEl.animate(
         [
@@ -57,7 +57,7 @@
       );
     }
 
-    // Key path draw
+    
     if (keyPathEl) {
       keyPathEl.animate(
         [
@@ -68,7 +68,7 @@
       );
     }
 
-    // Head pulse (delayed)
+    
     if (headCircleEl) {
       headCircleEl.animate(
         [
@@ -81,7 +81,7 @@
       );
     }
 
-    // Bite nudge (delayed)
+    
     if (biteGroupEl) {
       biteGroupEl.animate(
         [
@@ -111,7 +111,7 @@
     });
   }
 
-  // --- Public API ---
+  
   export function start() {
     if (!isAnimating) {
       currentState = 'active';
@@ -135,7 +135,7 @@
     return { state: currentState, isAnimating };
   }
 
-  // --- Event handlers ---
+  
   function handleMouseEnter() {
     if (triggers.hover && !triggers.custom) start();
   }
@@ -152,7 +152,7 @@
     if (triggers.focus) stop();
   }
 
-  // --- Reactivity ---
+  
   $effect(() => {
     setState(animationState);
   });

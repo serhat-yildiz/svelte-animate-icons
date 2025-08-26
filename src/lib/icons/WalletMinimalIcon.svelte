@@ -53,13 +53,13 @@
   let isAnimating = $state(false);
   let currentState = $state(animationState);
 
-  // --- Animation Controls ---
+  
   function startAnimation() {
     if (!svgRef || isAnimating) return;
     isAnimating = true;
     onAnimationStart?.();
 
-    // Wrapper rotate + scale
+    
     wrapperEl?.animate(
       [
         { transform: 'rotate(0deg) scale(1)' },
@@ -71,7 +71,7 @@
       { duration: 900, easing: 'ease-in-out' }
     );
 
-    // Outline
+    
     outlineEl?.animate(
       [
         { strokeDashoffset: '120', opacity: '0.4' },
@@ -80,7 +80,7 @@
       { duration: 800, easing: 'ease-in-out' }
     );
 
-    // Dot pop
+    
     if (dotEl) {
       setTimeout(() => {
         dotEl.animate(
@@ -94,7 +94,7 @@
       }, 400);
     }
 
-    // Latch snap
+    
     if (latchEl) {
       setTimeout(() => {
         latchEl.animate(
@@ -108,7 +108,7 @@
       }, 500);
     }
 
-    // Shimmer
+    
     if (shimmerEl) {
       setTimeout(() => {
         shimmerEl.animate(
@@ -153,7 +153,7 @@
     }
   }
 
-  // --- Event handlers ---
+  
   function handleMouseEnter() {
     if (triggers.hover && !triggers.custom) startAnimation();
   }
@@ -170,16 +170,16 @@
     if (triggers.focus) stopAnimation();
   }
 
-  // --- Reactive props ---
+  
   $effect(() => setAnimationState(animationState));
 
-  // AutoPlay
+  
   $effect(() => {
     if (autoPlay) startAnimation();
     return () => stopAnimation();
   });
 
-  // Public API
+  
   export function start() {
     startAnimation();
   }

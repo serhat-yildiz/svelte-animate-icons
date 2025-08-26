@@ -33,13 +33,13 @@
 	let isAnimating = $state(false);
 	let currentState: AnimationState = animationState;
   
-	// --- Core Animation ---
+	
 	function runAnimation() {
 	  if (!svgRef) return;
 	  isAnimating = true;
 	  onAnimationStart?.();
   
-	  // SVG wiggle
+	  
 	  svgRef.animate(
 		[
 		  { transform: 'scale(1) rotate(0deg)' },
@@ -50,7 +50,7 @@
 		{ duration, easing: 'ease-in-out', iterations: loop ? Infinity : 1 }
 	  );
   
-	  // Outline + camera draw
+	  
 	  const drawElements = svgRef.querySelectorAll('rect, path');
 	  drawElements.forEach(el => {
 		const len = el.getTotalLength();
@@ -65,7 +65,7 @@
 		);
 	  });
   
-	  // Dot pulse
+	  
 	  const dot = svgRef.querySelector('line');
 	  if (dot) {
 		dot.animate(
@@ -97,7 +97,7 @@
 	  });
 	}
   
-	// --- Public API ---
+	
 	export function start() {
 	  if (!isAnimating) {
 		currentState = 'active';
@@ -121,7 +121,7 @@
 	  return { state: currentState, isAnimating };
 	}
   
-	// --- Event handlers ---
+	
 	function handleMouseEnter() {
 	  if (triggers.hover && !triggers.custom) start();
 	}
@@ -138,7 +138,7 @@
 	  if (triggers.focus) stop();
 	}
   
-	// --- Reactivity ---
+	
 	$effect(() => {
 	  setState(animationState);
 	});

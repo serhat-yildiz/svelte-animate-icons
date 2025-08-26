@@ -33,13 +33,13 @@
 	let isAnimating = $state(false);
 	let currentState: AnimationState = animationState;
   
-	// --- Core animation ---
+	
 	function runAnimation() {
 	  if (!svgRef) return;
 	  isAnimating = true;
 	  onAnimationStart?.();
   
-	  // Group wiggle
+	  
 	  const group = svgRef.querySelector('g');
 	  if (group) {
 		group.animate(
@@ -54,7 +54,7 @@
 		);
 	  }
   
-	  // Circle pulse
+	  
 	  const circle = svgRef.querySelector('circle');
 	  if (circle) {
 		circle.animate(
@@ -68,7 +68,7 @@
 		);
 	  }
   
-	  // Shaft slide
+	  
 	  const shaft = svgRef.querySelector('path[d*="m21 2"]');
 	  if (shaft) {
 		shaft.animate(
@@ -82,7 +82,7 @@
 		);
 	  }
   
-	  // Head turn
+	  
 	  const head = svgRef.querySelector('path[d*="m15.5 7.5"]');
 	  if (head) {
 		head.animate(
@@ -119,7 +119,7 @@
 	  });
 	}
   
-	// --- Public API ---
+	
 	export function start() {
 	  if (!isAnimating) {
 		currentState = 'active';
@@ -143,7 +143,7 @@
 	  return { state: currentState, isAnimating };
 	}
   
-	// --- Event handlers ---
+	
 	function handleMouseEnter() {
 	  if (triggers.hover && !triggers.custom) start();
 	}
@@ -160,7 +160,7 @@
 	  if (triggers.focus) stop();
 	}
   
-	// --- Reactivity ---
+	
 	$effect(() => {
 	  setState(animationState);
 	});

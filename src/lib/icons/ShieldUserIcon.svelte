@@ -40,12 +40,12 @@
 	let currentState = $state(animationState);
 	let currentAnimations: Animation[] = [];
 	
-	// Refs for animation elements
+	
 	let shieldEl: SVGPathElement;
 	let bodyEl: SVGPathElement;
 	let headEl: SVGCircleElement;
 	
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
 			stopAnimation();
@@ -53,7 +53,7 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// Shield drawing animation
+			
 			if (shieldEl) {
 				const shieldLength = shieldEl.getTotalLength();
 				shieldEl.style.strokeDasharray = shieldLength + ' ' + shieldLength;
@@ -70,7 +70,7 @@
 				currentAnimations.push(shieldAnimation);
 			}
 			
-			// User head animation (delayed)
+			
 			if (headEl) {
 				setTimeout(() => {
 					const headAnimation = headEl.animate([
@@ -85,7 +85,7 @@
 				}, Math.floor(duration * 0.29));
 			}
 			
-			// User body animation (delayed)
+			
 			if (bodyEl) {
 				setTimeout(() => {
 					const bodyLength = bodyEl.getTotalLength();

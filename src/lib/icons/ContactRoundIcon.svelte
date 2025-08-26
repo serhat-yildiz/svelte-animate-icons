@@ -54,7 +54,7 @@
 			isAnimating = true;
 			onAnimationStart?.();
 
-			// Rect
+			
 			const rect = svgRef.querySelector('rect');
 			if (rect) {
 				const length = rect.getTotalLength?.() ?? 100;
@@ -69,7 +69,7 @@
 				);
 			}
 
-			// Circle (delay)
+			
 			const circle = svgRef.querySelector('circle');
 			if (circle) {
 				circle.animate(
@@ -82,7 +82,7 @@
 				);
 			}
 
-			// Curve (delay)
+			
 			const curve = svgRef.querySelector('path[d*="M17.915 22"]');
 			if (curve) {
 				const length = curve.getTotalLength?.() ?? 30;
@@ -97,7 +97,7 @@
 				);
 			}
 
-			// Lines (delay)
+			
 			const lines = svgRef.querySelectorAll('path[d*="v2"]');
 			lines.forEach(line => {
 				line.animate(
@@ -149,7 +149,7 @@
 		}
 	}
 
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) startAnimation();
 	}
@@ -166,7 +166,7 @@
 		if (triggers.focus) stopAnimation();
 	}
 
-	// Reactive updates
+	
 	$effect(() => {
 		if (svgRef) setAnimationState(animationState);
 	});
@@ -175,7 +175,7 @@
 		return () => stopAnimation();
 	});
 
-	// Public API
+	
 	export function start() { startAnimation(); }
 	export function stop() { stopAnimation(); }
 	export function toggle() { toggleAnimation(); }

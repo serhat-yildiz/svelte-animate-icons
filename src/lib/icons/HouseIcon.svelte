@@ -34,13 +34,13 @@
 	let currentState: AnimationState = animationState;
 	let isAnimating = $state(false);
   
-	// ---- Core Animations ----
+	
 	function runAnimation() {
 	  if (!svgRef) return;
 	  isAnimating = true;
 	  onAnimationStart?.();
   
-	  // Wiggle animation
+	  
 	  const houseGroup = svgRef.querySelector('g.house');
 	  houseGroup?.animate(
 		[
@@ -52,7 +52,7 @@
 		{ duration, easing: 'ease-in-out', iterations: loop ? Infinity : 1 }
 	  );
   
-	  // Outline
+	  
 	  const housePath = svgRef.querySelector('path[d*="M3 10a2 2"]');
 	  housePath?.animate(
 		[
@@ -62,7 +62,7 @@
 		{ duration: duration * 0.7, easing: 'ease-in-out', fill: 'forwards' }
 	  );
   
-	  // Door
+	  
 	  const doorPath = svgRef.querySelector('path[d*="M15 21v-8"]');
 	  doorPath?.animate(
 		[
@@ -73,7 +73,7 @@
 		{ duration: 500, delay: 450, easing: 'ease-out' }
 	  );
   
-	  // Smoke
+	  
 	  const smokeGroup = svgRef.querySelector('g.smoke');
 	  smokeGroup?.animate(
 		[
@@ -102,7 +102,7 @@
 	  });
 	}
   
-	// ---- Public API ----
+	
 	export function start() {
 	  if (!isAnimating) {
 		currentState = 'active';
@@ -126,7 +126,7 @@
 	  return { state: currentState, isAnimating };
 	}
   
-	// ---- Event handlers ----
+	
 	function handleMouseEnter() {
 	  if (triggers.hover && !triggers.custom) start();
 	}
@@ -143,7 +143,7 @@
 	  if (triggers.focus) stop();
 	}
   
-	// ---- Reactivity ----
+	
 	$effect(() => {
 	  setState(animationState);
 	});

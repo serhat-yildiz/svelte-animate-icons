@@ -40,7 +40,7 @@
 	let currentState = $state(animationState);
 	let currentAnimations: Animation[] = [];
 	
-	// Refs for animation elements
+	
 	let mainStrokeEl: SVGPathElement;
 	let topStrokeEl: SVGPathElement;
 	let midStrokeEl: SVGPathElement;
@@ -52,7 +52,7 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// SVG animation
+			
 			const svgAnimation = svgRef.animate([
 				{ transform: 'scale(1) rotate(0deg) translateY(0px)' },
 				{ transform: 'scale(1.06) rotate(-2deg) translateY(-1px)' },
@@ -65,7 +65,7 @@
 			});
 			currentAnimations.push(svgAnimation);
 			
-			// Sequential stroke animations
+			
 			const animateStroke = (element: SVGPathElement, delay: number, opacity: string) => {
 				setTimeout(() => {
 					const length = element.getTotalLength();

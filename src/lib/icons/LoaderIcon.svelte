@@ -40,15 +40,15 @@
 	let currentState = $state(animationState);
 	let currentAnimations: Animation[] = [];
   
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
-			stopAnimation(); // Clear any existing animation
+			stopAnimation(); 
 			
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// Rotation animation
+			
 			if (svgRef) {
 				const rotationAnimation = svgRef.animate([
 					{ transform: 'rotate(0deg)' },
@@ -60,7 +60,7 @@
 				});
 				currentAnimations.push(rotationAnimation);
 				
-				// Scale animation (mirror repeat)
+				
 				const scaleAnimation = svgRef.animate([
 					{ transform: 'scale(1)' },
 					{ transform: 'scale(1.1)' },
@@ -72,7 +72,7 @@
 				});
 				currentAnimations.push(scaleAnimation);
 				
-				// Handle animation completion
+				
 				rotationAnimation.addEventListener('finish', () => {
 					if (!loop && !autoPlay && currentState !== 'loading') {
 						if (currentAnimations.every(anim => anim.playState === 'finished')) {
@@ -108,7 +108,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -123,7 +123,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -154,26 +154,26 @@
 		}
 	}
 	
-	// Reactive state changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

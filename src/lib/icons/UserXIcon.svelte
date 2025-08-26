@@ -37,7 +37,7 @@
   let containerRef: HTMLDivElement;
   let svgRef: SVGSVGElement;
 
-  // refs
+  
   let bodyEl: SVGPathElement;
   let headEl: SVGCircleElement;
   let crossGroupEl: SVGGElement;
@@ -53,7 +53,7 @@
     isAnimating = true;
     onAnimationStart?.();
 
-    // Body drawing
+    
     if (bodyEl) {
       bodyEl.animate(
         [
@@ -64,7 +64,7 @@
       );
     }
 
-    // Head
+    
     if (headEl) {
       headEl.animate(
         [
@@ -76,7 +76,7 @@
       );
     }
 
-    // Cross group
+    
     if (crossGroupEl) {
       crossGroupEl.animate(
         [
@@ -89,7 +89,7 @@
       );
     }
 
-    // Cross lines
+    
     [crossLine1El, crossLine2El].forEach((line) => {
       if (line) {
         line.animate(
@@ -159,7 +159,7 @@
     return () => stopAnimation();
   });
 
-  // Public API
+  
   export function start() { startAnimation(); }
   export function stop() { stopAnimation(); }
   export function toggle() { toggleAnimation(); }

@@ -46,7 +46,7 @@
 			isAnimating = true;
 			onAnimationStart?.();
 
-			// Left arrow
+			
 			const leftArrow = svgRef.querySelector('path[d*="m6 8"]');
 			if (leftArrow) {
 				const pathLength = leftArrow.getTotalLength();
@@ -68,7 +68,7 @@
 				);
 			}
 
-			// Right arrow
+			
 			const rightArrow = svgRef.querySelector('path[d*="m18 16"]');
 			if (rightArrow) {
 				const pathLength = rightArrow.getTotalLength();
@@ -91,7 +91,7 @@
 				);
 			}
 
-			// Slash
+			
 			const slash = svgRef.querySelector('path[d*="m14.5 4"]');
 			if (slash) {
 				const pathLength = slash.getTotalLength();
@@ -179,7 +179,7 @@
 		return () => stopAnimation();
 	});
 
-	// Public API
+	
 	export function start() {
 		startAnimation();
 	}

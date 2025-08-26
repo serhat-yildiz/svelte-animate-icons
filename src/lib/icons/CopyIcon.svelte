@@ -50,13 +50,13 @@
 	let isAnimating = $state(false);
 	let currentState = $state(animationState);
   
-	// --- Animation controls ---
+	
 	function startAnimation() {
 	  if (!svgRef || isAnimating) return;
 	  isAnimating = true;
 	  onAnimationStart?.();
   
-	  // Box animation
+	  
 	  rectEl?.animate(
 		[
 		  { transform: 'translateY(0px) translateX(0px) rotate(0deg)' },
@@ -69,7 +69,7 @@
 		}
 	  );
   
-	  // Path animation
+	  
 	  pathEl?.animate(
 		[
 		  { transform: 'translateX(0px) translateY(0px)' },
@@ -113,7 +113,7 @@
 	  }
 	}
   
-	// --- Event handlers ---
+	
 	function handleMouseEnter() {
 	  if (triggers.hover && !triggers.custom) startAnimation();
 	}
@@ -130,16 +130,16 @@
 	  if (triggers.focus) stopAnimation();
 	}
   
-	// Reactive props
+	
 	$effect(() => setAnimationState(animationState));
   
-	// AutoPlay
+	
 	$effect(() => {
 	  if (autoPlay) startAnimation();
 	  return () => stopAnimation();
 	});
   
-	// Public API
+	
 	export function start() {
 	  startAnimation();
 	}

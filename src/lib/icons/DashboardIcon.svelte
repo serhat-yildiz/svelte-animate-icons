@@ -55,7 +55,7 @@
 	  isAnimating = true;
 	  onAnimationStart?.();
   
-	  // Icon scale + rotate
+	  
 	  currentAnimations.push(
 		svgRef.animate(
 		  [
@@ -72,7 +72,7 @@
 		)
 	  );
   
-	  // Tiles animation (staggered)
+	  
 	  const tiles = svgRef.querySelectorAll('rect');
 	  tiles.forEach((tile, i) => {
 		currentAnimations.push(
@@ -131,7 +131,7 @@
 	  }
 	}
   
-	// Event handlers
+	
 	function handleMouseEnter() {
 	  if (triggers.hover && !triggers.custom) startAnimation();
 	}
@@ -148,7 +148,7 @@
 	  if (triggers.focus) stopAnimation();
 	}
   
-	// Reactivity
+	
 	$effect(() => setAnimationState(animationState));
   
 	$effect(() => {
@@ -156,7 +156,7 @@
 	  return () => stopAnimation();
 	});
   
-	// Public API
+	
 	export function start() {
 	  startAnimation();
 	}

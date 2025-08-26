@@ -40,7 +40,7 @@
 	let currentState = $state(animationState);
 	let currentAnimations: Animation[] = [];
 	
-	// Refs for animation elements
+	
 	let wheel1El: SVGCircleElement;
 	let wheel2El: SVGCircleElement;
 	let cartEl: SVGPathElement;
@@ -52,7 +52,7 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// Cart bounce animation
+			
 			if (cartEl) {
 				const cartAnimation = cartEl.animate([
 					{ transform: 'translateY(0px) rotate(0deg)' },
@@ -68,7 +68,7 @@
 				currentAnimations.push(cartAnimation);
 			}
 			
-			// Wheel animations
+			
 			[wheel1El, wheel2El].forEach((wheel, index) => {
 				if (wheel) {
 					const wheelAnimation = wheel.animate([

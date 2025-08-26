@@ -40,18 +40,18 @@
 	let currentState = $state(animationState);
 	let currentAnimations: Animation[] = [];
 	
-	// Refs for animation elements
+	
 	let pathEl: SVGPathElement;
   
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
-			stopAnimation(); // Clear any existing animation
+			stopAnimation(); 
 			
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// SVG scale and rotate animation
+			
 			if (svgRef) {
 				const svgAnimation = svgRef.animate([
 					{ transform: 'scale(1) rotate(0deg)' },
@@ -66,7 +66,7 @@
 				currentAnimations.push(svgAnimation);
 			}
 			
-			// Path drawing animation
+			
 			if (pathEl) {
 				const pathLength = pathEl.getTotalLength();
 				pathEl.style.strokeDasharray = pathLength + ' ' + pathLength;
@@ -83,7 +83,7 @@
 				currentAnimations.push(pathAnimation);
 			}
 			
-			// Handle animation completion
+			
 			const lastAnimation = currentAnimations[currentAnimations.length - 1];
 			lastAnimation?.addEventListener('finish', () => {
 				if (!loop && !autoPlay && currentState !== 'loading') {
@@ -105,10 +105,10 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			// Reset SVG
+			
 			svgRef.style.transform = 'scale(1) rotate(0deg)';
 			
-			// Reset path
+			
 			if (pathEl) {
 				pathEl.style.strokeDasharray = 'none';
 				pathEl.style.strokeDashoffset = '';
@@ -128,7 +128,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -143,7 +143,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -174,26 +174,26 @@
 		}
 	}
 	
-	// Reactive state changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

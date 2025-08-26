@@ -40,20 +40,20 @@
 	let currentState = $state(animationState);
 	let currentAnimations: Animation[] = [];
 	
-	// Refs for animation elements
+	
 	let topStrokeEl: SVGPathElement;
 	let midStrokeEl: SVGPathElement;
 	let pStrokeEl: SVGPathElement;
   
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
-			stopAnimation(); // Clear any existing animation
+			stopAnimation(); 
 			
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// SVG animation
+			
 			if (svgRef) {
 				const svgAnimation = svgRef.animate([
 					{ transform: 'scale(1) rotate(0deg) translateY(0px)' },
@@ -68,7 +68,7 @@
 				currentAnimations.push(svgAnimation);
 			}
 			
-			// Top stroke animation (delayed)
+			
 			if (topStrokeEl) {
 				setTimeout(() => {
 					const topLength = topStrokeEl.getTotalLength();
@@ -87,7 +87,7 @@
 				}, Math.floor(duration * 0.04));
 			}
 			
-			// Mid stroke animation (delayed)
+			
 			if (midStrokeEl) {
 				setTimeout(() => {
 					const midLength = midStrokeEl.getTotalLength();
@@ -106,7 +106,7 @@
 				}, Math.floor(duration * 0.11));
 			}
 			
-			// P stroke animation (delayed)
+			
 			if (pStrokeEl) {
 				setTimeout(() => {
 					const pLength = pStrokeEl.getTotalLength();
@@ -123,7 +123,7 @@
 					});
 					currentAnimations.push(pAnimation);
 					
-					// Handle animation completion
+					
 					pAnimation.addEventListener('finish', () => {
 						if (!loop && !autoPlay && currentState !== 'loading') {
 							if (currentAnimations.every(anim => anim.playState === 'finished')) {
@@ -146,10 +146,10 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			// Reset SVG
+			
 			svgRef.style.transform = 'scale(1) rotate(0deg) translateY(0px)';
 			
-			// Reset all strokes to normal state
+			
 			if (topStrokeEl) {
 				topStrokeEl.style.strokeDasharray = 'none';
 				topStrokeEl.style.strokeDashoffset = '';
@@ -181,7 +181,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -196,7 +196,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -227,26 +227,26 @@
 		}
 	}
 	
-	// Reactive state changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

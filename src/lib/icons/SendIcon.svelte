@@ -40,11 +40,11 @@
 	let currentState = $state(animationState);
 	let currentAnimations: Animation[] = [];
 	
-	// Refs for animation elements
+	
 	let paperPlaneEl: SVGPathElement;
 	let trailEl: SVGPathElement;
 	
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
 			stopAnimation();
@@ -52,7 +52,7 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// SVG animation
+			
 			if (svgRef) {
 				const svgAnimation = svgRef.animate([
 					{ transform: 'rotate(0deg) translateX(0px) scale(1)' },
@@ -67,7 +67,7 @@
 				currentAnimations.push(svgAnimation);
 			}
 			
-			// Paper plane path animation
+			
 			if (paperPlaneEl) {
 				const planeLength = paperPlaneEl.getTotalLength();
 				paperPlaneEl.style.strokeDasharray = planeLength + ' ' + planeLength;
@@ -84,7 +84,7 @@
 				currentAnimations.push(planeAnimation);
 			}
 			
-			// Trail animation (delayed)
+			
 			if (trailEl) {
 				setTimeout(() => {
 					const trailLength = trailEl.getTotalLength();

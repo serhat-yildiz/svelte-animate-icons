@@ -40,15 +40,15 @@
 	let currentAnimations: Animation[] = [];
 	let currentState = $state(animationState);
 	
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
-			stopAnimation(); // Clear any existing animation
+			stopAnimation(); 
 			
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// Group sway animation
+			
 			const group = svgRef.querySelector('g');
 			if (group) {
 				const groupAnimation = group.animate([
@@ -64,7 +64,7 @@
 				currentAnimations.push(groupAnimation);
 			}
 			
-			// Path drawing animations with different delays and durations
+			
 			const pathAnimations = [
 				{ selector: 'path[d*="M11.767 19.089c4.924"]', delay: 60, baseDuration: 550 },
 				{ selector: 'path[d*="M10.551 19.089L5.86"]', delay: 120, baseDuration: 450 },
@@ -97,7 +97,7 @@
 				}
 			});
 			
-			// Spark effects (circles)
+			
 			const sparkAnimations = [
 				{ selector: 'circle[cx="12.2"]', delay: 280 },
 				{ selector: 'circle[cx="10.6"]', delay: 160 },
@@ -121,7 +121,7 @@
 				}
 			});
 			
-			// Handle animation completion
+			
 			const lastAnimation = currentAnimations[currentAnimations.length - 1];
 			lastAnimation?.addEventListener('finish', () => {
 				if (!loop && !autoPlay && currentState !== 'loading') {
@@ -143,7 +143,7 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			// Reset all elements to normal state
+			
 			const allElements = svgRef.querySelectorAll('*');
 			allElements.forEach(element => {
 				element.style.transform = '';
@@ -165,7 +165,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -180,7 +180,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -211,26 +211,26 @@
 		}
 	}
 	
-	// Reactive state changes - update animation when state prop changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

@@ -55,7 +55,7 @@
 	  isAnimating = true;
 	  onAnimationStart?.();
   
-	  // SVG scale + rotation
+	  
 	  currentAnimations.push(
 		svgRef.animate(
 		  [
@@ -72,7 +72,7 @@
 		)
 	  );
   
-	  // Path + circle drawing animation with stagger
+	  
 	  const paths = svgRef.querySelectorAll('circle, path');
 	  paths.forEach((path, i) => {
 		const len = (path as SVGGeometryElement).getTotalLength?.() ?? 60;
@@ -161,7 +161,7 @@
 	  return () => stopAnimation();
 	});
   
-	// Public API
+	
 	export function start() { startAnimation(); }
 	export function stop() { stopAnimation(); }
 	export function toggle() { toggleAnimation(); }

@@ -40,20 +40,20 @@
 	let currentState = $state(animationState);
 	let currentAnimations: Animation[] = [];
 	
-	// Refs for animation elements
+	
 	let line1El: SVGPathElement;
 	let line2El: SVGPathElement;
 	let line3El: SVGPathElement;
   
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
-			stopAnimation(); // Clear any existing animation
+			stopAnimation(); 
 			
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// Line animations with stagger and different directions
+			
 			const lines = [line1El, line2El, line3El];
 			lines.forEach((line, index) => {
 				if (line) {
@@ -70,7 +70,7 @@
 						});
 						currentAnimations.push(lineAnimation);
 						
-						// Handle completion for the last line
+						
 						if (index === lines.length - 1) {
 							lineAnimation.addEventListener('finish', () => {
 								if (!loop && !autoPlay && currentState !== 'loading') {
@@ -96,7 +96,7 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			// Reset all lines to normal state
+			
 			const lines = [line1El, line2El, line3El];
 			lines.forEach(line => {
 				if (line) {
@@ -118,7 +118,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -133,7 +133,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -164,26 +164,26 @@
 		}
 	}
 	
-	// Reactive state changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

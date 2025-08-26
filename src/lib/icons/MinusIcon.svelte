@@ -43,13 +43,13 @@
   let isAnimating = $state(false);
   let currentState: AnimationState = animationState;
 
-  // ---- Core Animations ----
+  
   function startAnimation() {
     if (isAnimating) return;
     isAnimating = true;
     onAnimationStart?.();
 
-    // SVG pulse
+    
     if (svgEl) {
       svgEl.animate(
         [
@@ -66,7 +66,7 @@
       );
     }
 
-    // Line drawing
+    
     if (lineEl) {
       lineEl.animate(
         [
@@ -111,7 +111,7 @@
     else stopAnimation();
   }
 
-  // ---- Event handlers ----
+  
   function handleMouseEnter() {
     if (triggers.hover && !triggers.custom) startAnimation();
   }
@@ -128,7 +128,7 @@
     if (triggers.focus) stopAnimation();
   }
 
-  // ---- Lifecycle ----
+  
   $effect(() => {
     setAnimationState(animationState);
   });
@@ -138,7 +138,7 @@
     return () => stopAnimation();
   });
 
-  // ---- Public API ----
+  
   export function start() { startAnimation(); }
   export function stop() { stopAnimation(); }
   export function toggle() { toggleAnimation(); }

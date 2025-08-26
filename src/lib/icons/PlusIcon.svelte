@@ -40,19 +40,19 @@
 	let currentState = $state(animationState);
 	let currentAnimations: Animation[] = [];
 	
-	// Refs for animation elements
+	
 	let horizontalLineEl: SVGPathElement;
 	let verticalLineEl: SVGPathElement;
 	
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
-			stopAnimation(); // Clear any existing animation
+			stopAnimation(); 
 			
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// SVG plus animation (scale and rotate)
+			
 			if (svgRef) {
 				const svgAnimation = svgRef.animate([
 					{ transform: 'scale(1) rotate(0deg)' },
@@ -67,7 +67,7 @@
 				currentAnimations.push(svgAnimation);
 			}
 			
-			// Horizontal line drawing animation
+			
 			if (horizontalLineEl) {
 				const hLength = horizontalLineEl.getTotalLength();
 				horizontalLineEl.style.strokeDasharray = hLength + ' ' + hLength;
@@ -85,7 +85,7 @@
 				currentAnimations.push(hLineAnimation);
 			}
 			
-			// Vertical line drawing animation (delayed)
+			
 			if (verticalLineEl) {
 				const vLength = verticalLineEl.getTotalLength();
 				verticalLineEl.style.strokeDasharray = vLength + ' ' + vLength;
@@ -102,7 +102,7 @@
 					});
 					currentAnimations.push(vLineAnimation);
 					
-					// Handle animation completion
+					
 					vLineAnimation.addEventListener('finish', () => {
 						if (!loop && !autoPlay && currentState !== 'loading') {
 							if (currentAnimations.every(anim => anim.playState === 'finished')) {
@@ -125,17 +125,17 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			// Reset SVG
+			
 			svgRef.style.transform = 'scale(1) rotate(0deg)';
 			
-			// Reset horizontal line to normal state
+			
 			if (horizontalLineEl) {
 				horizontalLineEl.style.strokeDasharray = 'none';
 				horizontalLineEl.style.strokeDashoffset = '';
 				horizontalLineEl.style.opacity = '1';
 			}
 			
-			// Reset vertical line to normal state
+			
 			if (verticalLineEl) {
 				verticalLineEl.style.strokeDasharray = 'none';
 				verticalLineEl.style.strokeDashoffset = '';
@@ -155,7 +155,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -170,7 +170,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -201,26 +201,26 @@
 		}
 	}
 	
-	// Reactive state changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

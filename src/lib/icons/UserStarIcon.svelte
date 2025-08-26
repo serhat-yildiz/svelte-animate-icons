@@ -37,7 +37,7 @@
   let containerRef: HTMLDivElement;
   let svgRef: SVGSVGElement;
 
-  // refs
+  
   let bodyEl: SVGPathElement;
   let headEl: SVGCircleElement;
   let starEl: SVGPathElement;
@@ -51,7 +51,7 @@
     isAnimating = true;
     onAnimationStart?.();
 
-    // Body
+    
     if (bodyEl) {
       bodyEl.animate(
         [
@@ -62,7 +62,7 @@
       );
     }
 
-    // Head
+    
     if (headEl) {
       headEl.animate(
         [
@@ -74,7 +74,7 @@
       );
     }
 
-    // Star
+    
     if (starEl) {
       starEl.animate(
         [
@@ -145,7 +145,7 @@
     return () => stopAnimation();
   });
 
-  // Public API
+  
   export function start() { startAnimation(); }
   export function stop() { stopAnimation(); }
   export function toggle() { toggleAnimation(); }

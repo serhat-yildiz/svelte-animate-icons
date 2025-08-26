@@ -54,7 +54,7 @@
 	  isAnimating = true;
 	  onAnimationStart?.();
   
-	  // SVG scale + rotate
+	  
 	  currentAnimations.push(
 		svgRef.animate(
 		  [
@@ -71,7 +71,7 @@
 		)
 	  );
   
-	  // Path drawing
+	  
 	  const path = svgRef.querySelector('path');
 	  if (path) {
 		const len = path.getTotalLength();
@@ -158,7 +158,7 @@
 	  return () => stopAnimation();
 	});
   
-	// Public API
+	
 	export function start() { startAnimation(); }
 	export function stop() { stopAnimation(); }
 	export function toggle() { toggleAnimation(); }

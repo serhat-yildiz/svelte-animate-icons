@@ -54,7 +54,7 @@
 		isAnimating = true;
 		onAnimationStart?.();
 
-		// Whole SVG wobble
+		
 		const svgAnim = svgRef.animate([
 			{ transform: 'scale(1) rotate(0deg)' },
 			{ transform: 'scale(1.1) rotate(-3deg)' },
@@ -68,7 +68,7 @@
 		});
 		currentAnimations.push(svgAnim);
 
-		// Headphones pulse
+		
 		const headphonesPath = svgRef.querySelector('path[d*="M3 14h3"]');
 		if (headphonesPath) {
 			const hpAnim = headphonesPath.animate([
@@ -84,7 +84,7 @@
 			currentAnimations.push(hpAnim);
 		}
 
-		// Slash drawing
+		
 		const slashPath = svgRef.querySelector('path[d*="M22 2L2 22"]');
 		if (slashPath) {
 			const pathLength = slashPath.getTotalLength();
@@ -145,7 +145,7 @@
 		}
 	}
 
-	// Events
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) startAnimation();
 	}
@@ -162,14 +162,14 @@
 		if (triggers.focus) stopAnimation();
 	}
 
-	// Sync props
+	
 	$effect(() => setAnimationState(animationState));
 	$effect(() => {
 		if (autoPlay) startAnimation();
 		return () => stopAnimation();
 	});
 
-	// Public API
+	
 	export function start() { startAnimation(); }
 	export function stop() { stopAnimation(); }
 	export function toggle() { toggleAnimation(); }

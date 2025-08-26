@@ -37,7 +37,7 @@
   let containerRef: HTMLDivElement;
   let svgRef: SVGSVGElement;
 
-  // refs
+  
   let curveEl: SVGPathElement;
   let headEl: SVGCircleElement;
 
@@ -50,7 +50,7 @@
     isAnimating = true;
     onAnimationStart?.();
 
-    // Head
+    
     if (headEl) {
       headEl.animate(
         [
@@ -62,7 +62,7 @@
       );
     }
 
-    // Curve (delayed)
+    
     if (curveEl) {
       setTimeout(() => {
         curveEl.animate(
@@ -132,7 +132,7 @@
     return () => stopAnimation();
   });
 
-  // Public API
+  
   export function start() { startAnimation(); }
   export function stop() { stopAnimation(); }
   export function toggle() { toggleAnimation(); }

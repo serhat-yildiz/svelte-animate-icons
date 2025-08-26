@@ -59,7 +59,7 @@
 	  isAnimating = true;
 	  onAnimationStart?.();
   
-	  // Card tilt
+	  
 	  if (groupEl) {
 		currentAnimation.push(
 		  groupEl.animate(
@@ -74,7 +74,7 @@
 		);
 	  }
   
-	  // Stripe slide
+	  
 	  if (stripeEl) {
 		currentAnimation.push(
 		  stripeEl.animate(
@@ -87,7 +87,7 @@
 		);
 	  }
   
-	  // Swipe line
+	  
 	  if (swipeEl) {
 		const pathLength = swipeEl.getTotalLength();
 		swipeEl.style.strokeDasharray = pathLength + ' ' + pathLength;
@@ -105,7 +105,7 @@
 		);
 	  }
   
-	  // Emboss pulse
+	  
 	  if (rectEl) {
 		currentAnimation.push(
 		  rectEl.animate(
@@ -158,7 +158,7 @@
 	  }
 	}
   
-	// Event handlers
+	
 	function handleMouseEnter() {
 	  if (triggers.hover && !triggers.custom) startAnimation();
 	}
@@ -175,16 +175,16 @@
 	  if (triggers.focus) stopAnimation();
 	}
   
-	// React to prop changes
+	
 	$effect(() => setAnimationState(animationState));
   
-	// AutoPlay
+	
 	$effect(() => {
 	  if (autoPlay) startAnimation();
 	  return () => stopAnimation();
 	});
   
-	// Public API
+	
 	export function start() {
 	  startAnimation();
 	}

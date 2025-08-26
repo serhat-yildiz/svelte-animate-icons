@@ -48,7 +48,7 @@
     isAnimating = true;
     onAnimationStart?.();
 
-    // Circle pulse
+    
     if (circleEl) {
       currentAnimations.push(
         circleEl.animate(
@@ -63,7 +63,7 @@
       );
     }
 
-    // Arrow slide right
+    
     if (arrowEl) {
       currentAnimations.push(
         arrowEl.animate(
@@ -143,7 +143,7 @@
     return () => stopAnimation();
   });
 
-  // Public API
+  
   export function start() { startAnimation(); }
   export function stop() { stopAnimation(); }
   export function toggle() { toggleAnimation(); }

@@ -48,7 +48,7 @@
 	  const paths = svgRef.querySelectorAll('path');
 	  const dots = [paths[0], paths[1], paths[2]];
   
-	  // Dots stagger animation
+	  
 	  dots.forEach((dot, i) => {
 		if (dot) {
 		  currentAnimations.push(
@@ -69,7 +69,7 @@
 		}
 	  });
   
-	  // Left arrow
+	  
 	  if (paths[3]) {
 		currentAnimations.push(
 		  paths[3].animate(
@@ -87,7 +87,7 @@
 		);
 	  }
   
-	  // Right arrow
+	  
 	  if (paths[4]) {
 		currentAnimations.push(
 		  paths[4].animate(
@@ -121,10 +121,10 @@
 		const paths = svgRef.querySelectorAll('path');
 		paths.forEach((path, i) => {
 		  if (i < 3) {
-			path.style.opacity = '0.3'; // dots reset
+			path.style.opacity = '0.3'; 
 		  } else {
 			path.style.transform = 'translateX(0px)';
-			path.style.opacity = '1'; // arrows reset
+			path.style.opacity = '1'; 
 		  }
 		});
 	  }
@@ -173,7 +173,7 @@
 	  return () => stopAnimation();
 	});
   
-	// Public API
+	
 	export function start() { startAnimation(); }
 	export function stop() { stopAnimation(); }
 	export function toggle() { toggleAnimation(); }

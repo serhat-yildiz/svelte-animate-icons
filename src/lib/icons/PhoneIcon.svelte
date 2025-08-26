@@ -40,19 +40,19 @@
 	let currentState = $state(animationState);
 	let currentAnimations: Animation[] = [];
 	
-	// Refs for animation elements
+	
 	let groupEl: SVGGElement;
 	let pathEl: SVGPathElement;
 	
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
-			stopAnimation(); // Clear any existing animation
+			stopAnimation(); 
 			
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// Group wave animation
+			
 			if (groupEl) {
 				const groupAnimation = groupEl.animate([
 					{ transform: 'rotate(0deg) scale(1)' },
@@ -69,7 +69,7 @@
 				currentAnimations.push(groupAnimation);
 			}
 			
-			// Path draw and glow animation
+			
 			if (pathEl) {
 				const pathLength = pathEl.getTotalLength();
 				pathEl.style.strokeDasharray = pathLength + ' ' + pathLength;
@@ -87,7 +87,7 @@
 				});
 				currentAnimations.push(pathAnimation);
 				
-				// Handle animation completion
+				
 				pathAnimation.addEventListener('finish', () => {
 					if (!loop && !autoPlay && currentState !== 'loading') {
 						if (currentAnimations.every(anim => anim.playState === 'finished')) {
@@ -109,12 +109,12 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			// Reset group
+			
 			if (groupEl) {
 				groupEl.style.transform = 'rotate(0deg) scale(1)';
 			}
 			
-			// Reset path to normal state
+			
 			if (pathEl) {
 				pathEl.style.strokeDasharray = 'none';
 				pathEl.style.strokeDashoffset = '';
@@ -134,7 +134,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -149,7 +149,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -180,26 +180,26 @@
 		}
 	}
 	
-	// Reactive state changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

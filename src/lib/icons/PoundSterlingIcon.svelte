@@ -40,21 +40,21 @@
 	let currentState = $state(animationState);
 	let currentAnimations: Animation[] = [];
 	
-	// Refs for animation elements
+	
 	let curveEl: SVGPathElement;
 	let midEl: SVGPathElement;
 	let vertEl: SVGPathElement;
 	let baseEl: SVGPathElement;
 	
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
-			stopAnimation(); // Clear any existing animation
+			stopAnimation(); 
 			
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// SVG animation
+			
 			if (svgRef) {
 				const svgAnimation = svgRef.animate([
 					{ transform: 'scale(1) rotate(0deg) translateY(0px)' },
@@ -69,7 +69,7 @@
 				currentAnimations.push(svgAnimation);
 			}
 			
-			// Curve stroke animation (delayed)
+			
 			if (curveEl) {
 				setTimeout(() => {
 					const curveLength = curveEl.getTotalLength();
@@ -88,7 +88,7 @@
 				}, Math.floor(duration * 0.04));
 			}
 			
-			// Mid stroke animation (delayed)
+			
 			if (midEl) {
 				setTimeout(() => {
 					const midLength = midEl.getTotalLength();
@@ -107,7 +107,7 @@
 				}, Math.floor(duration * 0.11));
 			}
 			
-			// Vertical stroke animation (delayed)
+			
 			if (vertEl) {
 				setTimeout(() => {
 					const vertLength = vertEl.getTotalLength();
@@ -126,7 +126,7 @@
 				}, Math.floor(duration * 0.17));
 			}
 			
-			// Base stroke animation (delayed)
+			
 			if (baseEl) {
 				setTimeout(() => {
 					const baseLength = baseEl.getTotalLength();
@@ -143,7 +143,7 @@
 					});
 					currentAnimations.push(baseAnimation);
 					
-					// Handle animation completion
+					
 					baseAnimation.addEventListener('finish', () => {
 						if (!loop && !autoPlay && currentState !== 'loading') {
 							if (currentAnimations.every(anim => anim.playState === 'finished')) {
@@ -166,10 +166,10 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			// Reset SVG
+			
 			svgRef.style.transform = 'scale(1) rotate(0deg) translateY(0px)';
 			
-			// Reset all strokes to normal state
+			
 			[curveEl, midEl, vertEl, baseEl].forEach(el => {
 				if (el) {
 					el.style.strokeDasharray = 'none';
@@ -191,7 +191,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -206,7 +206,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -237,26 +237,26 @@
 		}
 	}
 	
-	// Reactive state changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

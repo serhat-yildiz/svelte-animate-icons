@@ -55,7 +55,7 @@
 		isAnimating = true;
 		onAnimationStart?.();
 
-		// Whole SVG bobbing animation
+		
 		const svgAnim = svgRef.animate([
 			{ transform: 'scale(1) rotate(0deg)' },
 			{ transform: 'scale(1.1) rotate(-3deg)' },
@@ -69,7 +69,7 @@
 		});
 		currentAnimations.push(svgAnim);
 
-		// Earcup path pulse animation
+		
 		const path = svgRef.querySelector('path');
 		if (path) {
 			const pathAnim = path.animate([
@@ -127,7 +127,7 @@
 		}
 	}
 
-	// Events
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) startAnimation();
 	}
@@ -144,14 +144,14 @@
 		if (triggers.focus) stopAnimation();
 	}
 
-	// Sync with props
+	
 	$effect(() => setAnimationState(animationState));
 	$effect(() => {
 		if (autoPlay) startAnimation();
 		return () => stopAnimation();
 	});
 
-	// Public API
+	
 	export function start() { startAnimation(); }
 	export function stop() { stopAnimation(); }
 	export function toggle() { toggleAnimation(); }

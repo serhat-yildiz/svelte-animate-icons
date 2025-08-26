@@ -35,13 +35,13 @@
   let isAnimating = $state(false);
   let currentState: AnimationState = animationState;
 
-  // --- Core animation ---
+  
   function runAnimation() {
     if (!svgRef || !pathRef) return;
     isAnimating = true;
     onAnimationStart?.();
 
-    // SVG wiggle
+    
     svgRef.animate(
       [
         { transform: 'scale(1) rotate(0deg)' },
@@ -53,7 +53,7 @@
       { duration, easing: 'ease-in-out', iterations: loop ? Infinity : 1 }
     );
 
-    // Path drawing
+    
     const len = pathRef.getTotalLength();
     pathRef.style.strokeDasharray = `${len}`;
     pathRef.animate(
@@ -84,7 +84,7 @@
     svgRef.style.transform = '';
   }
 
-  // --- Public API ---
+  
   export function start() {
     if (!isAnimating) {
       currentState = 'active';
@@ -108,7 +108,7 @@
     return { state: currentState, isAnimating };
   }
 
-  // --- Events ---
+  
   function handleMouseEnter() {
     if (triggers.hover && !triggers.custom) start();
   }
@@ -125,7 +125,7 @@
     if (triggers.focus) stop();
   }
 
-  // --- Reactivity ---
+  
   $effect(() => setState(animationState));
   $effect(() => {
     if (autoPlay) start();

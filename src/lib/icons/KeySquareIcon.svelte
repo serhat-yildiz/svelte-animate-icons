@@ -39,13 +39,13 @@
   let isAnimating = $state(false);
   let currentState: AnimationState = animationState;
 
-  // --- Core Animation ---
+  
   function runAnimation() {
     if (!svgRef) return;
     isAnimating = true;
     onAnimationStart?.();
 
-    // Group wiggle
+    
     if (groupEl) {
       groupEl.animate(
         [
@@ -58,7 +58,7 @@
       );
     }
 
-    // Main link draw
+    
     if (linkPathEl) {
       linkPathEl.animate(
         [
@@ -69,7 +69,7 @@
       );
     }
 
-    // Tooth snap
+    
     if (toothEl) {
       toothEl.animate(
         [
@@ -81,7 +81,7 @@
       );
     }
 
-    // Mini link
+    
     if (miniLinkEl) {
       miniLinkEl.animate(
         [
@@ -93,7 +93,7 @@
       );
     }
 
-    // Spark trail
+    
     if (sparkEl) {
       sparkEl.animate(
         [
@@ -123,7 +123,7 @@
     });
   }
 
-  // --- Public API ---
+  
   export function start() {
     if (!isAnimating) {
       currentState = 'active';
@@ -147,7 +147,7 @@
     return { state: currentState, isAnimating };
   }
 
-  // --- Event Handlers ---
+  
   function handleMouseEnter() {
     if (triggers.hover && !triggers.custom) start();
   }
@@ -164,7 +164,7 @@
     if (triggers.focus) stop();
   }
 
-  // --- Reactivity ---
+  
   $effect(() => {
     setState(animationState);
   });

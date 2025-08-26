@@ -40,15 +40,15 @@
 	let currentAnimations: Animation[] = [];
 	let currentState = $state(animationState);
 	
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
-			stopAnimation(); // Clear any existing animation
+			stopAnimation(); 
 			
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// Bell swing animation
+			
 			const svgAnimation = svgRef.animate([
 				{ transform: 'rotate(0deg)' },
 				{ transform: 'rotate(-12deg)' },
@@ -63,8 +63,8 @@
 			});
 			currentAnimations.push(svgAnimation);
 			
-			// Clapper movement animation
-			const clapper = svgRef.querySelector('path[d*="21a2"]'); // clapper path
+			
+			const clapper = svgRef.querySelector('path[d*="21a2"]'); 
 			if (clapper) {
 				const clapperAnimation = clapper.animate([
 					{ transform: 'translateX(0px)' },
@@ -81,8 +81,8 @@
 				currentAnimations.push(clapperAnimation);
 			}
 			
-			// Plus cross animation
-			const plusPaths = svgRef.querySelectorAll('path[d*="15 8h6"], path[d*="18 5v6"]'); // plus paths
+			
+			const plusPaths = svgRef.querySelectorAll('path[d*="15 8h6"], path[d*="18 5v6"]'); 
 			plusPaths.forEach(path => {
 				const plusAnimation = path.animate([
 					{ transform: 'scale(1) rotate(0deg)', opacity: '1' },
@@ -98,7 +98,7 @@
 				currentAnimations.push(plusAnimation);
 			});
 			
-			// Handle animation completion
+			
 			const lastAnimation = currentAnimations[currentAnimations.length - 1];
 			lastAnimation?.addEventListener('finish', () => {
 				if (!loop && !autoPlay && currentState !== 'loading') {
@@ -120,7 +120,7 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			// Reset to normal state
+			
 			svgRef.style.transform = 'rotate(0deg)';
 			const clapper = svgRef.querySelector('path[d*="21a2"]');
 			const plusPaths = svgRef.querySelectorAll('path[d*="15 8h6"], path[d*="18 5v6"]');
@@ -146,7 +146,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -161,7 +161,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -192,26 +192,26 @@
 		}
 	}
 	
-	// Reactive state changes - update animation when state prop changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

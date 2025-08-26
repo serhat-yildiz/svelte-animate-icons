@@ -40,7 +40,7 @@
 	let currentState = $state(animationState);
 	let currentAnimations: Animation[] = [];
 	
-	// Refs for animation elements
+	
 	let swayGroupEl: SVGGElement;
 	let dotEl: SVGPathElement;
 	let bar1El: SVGPathElement;
@@ -55,7 +55,7 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// Complex signal bar animations with staggered timing
+			
 			const bars = [bar1El, bar2El, bar3El, bar4El];
 			const delays = [0, 0.1, 0.2, 0.3];
 			
@@ -88,7 +88,7 @@
 				}
 			});
 			
-			// Dot pulse animation
+			
 			if (dotEl) {
 				const dotAnimation = dotEl.animate([
 					{ opacity: '0.4', transform: 'scale(1)' },

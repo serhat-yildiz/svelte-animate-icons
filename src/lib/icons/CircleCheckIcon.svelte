@@ -45,7 +45,7 @@
 	  isAnimating = true;
 	  onAnimationStart?.();
   
-	  // Scale "pop"
+	  
 	  currentAnimations.push(
 		svgRef.animate(
 		  [
@@ -58,7 +58,7 @@
 		)
 	  );
   
-	  // Tick draw
+	  
 	  const tick = svgRef.querySelector('path[d*="m9 12"]');
 	  if (tick) {
 		const pathLength = tick.getTotalLength();
@@ -146,7 +146,7 @@
 	  return () => stopAnimation();
 	});
   
-	// Public API
+	
 	export function start() { startAnimation(); }
 	export function stop() { stopAnimation(); }
 	export function toggle() { toggleAnimation(); }

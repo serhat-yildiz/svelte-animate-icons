@@ -47,7 +47,7 @@
   
 	  const paths = svgRef.querySelectorAll('path');
   
-	  // Leading arrow
+	  
 	  if (paths[1]) {
 		currentAnimations.push(
 		  paths[1].animate(
@@ -65,7 +65,7 @@
 		);
 	  }
   
-	  // Trailing arrow (delayed)
+	  
 	  if (paths[0]) {
 		currentAnimations.push(
 		  paths[0].animate(
@@ -147,7 +147,7 @@
 	  return () => stopAnimation();
 	});
   
-	// Public API
+	
 	export function start() { startAnimation(); }
 	export function stop() { stopAnimation(); }
 	export function toggle() { toggleAnimation(); }

@@ -40,15 +40,15 @@
 	let currentAnimations: Animation[] = [];
 	let currentState = $state(animationState);
 	
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
-			stopAnimation(); // Clear any existing animation
+			stopAnimation(); 
 			
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// Group micro tilt
+			
 			const group = svgRef.querySelector('g');
 			if (group) {
 				const groupAnimation = group.animate([
@@ -64,7 +64,7 @@
 				currentAnimations.push(groupAnimation);
 			}
 			
-			// Spine pulse animation
+			
 			const spine = svgRef.querySelector('path[d="M12 18V5"]');
 			if (spine) {
 				const pathLength = spine.getTotalLength();
@@ -84,7 +84,7 @@
 				currentAnimations.push(spineAnimation);
 			}
 			
-			// Lobe breathe A paths
+			
 			const lobePathsA = svgRef.querySelectorAll('path[d*="M15 13a4.17"], path[d*="M17.997 5.125"], path[d*="M19.967 17.483"], path[d*="M6.003 5.125"]');
 			lobePathsA.forEach(path => {
 				const pathLength = path.getTotalLength();
@@ -105,7 +105,7 @@
 				currentAnimations.push(lobeAAnimation);
 			});
 			
-			// Lobe breathe B paths
+			
 			const lobePathsB = svgRef.querySelectorAll('path[d*="M17.598 6.5"], path[d*="M18 18a4"], path[d*="M6 18a4"]');
 			lobePathsB.forEach(path => {
 				const pathLength = path.getTotalLength();
@@ -126,7 +126,7 @@
 				currentAnimations.push(lobeBAnimation);
 			});
 			
-			// Synapse spark L
+			
 			const sparkL = svgRef.querySelector('path[d*="M8.5 11.6"]');
 			if (sparkL) {
 				const pathLength = sparkL.getTotalLength();
@@ -146,7 +146,7 @@
 				currentAnimations.push(sparkLAnimation);
 			}
 			
-			// Synapse spark R
+			
 			const sparkR = svgRef.querySelector('path[d*="M13.8 9.4"]');
 			if (sparkR) {
 				const pathLength = sparkR.getTotalLength();
@@ -166,7 +166,7 @@
 				currentAnimations.push(sparkRAnimation);
 			}
 			
-			// Handle animation completion
+			
 			const lastAnimation = currentAnimations[currentAnimations.length - 1];
 			lastAnimation?.addEventListener('finish', () => {
 				if (!loop && !autoPlay && currentState !== 'loading') {
@@ -188,7 +188,7 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			// Reset all elements to normal state
+			
 			const allElements = svgRef.querySelectorAll('*');
 			allElements.forEach(element => {
 				element.style.transform = '';
@@ -210,7 +210,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -225,7 +225,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -256,26 +256,26 @@
 		}
 	}
 	
-	// Reactive state changes - update animation when state prop changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

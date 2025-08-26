@@ -40,19 +40,19 @@
 	let currentState = $state(animationState);
 	let currentAnimations: Animation[] = [];
 	
-	// Refs for animation elements
+	
 	let arrowEl: SVGPathElement;
 	let lineEl: SVGPathElement;
   
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
-			stopAnimation(); // Clear any existing animation
+			stopAnimation(); 
 			
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// Arrow movement animation
+			
 			if (arrowEl) {
 				const arrowAnimation = arrowEl.animate([
 					{ transform: 'translateX(0px)' },
@@ -66,7 +66,7 @@
 				currentAnimations.push(arrowAnimation);
 			}
 			
-			// Line opacity animation
+			
 			if (lineEl) {
 				const lineAnimation = lineEl.animate([
 					{ opacity: '1' },
@@ -79,7 +79,7 @@
 				currentAnimations.push(lineAnimation);
 			}
 			
-			// Handle animation completion
+			
 			const lastAnimation = currentAnimations[currentAnimations.length - 1];
 			lastAnimation?.addEventListener('finish', () => {
 				if (!loop && !autoPlay && currentState !== 'loading') {
@@ -101,7 +101,7 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			// Reset all elements to normal state
+			
 			if (arrowEl) {
 				arrowEl.style.transform = 'translateX(0px)';
 			}
@@ -123,7 +123,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -138,7 +138,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -169,26 +169,26 @@
 		}
 	}
 	
-	// Reactive state changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

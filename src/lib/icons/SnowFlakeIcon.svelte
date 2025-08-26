@@ -47,7 +47,7 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// SVG rotation and scale animation
+			
 			const svgAnimation = svgRef.animate([
 				{ transform: 'rotate(0deg) scale(1)' },
 				{ transform: 'rotate(10deg) scale(1.05)' },
@@ -60,7 +60,7 @@
 			});
 			currentAnimations.push(svgAnimation);
 			
-			// Individual path animations
+			
 			const paths = svgRef.querySelectorAll('path') as NodeListOf<SVGPathElement>;
 			paths.forEach((path, index) => {
 				setTimeout(() => {

@@ -72,7 +72,7 @@
 		currentAnimations.push(anim);
 	  });
   
-	  // anim bittiğinde state resetle
+	  
 	  if (!(loop || autoPlay || currentState === 'loading')) {
 		setTimeout(() => {
 		  stopAnimation();
@@ -135,7 +135,7 @@
 	  return () => stopAnimation();
 	});
   
-	// Public API
+	
 	export function start() {
 	  startAnimation();
 	}

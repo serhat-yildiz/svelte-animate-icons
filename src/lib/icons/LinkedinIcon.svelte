@@ -40,20 +40,20 @@
 	let currentState = $state(animationState);
 	let currentAnimations: Animation[] = [];
 	
-	// Refs for animation elements
+	
 	let pathEl: SVGPathElement;
 	let rectEl: SVGRectElement;
 	let circleEl: SVGCircleElement;
   
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
-			stopAnimation(); // Clear any existing animation
+			stopAnimation(); 
 			
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// SVG icon variants animation
+			
 			if (svgRef) {
 				const svgAnimation = svgRef.animate([
 					{ transform: 'scale(1) rotate(0deg)' },
@@ -68,7 +68,7 @@
 				currentAnimations.push(svgAnimation);
 			}
 			
-			// Path drawing animation
+			
 			if (pathEl) {
 				const pathLength = pathEl.getTotalLength();
 				pathEl.style.strokeDasharray = pathLength + ' ' + pathLength;
@@ -85,7 +85,7 @@
 				currentAnimations.push(pathAnimation);
 			}
 			
-			// Rectangle drawing animation
+			
 			if (rectEl) {
 				const rectLength = rectEl.getTotalLength();
 				rectEl.style.strokeDasharray = rectLength + ' ' + rectLength;
@@ -102,7 +102,7 @@
 				currentAnimations.push(rectAnimation);
 			}
 			
-			// Circle drawing animation
+			
 			if (circleEl) {
 				const circleLength = circleEl.getTotalLength();
 				circleEl.style.strokeDasharray = circleLength + ' ' + circleLength;
@@ -119,7 +119,7 @@
 				currentAnimations.push(circleAnimation);
 			}
 			
-			// Handle animation completion
+			
 			const lastAnimation = currentAnimations[currentAnimations.length - 1];
 			lastAnimation?.addEventListener('finish', () => {
 				if (!loop && !autoPlay && currentState !== 'loading') {
@@ -141,10 +141,10 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			// Reset SVG
+			
 			svgRef.style.transform = 'scale(1) rotate(0deg)';
 			
-			// Reset all shapes to normal state
+			
 			if (pathEl) {
 				pathEl.style.strokeDasharray = 'none';
 				pathEl.style.strokeDashoffset = '';
@@ -176,7 +176,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -191,7 +191,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -222,26 +222,26 @@
 		}
 	}
 	
-	// Reactive state changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

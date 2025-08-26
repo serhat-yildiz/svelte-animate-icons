@@ -45,11 +45,11 @@
 	let currentState = $state(animationState);
 	let currentAnimations: Animation[] = [];
 	
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef) {
 			isAnimating = true;
-			// Bell swing animation
+			
 			svgRef.animate([
 				{ transform: 'rotate(0deg)' },
 				{ transform: 'rotate(15deg)' },
@@ -61,7 +61,7 @@
 				easing: 'ease-in-out'
 			});
 			
-			// Ring lines animation
+			
 			const ringPaths = svgRef.querySelectorAll('path');
 			if (ringPaths.length > 1) {
 				ringPaths[1].animate([
@@ -90,12 +90,12 @@
 	function stopAnimation() {
 		if (svgRef) {
 			isAnimating = false;
-			// Cancel all animations
+			
 			svgRef.getAnimations().forEach(animation => animation.cancel());
 			const paths = svgRef.querySelectorAll('path');
 			paths.forEach(path => {
 				path.getAnimations().forEach(animation => animation.cancel());
-				// Reset stroke properties
+				
 				path.style.strokeDasharray = '';
 				path.style.strokeDashoffset = '';
 			});
@@ -150,7 +150,7 @@
 		return () => stopAnimation();
 	});
 	
-	// Public API
+	
 	export function start() { startAnimation(); }
 	export function stop() { stopAnimation(); }
 	export function toggle() { toggleAnimation(); }

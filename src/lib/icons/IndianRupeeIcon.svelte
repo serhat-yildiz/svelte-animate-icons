@@ -40,13 +40,13 @@
   let currentState: AnimationState = animationState;
   let isAnimating = $state(false);
 
-  // ---- Core Animations ----
+  
   function runAnimation() {
     if (!svgRef) return;
     isAnimating = true;
     onAnimationStart?.();
 
-    // Group wiggle
+    
     groupEl?.animate(
       [
         { transform: 'scale(1) translate(0,0)' },
@@ -70,7 +70,7 @@
     draw(curveEl, 260, 800);
     draw(notchEl, 420, 450);
 
-    // diagonal special animation
+    
     if (diagonalEl) {
       const len = diagonalEl.getTotalLength();
       diagonalEl.animate(
@@ -101,7 +101,7 @@
     });
   }
 
-  // ---- Public API ----
+  
   export function start() {
     if (!isAnimating) {
       currentState = 'active';
@@ -125,7 +125,7 @@
     return { state: currentState, isAnimating };
   }
 
-  // ---- Event handlers ----
+  
   function handleMouseEnter() {
     if (triggers.hover && !triggers.custom) start();
   }
@@ -142,7 +142,7 @@
     if (triggers.focus) stop();
   }
 
-  // ---- Reactivity ----
+  
   $effect(() => {
     setState(animationState);
   });

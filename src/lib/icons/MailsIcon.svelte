@@ -40,20 +40,20 @@
 	let currentState = $state(animationState);
 	let currentAnimations: Animation[] = [];
 	
-	// Refs for animation elements
+	
 	let flapEl: SVGPathElement;
 	let outlinePath1El: SVGPathElement;
 	let outlineRectEl: SVGRectElement;
   
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
-			stopAnimation(); // Clear any existing animation
+			stopAnimation(); 
 			
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// SVG bounce animation
+			
 			if (svgRef) {
 				const svgAnimation = svgRef.animate([
 					{ transform: 'translateY(0px) scale(1)' },
@@ -69,7 +69,7 @@
 				currentAnimations.push(svgAnimation);
 			}
 			
-			// Flap animation
+			
 			if (flapEl) {
 				const flapAnimation = flapEl.animate([
 					{ transform: 'rotate(-4deg)', opacity: '1' },
@@ -84,7 +84,7 @@
 				currentAnimations.push(flapAnimation);
 			}
 			
-			// Outline path animation
+			
 			if (outlinePath1El) {
 				const outlineAnimation = outlinePath1El.animate([
 					{ opacity: '0.7' },
@@ -99,7 +99,7 @@
 				currentAnimations.push(outlineAnimation);
 			}
 			
-			// Outline rect animation
+			
 			if (outlineRectEl) {
 				const rectAnimation = outlineRectEl.animate([
 					{ opacity: '0.7' },
@@ -114,7 +114,7 @@
 				currentAnimations.push(rectAnimation);
 			}
 			
-			// Handle animation completion
+			
 			const lastAnimation = currentAnimations[currentAnimations.length - 1];
 			lastAnimation?.addEventListener('finish', () => {
 				if (!loop && !autoPlay && currentState !== 'loading') {
@@ -136,7 +136,7 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			// Reset all elements to normal state
+			
 			svgRef.style.transform = 'translateY(0px) scale(1)';
 			
 			if (flapEl) {
@@ -165,7 +165,7 @@
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		
-		// State-based animation logic
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -180,7 +180,7 @@
 		}
 	}
 	
-	// Event handlers
+	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) {
 			startAnimation();
@@ -211,26 +211,26 @@
 		}
 	}
 	
-	// Reactive state changes
+	
 	$effect(() => {
 		if (svgRef) {
 			setAnimationState(animationState);
 		}
 	});
 	
-	// Auto-play on mount
+	
 	$effect(() => {
 		if (autoPlay && svgRef) {
 			startAnimation();
 		}
 		
-		// Cleanup on destroy
+		
 		return () => {
 			stopAnimation();
 		};
 	});
 	
-	// Public API for external control
+	
 	export function start() {
 		startAnimation();
 	}

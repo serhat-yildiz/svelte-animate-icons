@@ -44,7 +44,7 @@
 	  isAnimating = true;
 	  onAnimationStart?.();
   
-	  // rotate wiggle
+	  
 	  svgRef.animate(
 		[
 		  { transform: 'rotate(0deg)' },
@@ -55,7 +55,7 @@
 		{ duration, iterations: loop ? Infinity : 1, easing: 'ease-in-out' }
 	  );
   
-	  // scale pulse
+	  
 	  svgRef.animate(
 		[
 		  { transform: 'scale(1)' },
@@ -65,7 +65,7 @@
 		{ duration: duration * 0.6, iterations: loop ? Infinity : 1, easing: 'ease-in-out' }
 	  );
   
-	  // path drawing
+	  
 	  svgRef.querySelectorAll('path').forEach((p, i) => {
 		const len = (p as SVGPathElement).getTotalLength();
 		(p as SVGPathElement).style.strokeDasharray = `${len}`;
@@ -110,7 +110,7 @@
 	  }
 	}
   
-	// Hover/click/focus handlers
+	
 	function handleMouseEnter() {
 	  if (triggers.hover && !triggers.custom) startAnimation();
 	}
@@ -133,7 +133,7 @@
 	  return () => stopAnimation();
 	});
   
-	// Public API
+	
 	export function start() { startAnimation(); }
 	export function stop() { stopAnimation(); }
 	export function toggle() { toggleAnimation(); }

@@ -40,7 +40,7 @@
 	let currentState = $state(animationState);
 	let currentAnimations: Animation[] = [];
 	
-	// Refs for animation elements
+	
 	let boxEl: SVGPathElement;
 	let arrowLineEl: SVGPathElement;
 	let arrowHeadEl: SVGPathElement;
@@ -52,7 +52,7 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			// Box drawing animation
+			
 			if (boxEl) {
 				const boxLength = boxEl.getTotalLength();
 				boxEl.style.strokeDasharray = boxLength + ' ' + boxLength;
@@ -69,7 +69,7 @@
 				currentAnimations.push(boxAnimation);
 			}
 			
-			// Arrow line animation (delayed)
+			
 			if (arrowLineEl) {
 				setTimeout(() => {
 					const lineLength = arrowLineEl.getTotalLength();
@@ -88,7 +88,7 @@
 				}, Math.floor(duration * 0.29));
 			}
 			
-			// Arrow head animation (delayed)
+			
 			if (arrowHeadEl) {
 				setTimeout(() => {
 					const headLength = arrowHeadEl.getTotalLength();

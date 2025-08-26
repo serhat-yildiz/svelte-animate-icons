@@ -37,7 +37,7 @@
   let containerRef: HTMLDivElement;
   let svgRef: SVGSVGElement;
 
-  // refs
+  
   let arcEl: SVGPathElement;
   let headEl: SVGCircleElement;
   let sideEl: SVGPathElement;
@@ -51,7 +51,7 @@
     isAnimating = true;
     onAnimationStart?.();
 
-    // Arc
+    
     if (arcEl) {
       arcEl.animate(
         [
@@ -62,7 +62,7 @@
       );
     }
 
-    // Head
+    
     if (headEl) {
       headEl.animate(
         [
@@ -74,7 +74,7 @@
       );
     }
 
-    // Side (delayed)
+    
     if (sideEl) {
       setTimeout(() => {
         sideEl.animate(
@@ -144,7 +144,7 @@
     return () => stopAnimation();
   });
 
-  // Public API
+  
   export function start() { startAnimation(); }
   export function stop() { stopAnimation(); }
   export function toggle() { toggleAnimation(); }

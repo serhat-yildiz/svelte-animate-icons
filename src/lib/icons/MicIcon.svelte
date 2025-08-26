@@ -40,7 +40,7 @@
 	let currentState = $state(animationState);
 	let currentAnimations: Animation[] = [];
   
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
 			stopAnimation();
