@@ -2,11 +2,11 @@
 
 ## Project Overview
 
-Svelte Animate Icons is a comprehensive animated SVG icon library specifically designed for Svelte 5 applications. The library provides 130+ beautifully animated icons with smooth hover effects, built using the Web Animations API for optimal performance.
+Svelte Animate Icons is a comprehensive animated SVG icon library specifically designed for Svelte 5 applications. The library provides 550+ beautifully animated icons with smooth hover effects, built using the Web Animations API for optimal performance.
 
 ## Key Features
 
-- **130+ Animated Icons**: Professional SVG icons with built-in hover animations
+- **550+ Animated Icons**: Professional SVG icons with built-in hover animations
 - **Svelte 5 Native**: Built with modern Svelte 5 runes and reactivity system
 - **Web Animations API**: 60fps smooth animations with optimal performance
 - **Tree-shakeable**: Import only the icons you need, minimal bundle impact
@@ -22,7 +22,7 @@ Svelte Animate Icons is a comprehensive animated SVG icon library specifically d
 src/
 ├── lib/
 │   ├── components/          # Demo website components
-│   ├── icons/              # Individual icon components (130+ icons)
+│   ├── icons/              # Individual icon components (550+ icons)
 │   ├── registry/           # Icon registry and metadata system
 │   ├── types/              # TypeScript type definitions
 │   └── index.ts            # Main export file

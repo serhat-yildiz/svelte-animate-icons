@@ -186,7 +186,7 @@
 				<div class="feature-icon">
 					<BlocksIcon bind:this={blocksIconRef} size={24} triggers={{ custom: true }} />
 				</div>
-				<h4>130+ Icons</h4>
+				<h4>{getAvailableIcons().length}+ Icons</h4>
 				<p>Comprehensive icon library covering all common use cases and design needs.</p>
 			</div>
 			
