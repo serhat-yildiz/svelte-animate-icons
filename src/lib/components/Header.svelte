@@ -56,7 +56,10 @@
 					<BicepsFlexedIcon bind:this={logoIconRef} size={32} triggers={{ custom: true }} />
 				</div>
 				<div class="logo-text">
-					<h1>AnimateIcons</h1>
+					<h1>
+						<span class="hide-mobile">AnimateIcons</span>
+						<span class="show-mobile">Animate</span>
+					</h1>
 					<span class="logo-badge">Svelte 5</span>
 				</div>
 			</a>
@@ -92,7 +95,7 @@
 				>
 					<GithubIcon bind:this={githubIconRef} size={20} triggers={{ custom: true }} />
 					<span class="hide-mobile">GitHub</span>
-					<div class="star-count">
+					<div class="star-count hide-mobile">
 						<HeartIcon bind:this={heartIconRef} size={14} triggers={{ custom: true }} />
 						<span>{starCount}</span>
 					</div>
@@ -113,15 +116,15 @@
 		{#if mobileMenuOpen}
 			<div class="mobile-menu animate-fade-in">
 				<nav class="mobile-nav">
-					<button class="mobile-nav-link" onclick={() => scrollToSection('docs')}>
+					<a href="{base}/docs" class="mobile-nav-link" onclick={() => mobileMenuOpen = false}>
 						Docs
-					</button>
-					<button class="mobile-nav-link" onclick={() => scrollToSection('gallery')}>
+					</a>
+					<a href="{base}/#gallery" class="mobile-nav-link" onclick={() => mobileMenuOpen = false}>
 						Gallery
-					</button>
-					<button class="mobile-nav-link" onclick={() => scrollToSection('install')}>
+					</a>
+					<a href="{base}/#install" class="mobile-nav-link" onclick={() => mobileMenuOpen = false}>
 						Install
-					</button>
+					</a>
 				</nav>
 			</div>
 		{/if}
@@ -321,6 +324,7 @@
 		text-align: left;
 		width: 100%;
 		font-size: 1rem;
+		cursor: pointer;
 	}
 	
 	.mobile-nav-link:hover,
@@ -333,29 +337,60 @@
 	@media (max-width: 768px) {
 		.header-content {
 			padding: var(--space-md) 0;
+			gap: var(--space-md);
 		}
 		
 		.logo-text h1 {
 			font-size: 1.25rem;
 		}
 		
+		.logo-badge {
+			font-size: 0.7rem;
+		}
+		
 		.actions {
 			gap: var(--space-sm);
+		}
+		
+		.github-link {
+			padding: var(--space-sm) var(--space-md);
+			border-radius: var(--radius-md);
+			background: var(--glass-bg);
+			border: 1px solid var(--glass-border);
 		}
 	}
 	
 	@media (max-width: 480px) {
+		.header-content {
+			padding: var(--space-sm) 0;
+			gap: var(--space-sm);
+		}
+		
+		.logo {
+			gap: var(--space-sm);
+		}
+		
 		.logo-icon {
-			width: 40px;
-			height: 40px;
+			width: 36px;
+			height: 36px;
 		}
 		
 		.logo-text h1 {
-			font-size: 1.125rem;
+			font-size: 1rem;
 		}
 		
 		.logo-badge {
-			font-size: 0.65rem;
+			font-size: 0.6rem;
+			padding: 0.15em 0.5em;
+		}
+		
+		.github-link {
+			padding: var(--space-xs) var(--space-sm);
+		}
+		
+		.mobile-menu-btn {
+			width: 36px;
+			height: 36px;
 		}
 	}
 </style>

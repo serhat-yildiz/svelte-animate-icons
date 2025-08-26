@@ -378,7 +378,7 @@
 	
 	.features-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 		gap: var(--space-lg);
 	}
 	
@@ -424,7 +424,7 @@
 		}
 		
 		.features-grid {
-			grid-template-columns: 1fr;
+			grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
 			gap: var(--space-md);
 		}
 		
@@ -439,6 +439,25 @@
 	}
 	
 	@media (max-width: 480px) {
+		.section-title {
+			flex-direction: column;
+			gap: var(--space-sm);
+		}
+		
+		.features-grid {
+			grid-template-columns: 1fr;
+			gap: var(--space-sm);
+		}
+		
+		.feature-card {
+			padding: var(--space-lg);
+		}
+		
+		.install-card,
+		.usage-card {
+			padding: var(--space-md);
+		}
+		
 		.tab-list {
 			flex-direction: column;
 			gap: 4px;
