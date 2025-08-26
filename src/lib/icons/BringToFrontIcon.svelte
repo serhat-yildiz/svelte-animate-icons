@@ -1,44 +1,67 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
 	
+	interface AnimationTriggers {
+		hover?: boolean;
+		click?: boolean;
+		focus?: boolean;
+		custom?: boolean;
+	}
+	
 	interface Props {
 		size?: number;
 		class?: string;
+		triggers?: AnimationTriggers;
+		animationState?: 'idle' | 'active' | 'loading' | 'success' | 'error';
+		autoPlay?: boolean;
+		loop?: boolean;
+		duration?: number;
+		onAnimationStart?: () => void;
+		onAnimationEnd?: () => void;
 		[key: string]: any;
 	}
 	
-	let { size = 32, class: className, ...restProps }: Props = $props();
-	
-	export interface BringToFrontIconHandle {
-		startAnimation: () => void;
-		stopAnimation: () => void;
-	}
+	let { 
+		size = 28, 
+		class: className, 
+		triggers = { hover: true },
+		animationState = 'idle',
+		autoPlay = false,
+		loop = false,
+		duration = 2000,
+		onAnimationStart,
+		onAnimationEnd,
+		...restProps 
+	}: Props = $props();
 	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
-	let isControlled = false;
+	let currentAnimations: Animation[] = [];
+	let currentState = $state(animationState);
 	
-	// Animation controls
-	function startAnimation() {
-		if (svgRef) {
-			isAnimating = true;
+	
+			function startAnimation() {
+		if (svgRef && !isAnimating) {
+			stopAnimation(); 
 			
-			// SVG rotation and scale animation
-			// React: rotate: [0, -3, 3, 0], scale: [1, 1.05, 0.95, 1]
-			svgRef.animate([
+			isAnimating = true;
+			onAnimationStart?.();
+			
+			
+			const svgAnimation = svgRef.animate([
 				{ transform: 'rotate(0deg) scale(1)' },
 				{ transform: 'rotate(-3deg) scale(1.05)' },
 				{ transform: 'rotate(3deg) scale(0.95)' },
 				{ transform: 'rotate(0deg) scale(1)' }
 			], {
-				duration: 1400,
-				iterations: Infinity,
+				duration: Math.floor(duration * 0.7),
+				iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 				easing: 'cubic-bezier(0.42, 0, 0.58, 1)'
 			});
-			
-			// Path drawing animation
-			// React: pathLength: [0, 1], opacity: [0.5, 1]
+			currentAnimations.push(svgAnimation);
+
+
 			const paths = svgRef.querySelectorAll('path');
 			paths.forEach(path => {
 				const pathLength = path.getTotalLength();
@@ -54,9 +77,8 @@
 					easing: 'cubic-bezier(0.42, 0, 0.58, 1)'
 				});
 			});
-			
-			// Rect scaling animation
-			// React: scale: [1, 1.2, 0.9, 1]
+
+
 			const rect = svgRef.querySelector('rect');
 			if (rect) {
 				rect.animate([
@@ -76,40 +98,119 @@
 	function stopAnimation() {
 		if (svgRef) {
 			isAnimating = false;
-			// Cancel all animations
+			
 			svgRef.getAnimations().forEach(animation => animation.cancel());
 			const allElements = svgRef.querySelectorAll('*');
 			allElements.forEach(element => {
 				element.getAnimations().forEach(animation => animation.cancel());
-				// Reset styles
+				
 				element.style.transform = '';
 				element.style.strokeDasharray = '';
 				element.style.strokeDashoffset = '';
 				element.style.opacity = '1';
 			});
-			// Reset SVG transform
+			
 			svgRef.style.transform = 'rotate(0deg) scale(1)';
 		}
 	}
 	
+	function toggleAnimation() {
+		if (isAnimating) {
+			stopAnimation();
+		} else {
+			startAnimation();
+		}
+	}
+	
+	function setAnimationState(newState: string) {
+		currentState = newState as any;
+		
+		
+		switch (newState) {
+			case 'active':
+			case 'loading':
+				startAnimation();
+				break;
+			case 'idle':
+			case 'success':
+			case 'error':
+			default:
+				stopAnimation();
+				break;
+		}
+	}
+	
+	
 	function handleMouseEnter() {
-		if (!isControlled) {
+		if (triggers.hover && !triggers.custom) {
 			startAnimation();
 		}
 	}
 	
 	function handleMouseLeave() {
-		if (!isControlled) {
+		if (triggers.hover && !triggers.custom) {
 			stopAnimation();
 		}
 	}
 	
-	// Public API
-	export function getControls(): BringToFrontIconHandle {
-		isControlled = true;
+	function handleClick() {
+		if (triggers.click) {
+			toggleAnimation();
+		}
+	}
+	
+	function handleFocus() {
+		if (triggers.focus) {
+			startAnimation();
+		}
+	}
+	
+	function handleBlur() {
+		if (triggers.focus) {
+			stopAnimation();
+		}
+	}
+	
+	
+	$effect(() => {
+		if (svgRef) {
+			setAnimationState(animationState);
+		}
+	});
+	
+	
+	$effect(() => {
+		if (autoPlay && svgRef) {
+			startAnimation();
+		}
+		
+		
+		return () => {
+			stopAnimation();
+		};
+	});
+	
+	
+	export function start() {
+		startAnimation();
+	}
+	
+	export function stop() {
+		stopAnimation();
+	}
+	
+	export function toggle() {
+		toggleAnimation();
+	}
+	
+	export function setState(state: string) {
+		setAnimationState(state);
+	}
+	
+	export function getStatus() {
 		return {
-			startAnimation,
-			stopAnimation
+			isAnimating,
+			currentState
 		};
 	}
 </script>
@@ -117,8 +218,13 @@
 <div 
 	bind:this={containerRef}
 	class={clsx('inline-flex', className)}
-	on:mouseenter={handleMouseEnter}
-	on:mouseleave={handleMouseLeave}
+	onmouseenter={handleMouseEnter}
+	onmouseleave={handleMouseLeave}
+	onclick={handleClick}
+	onfocus={triggers.focus ? handleFocus : undefined}
+	onblur={triggers.focus ? handleBlur : undefined}
+	tabindex={triggers.focus ? 0 : -1}
+	role={triggers.click || triggers.focus ? "button" : undefined}
 	{...restProps}
 >
 	<svg

@@ -1,13 +1,38 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
 	
+	interface AnimationTriggers {
+		hover?: boolean;
+		click?: boolean;
+		focus?: boolean;
+		custom?: boolean;
+	}
+	
 	interface Props {
 		size?: number;
 		class?: string;
+		triggers?: AnimationTriggers;
+		animationState?: 'idle' | 'active' | 'loading' | 'success' | 'error';
+		autoPlay?: boolean;
+		loop?: boolean;
+		duration?: number;
+		onAnimationStart?: () => void;
+		onAnimationEnd?: () => void;
 		[key: string]: any;
 	}
 	
-	let { size = 28, class: className, ...restProps }: Props = $props();
+	let {
+		size = 28,
+		class: className,
+		triggers = { hover: true },
+		animationState = 'idle',
+		autoPlay = false,
+		loop = false,
+		duration = 600,
+		onAnimationStart,
+		onAnimationEnd,
+		...restProps
+	}: Props = $props();
 	
 	export interface BellRingIcon {
 		startAnimation: () => void;
@@ -17,13 +42,14 @@
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
-	let isControlled = false;
+	let currentState = $state(animationState);
+	let currentAnimations: Animation[] = [];
 	
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef) {
 			isAnimating = true;
-			// Bell swing animation
+			
 			svgRef.animate([
 				{ transform: 'rotate(0deg)' },
 				{ transform: 'rotate(15deg)' },
@@ -35,7 +61,7 @@
 				easing: 'ease-in-out'
 			});
 			
-			// Ring lines animation
+			
 			const ringPaths = svgRef.querySelectorAll('path');
 			if (ringPaths.length > 1) {
 				ringPaths[1].animate([
@@ -64,45 +90,84 @@
 	function stopAnimation() {
 		if (svgRef) {
 			isAnimating = false;
-			// Cancel all animations
+			
 			svgRef.getAnimations().forEach(animation => animation.cancel());
 			const paths = svgRef.querySelectorAll('path');
 			paths.forEach(path => {
 				path.getAnimations().forEach(animation => animation.cancel());
-				// Reset stroke properties
+				
 				path.style.strokeDasharray = '';
 				path.style.strokeDashoffset = '';
 			});
 		}
 	}
 	
-	function handleMouseEnter() {
-		if (!isControlled) {
-			startAnimation();
+	function toggleAnimation() {
+		if (isAnimating) stopAnimation();
+		else startAnimation();
+	}
+	
+	function setAnimationState(newState: string) {
+		currentState = newState as any;
+		switch (newState) {
+			case 'active':
+			case 'loading':
+			case 'success':
+				startAnimation();
+				break;
+			default:
+				stopAnimation();
+				break;
 		}
+	}
+	
+	function handleMouseEnter() {
+		if (triggers.hover && !triggers.custom) startAnimation();
 	}
 	
 	function handleMouseLeave() {
-		if (!isControlled) {
-			stopAnimation();
-		}
+		if (triggers.hover && !triggers.custom) stopAnimation();
 	}
 	
-	// Public API
-	export function getControls(): BellRingIcon {
-		isControlled = true;
-		return {
-			startAnimation,
-			stopAnimation
-		};
+	function handleClick() {
+		if (triggers.click) toggleAnimation();
 	}
+	
+	function handleFocus() {
+		if (triggers.focus) startAnimation();
+	}
+	
+	function handleBlur() {
+		if (triggers.focus) stopAnimation();
+	}
+	
+	$effect(() => {
+		if (svgRef) setAnimationState(animationState);
+	});
+	
+	$effect(() => {
+		if (autoPlay && svgRef) startAnimation();
+		return () => stopAnimation();
+	});
+	
+	
+	export function start() { startAnimation(); }
+	export function stop() { stopAnimation(); }
+	export function toggle() { toggleAnimation(); }
+	export function setState(state: string) { setAnimationState(state); }
+	export function getStatus() { return { isAnimating, currentState }; }
 </script>
 
 <div 
 	bind:this={containerRef}
-	class={clsx(className)}
-	on:mouseenter={handleMouseEnter}
-	on:mouseleave={handleMouseLeave}
+	class={clsx('inline-flex', className)}
+	onmouseenter={handleMouseEnter}
+	onmouseleave={handleMouseLeave}
+	onclick={handleClick}
+	onfocus={triggers.focus ? handleFocus : undefined}
+	onblur={triggers.focus ? handleBlur : undefined}
+	tabindex={triggers.focus ? 0 : -1}
+	role={triggers.click || triggers.focus ? "button" : undefined}
 	{...restProps}
 >
 	<svg

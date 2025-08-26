@@ -50,7 +50,7 @@
 		<div class="section-header">
 			<h2 class="section-title">
 				<div class="title-icon">
-					<BicepsFlexedIcon size={32} />
+					<BicepsFlexedIcon size={32} triggers={{ hover: true }} />
 				</div>
 				<span class="text-gradient">Icon Gallery</span>
 			</h2>

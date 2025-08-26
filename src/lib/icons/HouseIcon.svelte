@@ -1,136 +1,201 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
-	
+  
+	type AnimationState = 'idle' | 'active' | 'loading' | 'success' | 'error';
+  
 	interface Props {
-		size?: number;
-		class?: string;
-		[key: string]: any;
+	  size?: number;
+	  class?: string;
+	  triggers?: { hover?: boolean; click?: boolean; focus?: boolean; custom?: boolean };
+	  animationState?: AnimationState;
+	  autoPlay?: boolean;
+	  loop?: boolean;
+	  duration?: number;
+	  onAnimationStart?: () => void;
+	  onAnimationEnd?: () => void;
+	  [key: string]: any;
 	}
-	
-	let { size = 28, class: className, ...restProps }: Props = $props();
-	
-	export interface HouseIconHandle {
-		startAnimation: () => void;
-		stopAnimation: () => void;
-	}
-	
+  
+	let {
+	  size = 28,
+	  class: className,
+	  triggers = { hover: true },
+	  animationState = 'idle',
+	  autoPlay = false,
+	  loop = false,
+	  duration = 1200,
+	  onAnimationStart,
+	  onAnimationEnd,
+	  ...restProps
+	}: Props = $props();
+  
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
+	let currentState: AnimationState = animationState;
 	let isAnimating = $state(false);
-	let isControlled = false;
+  
 	
-	function startAnimation() {
-		if (svgRef) {
-			isAnimating = true;
-			
-			// Wiggle animation for house group
-			const houseGroup = svgRef.querySelector('g:first-child');
-			if (houseGroup) {
-				houseGroup.animate([
-					{ transform: 'rotate(0deg) scale(1)' },
-					{ transform: 'rotate(-1.5deg) scale(1.02)' },
-					{ transform: 'rotate(1.5deg) scale(1)' },
-					{ transform: 'rotate(0deg) scale(1)' }
-				], { duration: 600, easing: 'ease-in-out' });
-			}
-			
-			// House outline drawing
-			const housePath = svgRef.querySelector('path[d*="M3 10a2 2"]');
-			if (housePath) {
-				housePath.animate([
-					{ strokeDashoffset: '100', opacity: '0.35' },
-					{ strokeDashoffset: '0', opacity: '1' }
-				], { duration: 800, easing: 'ease-in-out', fill: 'forwards' });
-			}
-			
-			// Door animation (delay: 0.45)
-			const doorPath = svgRef.querySelector('path[d*="M15 21v-8"]');
-			if (doorPath) {
-				doorPath.animate([
-					{ transform: 'scaleY(0.6)', opacity: '0' },
-					{ transform: 'scaleY(1.15)', opacity: '1' },
-					{ transform: 'scaleY(1)', opacity: '1' }
-				], { duration: 500, delay: 450, easing: 'ease-out' });
-			}
-			
-			// Smoke animation (delay: 0.3)
-			const smokeGroup = svgRef.querySelector('g:last-child');
-			if (smokeGroup) {
-				smokeGroup.animate([
-					{ opacity: '0', transform: 'translateY(0px) scale(0.8)' },
-					{ opacity: '0.7', transform: 'translateY(-6px) scale(1)' },
-					{ opacity: '0', transform: 'translateY(-10px) scale(1.1)' }
-				], { duration: 1100, delay: 300, easing: 'ease-in-out' });
-			}
-		}
+	function runAnimation() {
+	  if (!svgRef) return;
+	  isAnimating = true;
+	  onAnimationStart?.();
+  
+	  
+	  const houseGroup = svgRef.querySelector('g.house');
+	  houseGroup?.animate(
+		[
+		  { transform: 'rotate(0deg) scale(1)' },
+		  { transform: 'rotate(-1.5deg) scale(1.02)' },
+		  { transform: 'rotate(1.5deg) scale(1)' },
+		  { transform: 'rotate(0deg) scale(1)' },
+		],
+		{ duration, easing: 'ease-in-out', iterations: loop ? Infinity : 1 }
+	  );
+  
+	  
+	  const housePath = svgRef.querySelector('path[d*="M3 10a2 2"]');
+	  housePath?.animate(
+		[
+		  { strokeDashoffset: '100', opacity: '0.35' },
+		  { strokeDashoffset: '0', opacity: '1' },
+		],
+		{ duration: duration * 0.7, easing: 'ease-in-out', fill: 'forwards' }
+	  );
+  
+	  
+	  const doorPath = svgRef.querySelector('path[d*="M15 21v-8"]');
+	  doorPath?.animate(
+		[
+		  { transform: 'scaleY(0.6)', opacity: '0' },
+		  { transform: 'scaleY(1.15)', opacity: '1' },
+		  { transform: 'scaleY(1)', opacity: '1' },
+		],
+		{ duration: 500, delay: 450, easing: 'ease-out' }
+	  );
+  
+	  
+	  const smokeGroup = svgRef.querySelector('g.smoke');
+	  smokeGroup?.animate(
+		[
+		  { opacity: '0', transform: 'translateY(0px) scale(0.8)' },
+		  { opacity: '0.7', transform: 'translateY(-6px) scale(1)' },
+		  { opacity: '0', transform: 'translateY(-10px) scale(1.1)' },
+		],
+		{ duration: duration * 0.9, delay: 300, easing: 'ease-in-out' }
+	  );
+  
+	  setTimeout(() => {
+		isAnimating = false;
+		onAnimationEnd?.();
+		if (!loop) currentState = 'idle';
+	  }, duration + 500);
 	}
+  
+	function resetAnimation() {
+	  if (!svgRef) return;
+	  svgRef.getAnimations().forEach((a) => a.cancel());
+	  svgRef.querySelectorAll('*').forEach((el) => {
+		el.getAnimations().forEach((a) => a.cancel());
+		(el as HTMLElement).style.transform = '';
+		(el as HTMLElement).style.opacity = '1';
+		(el as HTMLElement).style.strokeDashoffset = '';
+	  });
+	}
+  
 	
-	function stopAnimation() {
-		if (svgRef) {
-			isAnimating = false;
-			const allElements = svgRef.querySelectorAll('*');
-			allElements.forEach(element => {
-				element.getAnimations().forEach(animation => animation.cancel());
-				element.style.transform = '';
-				element.style.strokeDashoffset = '';
-				element.style.opacity = '1';
-			});
-			
-			// Reset smoke group to invisible
-			const smokeGroup = svgRef.querySelector('g:last-child');
-			if (smokeGroup) {
-				smokeGroup.style.opacity = '0';
-			}
-		}
+	export function start() {
+	  if (!isAnimating) {
+		currentState = 'active';
+		runAnimation();
+	  }
 	}
+	export function stop() {
+	  resetAnimation();
+	  currentState = 'idle';
+	  isAnimating = false;
+	}
+	export function toggle() {
+	  isAnimating ? stop() : start();
+	}
+	export function setState(state: AnimationState) {
+	  currentState = state;
+	  if (state === 'active' || state === 'loading') start();
+	  else stop();
+	}
+	export function getStatus() {
+	  return { state: currentState, isAnimating };
+	}
+  
 	
 	function handleMouseEnter() {
-		if (!isControlled) startAnimation();
+	  if (triggers.hover && !triggers.custom) start();
 	}
-	
 	function handleMouseLeave() {
-		if (!isControlled) stopAnimation();
+	  if (triggers.hover && !triggers.custom) stop();
 	}
+	function handleClick() {
+	  if (triggers.click) toggle();
+	}
+	function handleFocus() {
+	  if (triggers.focus) start();
+	}
+	function handleBlur() {
+	  if (triggers.focus) stop();
+	}
+  
 	
-	export function getControls(): HouseIconHandle {
-		isControlled = true;
-		return { startAnimation, stopAnimation };
-	}
-</script>
-
-<div 
+	$effect(() => {
+	  setState(animationState);
+	});
+  
+	$effect(() => {
+	  if (autoPlay) start();
+	  return () => stop();
+	});
+  </script>
+  
+  <div
 	bind:this={containerRef}
 	class={clsx('inline-flex items-center justify-center', className)}
 	on:mouseenter={handleMouseEnter}
 	on:mouseleave={handleMouseLeave}
+	on:click={handleClick}
+	on:focus={handleFocus}
+	on:blur={handleBlur}
+	tabindex={triggers.focus ? 0 : -1}
+	role={triggers.click || triggers.focus ? 'button' : undefined}
 	{...restProps}
->
+  >
 	<svg
-		bind:this={svgRef}
-		xmlns="http://www.w3.org/2000/svg"
-		width={size}
-		height={size}
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-		class="lucide lucide-house-icon lucide-house"
+	  bind:this={svgRef}
+	  xmlns="http://www.w3.org/2000/svg"
+	  width={size}
+	  height={size}
+	  viewBox="0 0 24 24"
+	  fill="none"
+	  stroke="currentColor"
+	  stroke-width="2"
+	  stroke-linecap="round"
+	  stroke-linejoin="round"
+	  class="lucide lucide-house-icon lucide-house"
+	  style="transform-origin: center;"
 	>
-		<g style="transform-origin: center;">
-			<path 
-				d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" 
-				stroke-dasharray="100" 
-				stroke-dashoffset="100"
-			/>
-			<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" style="transform-origin: center;" />
-		</g>
-		
-		<g style="opacity: 0; transform-origin: center;">
-			<circle cx="16.5" cy="6" r="0.8" />
-			<circle cx="17.5" cy="4.5" r="0.6" />
-			<circle cx="18.3" cy="3.2" r="0.45" />
-		</g>
+	  <g class="house" style="transform-origin: center;">
+		<path
+		  d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+		  stroke-dasharray="100"
+		  stroke-dashoffset="100"
+		/>
+		<path
+		  d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"
+		  style="transform-origin: center;"
+		/>
+	  </g>
+	  <g class="smoke" style="opacity: 0; transform-origin: center;">
+		<circle cx="16.5" cy="6" r="0.8" />
+		<circle cx="17.5" cy="4.5" r="0.6" />
+		<circle cx="18.3" cy="3.2" r="0.45" />
+	  </g>
 	</svg>
-</div>
+  </div>
+  

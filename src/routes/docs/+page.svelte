@@ -2,14 +2,41 @@
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import { getAvailableIcons, getTotalIconCount } from '$lib/registry/iconRegistry.js';
-	import { HeartIcon, BellIcon, BoltIcon, ActivityIcon, BlocksIcon, CodeIcon } from '$lib';
+	import { ActivityIcon, BoltIcon, BlocksIcon, CodeIcon } from '$lib';
 	import { base } from '$app/paths';
 	
 	const totalIcons = getTotalIconCount();
-	const allIcons = getAvailableIcons();
 	
-	// Get a few sample icons for examples
-	const sampleIcons = allIcons.slice(0, 3);
+	// Demo states for interactive examples
+	let customIcon: any;
+	let loadingState = $state<'idle' | 'loading' | 'success'>('idle');
+	let buttonIcon: any;
+	let isButtonHovered = $state(false);
+	
+	// Demo functions
+	function startCustomAnimation() {
+		customIcon?.start();
+	}
+	
+	function simulateLoading() {
+		loadingState = 'loading';
+		setTimeout(() => {
+			loadingState = 'success';
+			setTimeout(() => {
+				loadingState = 'idle';
+			}, 2000);
+		}, 3000);
+	}
+	
+	function handleButtonHover() {
+		isButtonHovered = true;
+		buttonIcon?.start();
+	}
+	
+	function handleButtonLeave() {
+		isButtonHovered = false;
+		buttonIcon?.stop();
+	}
 </script>
 
 <svelte:head>
@@ -56,53 +83,154 @@
 			</div>
 		</section>
 
-		<!-- Quick Usage -->
+		<!-- Basic Usage -->
 		<section class="usage-section">
-			<h2>2. Use</h2>
+			<h2>2. Basic Usage</h2>
 			<div class="code-block">
 				<pre><code>{`<script>
-  import { HeartIcon, BellIcon } from '$lib';
+  import { ActivityIcon } from '$lib';
 </script>
 
-<HeartIcon size={24} />
-<BellIcon size={32} class="text-red-500" />`}</code></pre>
+<!-- Default hover animation -->
+<ActivityIcon size={24} />`}</code></pre>
 			</div>
 			
 			<div class="live-demo">
-				<h3>Live Demo</h3>
+				<h3>Try it - Hover the icon</h3>
 				<div class="icon-showcase">
 					<div class="demo-icon">
-						<HeartIcon size={48} />
+						<ActivityIcon size={48} />
 					</div>
-					<div class="demo-icon">
-						<BellIcon size={48} />
-					</div>
-					{#each sampleIcons.slice(2, 4) as icon}
-						{@const IconComponent = icon.component}
-						<div class="demo-icon">
-							<IconComponent size={48} />
-						</div>
-					{/each}
 				</div>
-				<p class="demo-note">Hover to see animations</p>
 			</div>
 		</section>
 
-		<!-- Quick Reference -->
+		<!-- Custom Control -->
+		<section class="control-section">
+			<h2>3. Custom Control</h2>
+			<div class="code-block">
+				<pre><code>{`<script>
+  import { ActivityIcon } from '$lib';
+  let iconRef;
+</script>
+
+<!-- Custom trigger control -->
+<ActivityIcon bind:this={iconRef} triggers={{ custom: true }} />
+<button onclick={() => iconRef?.start()}>Start Animation</button>`}</code></pre>
+			</div>
+			
+			<div class="live-demo">
+				<h3>Try it - Click the button</h3>
+				<div class="control-demo">
+					<ActivityIcon bind:this={customIcon} triggers={{ custom: true }} size={48} />
+					<button class="demo-btn" onclick={startCustomAnimation}>Start Animation</button>
+				</div>
+			</div>
+		</section>
+
+		<!-- State-Based Animation -->
+		<section class="state-section">
+			<h2>4. State-Based Animation</h2>
+			<div class="code-block">
+				<pre><code>{`<script>
+  let appState = 'idle'; // 'idle' | 'loading' | 'success'
+</script>
+
+<!-- Animation follows state -->
+<ActivityIcon animationState={appState} />
+<button onclick={() => appState = 'loading'}>Start Loading</button>`}</code></pre>
+			</div>
+			
+			<div class="live-demo">
+				<h3>Try it - Simulate loading</h3>
+				<div class="state-demo">
+					<div class="state-display">
+						<ActivityIcon animationState={loadingState} size={48} />
+						<span class="state-label {loadingState}">{loadingState}</span>
+					</div>
+					<button class="demo-btn" onclick={simulateLoading} disabled={loadingState !== 'idle'}>
+						{loadingState === 'loading' ? 'Loading...' : 'Simulate Loading'}
+					</button>
+				</div>
+			</div>
+		</section>
+
+		<!-- Parent Integration -->
+		<section class="integration-section">
+			<h2>5. Parent Element Integration</h2>
+			<div class="code-block">
+				<pre><code>{`<script>
+  let cardIcon;
+</script>
+
+<!-- Button controls icon animation -->
+<button 
+  onmouseenter={() => cardIcon?.start()}
+  onmouseleave={() => cardIcon?.stop()}
+>
+  <ActivityIcon bind:this={cardIcon} triggers={{ custom: true }} />
+  Loading Data...
+</button>`}</code></pre>
+			</div>
+			
+			<div class="live-demo">
+				<h3>Try it - Hover the button</h3>
+				<button 
+					class="integration-btn"
+					onmouseenter={handleButtonHover}
+					onmouseleave={handleButtonLeave}
+				>
+					<ActivityIcon bind:this={buttonIcon} triggers={{ custom: true }} size={20} />
+					Loading Data...
+				</button>
+			</div>
+		</section>
+
+		<!-- Props Reference -->
 		<section class="reference-section">
-			<h2>3. Customize</h2>
-			<div class="quick-props">
+			<h2>6. Props Reference</h2>
+			<div class="props-grid">
 				<div class="prop-item">
 					<code>size={24}</code>
 					<span>Icon size in pixels</span>
 				</div>
 				<div class="prop-item">
-					<code>class="my-style"</code>
+					<code>triggers={{ hover: true }}</code>
+					<span>Animation triggers: hover, click, focus, custom</span>
+				</div>
+				<div class="prop-item">
+					<code>animationState="idle"</code>
+					<span>State-based animation: idle, loading, success, error</span>
+				</div>
+				<div class="prop-item">
+					<code>class="text-blue-500"</code>
 					<span>CSS classes for styling</span>
 				</div>
 				<div class="prop-item">
-					<code>onclick={() => {}}</code>
-					<span>Event handlers</span>
+					<code>duration={2000}</code>
+					<span>Animation duration in milliseconds</span>
+				</div>
+				<div class="prop-item">
+					<code>loop={true}</code>
+					<span>Loop animation infinitely</span>
+				</div>
+			</div>
+			
+			<div class="methods-section">
+				<h3>Methods (when using bind:this)</h3>
+				<div class="methods-grid">
+					<div class="method-item">
+						<code>iconRef.start()</code>
+						<span>Start animation</span>
+					</div>
+					<div class="method-item">
+						<code>iconRef.stop()</code>
+						<span>Stop animation</span>
+					</div>
+					<div class="method-item">
+						<code>iconRef.toggle()</code>
+						<span>Toggle animation state</span>
+					</div>
 				</div>
 			</div>
 		</section>
@@ -316,21 +444,27 @@
 		margin: 0;
 	}
 
-	/* Quick props */
-	.quick-props {
-		display: flex;
-		flex-direction: column;
+	/* Props and methods */
+	.props-grid, .methods-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 		gap: var(--space-md);
 	}
 
-	.prop-item {
+	.prop-item, .method-item {
 		display: flex;
-		align-items: center;
+		align-items: flex-start;
 		gap: var(--space-md);
 		padding: var(--space-md);
 		background: rgba(255, 255, 255, 0.02);
 		border-radius: var(--radius-md);
 		border: 1px solid var(--glass-border);
+	}
+
+	.methods-section {
+		margin-top: var(--space-xl);
+		padding-top: var(--space-lg);
+		border-top: 1px solid var(--glass-border);
 	}
 
 	.prop-item code {
@@ -343,9 +477,78 @@
 		flex-shrink: 0;
 	}
 
-	.prop-item span {
+	.prop-item span, .method-item span {
 		color: var(--text-secondary);
 		font-size: 0.875rem;
+		line-height: 1.4;
+	}
+
+	/* Demo components */
+	.control-demo, .state-demo {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-lg);
+		flex-wrap: wrap;
+	}
+
+	.state-display {
+		display: flex;
+		align-items: center;
+		gap: var(--space-md);
+	}
+
+	.state-label {
+		font-weight: 600;
+		padding: 0.25rem 0.75rem;
+		border-radius: var(--radius-full);
+		font-size: 0.875rem;
+		text-transform: capitalize;
+	}
+
+	.state-label.idle { background: rgba(156, 163, 175, 0.1); color: #9ca3af; }
+	.state-label.loading { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+	.state-label.success { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+
+	.demo-btn {
+		padding: var(--space-sm) var(--space-lg);
+		background: var(--svelte-primary);
+		color: white;
+		border: none;
+		border-radius: var(--radius-md);
+		font-weight: 600;
+		cursor: pointer;
+		transition: all var(--transition-normal);
+	}
+
+	.demo-btn:hover:not(:disabled) {
+		background: var(--svelte-secondary);
+		transform: translateY(-1px);
+	}
+
+	.demo-btn:disabled {
+		opacity: 0.7;
+		cursor: not-allowed;
+	}
+
+	.integration-btn {
+		display: flex;
+		align-items: center;
+		gap: var(--space-sm);
+		padding: var(--space-md) var(--space-lg);
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid var(--glass-border);
+		border-radius: var(--radius-md);
+		color: var(--text-primary);
+		font-weight: 600;
+		cursor: pointer;
+		transition: all var(--transition-normal);
+	}
+
+	.integration-btn:hover {
+		background: rgba(255, 62, 0, 0.1);
+		border-color: var(--svelte-primary);
+		transform: translateY(-1px);
 	}
 
 	/* Features */

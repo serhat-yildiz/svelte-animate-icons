@@ -1,160 +1,235 @@
 <script lang="ts">
-  import { clsx } from 'clsx';
-  
-  interface Props {
-    size?: number;
-    class?: string;
-  }
-  
-  let { size = 28, class: className, ...restProps }: Props = $props();
-  
-  // Animation control
-  let isAnimating = $state(false);
-  
-  // Refs for animation elements
-  let svgEl: SVGSVGElement;
-  let leftMainEl: SVGPathElement;
-  let crossStrokeEl: SVGPathElement;
-  let rightMainEl: SVGPathElement;
-  let tailStrokeEl: SVGPathElement;
-  
-  export function startAnimation() {
-    if (isAnimating) return;
-    isAnimating = true;
-    
-    // SVG animation
-    if (svgEl) {
-      svgEl.animate([
-        { transform: 'scale(1) rotate(0deg) translateY(0px)' },
-        { transform: 'scale(1.06) rotate(-2deg) translateY(-1px)' },
-        { transform: 'scale(1) rotate(2deg) translateY(0px)' },
-        { transform: 'scale(1) rotate(0deg) translateY(0px)' }
-      ], {
-        duration: 1200,
-        easing: 'ease-in-out'
-      });
-    }
-    
-    // Left main stroke animation (delayed)
-    if (leftMainEl) {
-      setTimeout(() => {
-        leftMainEl.animate([
-          { strokeDashoffset: leftMainEl.getTotalLength(), opacity: '0.7' },
-          { strokeDashoffset: '0', opacity: '1' }
-        ], {
-          duration: 800,
-          easing: 'ease-in-out'
-        });
-      }, 60);
-    }
-    
-    // Cross stroke animation (delayed)
-    if (crossStrokeEl) {
-      setTimeout(() => {
-        crossStrokeEl.animate([
-          { strokeDashoffset: crossStrokeEl.getTotalLength(), opacity: '0.75' },
-          { strokeDashoffset: '0', opacity: '1' }
-        ], {
-          duration: 600,
-          easing: 'ease-in-out'
-        });
-      }, 180);
-    }
-    
-    // Right main stroke animation (delayed)
-    if (rightMainEl) {
-      setTimeout(() => {
-        rightMainEl.animate([
-          { strokeDashoffset: rightMainEl.getTotalLength(), opacity: '0.8' },
-          { strokeDashoffset: '0', opacity: '1' }
-        ], {
-          duration: 800,
-          easing: 'ease-in-out'
-        });
-      }, 300);
-    }
-    
-    // Tail stroke animation (delayed)
-    if (tailStrokeEl) {
-      setTimeout(() => {
-        tailStrokeEl.animate([
-          { strokeDashoffset: tailStrokeEl.getTotalLength(), opacity: '0.8' },
-          { strokeDashoffset: '0', opacity: '1' }
-        ], {
-          duration: 500,
-          easing: 'ease-in-out'
-        });
-      }, 440);
-    }
-    
-    // Reset animation state
-    setTimeout(() => {
-      isAnimating = false;
-    }, 1600);
-  }
-  
-  export function stopAnimation() {
-    isAnimating = false;
-  }
-  
-  function handleMouseEnter() {
-    startAnimation();
-  }
-  
-  function handleMouseLeave() {
-    stopAnimation();
-  }
+	import { clsx } from 'clsx';
+	
+	interface AnimationTriggers {
+		hover?: boolean;
+		click?: boolean;
+		focus?: boolean;
+		custom?: boolean;
+	}
+	
+	interface Props {
+		size?: number;
+		class?: string;
+		triggers?: AnimationTriggers;
+		animationState?: 'idle' | 'active' | 'loading' | 'success' | 'error';
+		autoPlay?: boolean;
+		loop?: boolean;
+		duration?: number;
+		onAnimationStart?: () => void;
+		onAnimationEnd?: () => void;
+		[key: string]: any;
+	}
+	
+	let {
+		size = 28,
+		class: className,
+		triggers = { hover: true },
+		animationState = 'idle',
+		autoPlay = false,
+		loop = false,
+		duration = 1600,
+		onAnimationStart,
+		onAnimationEnd,
+		...restProps
+	}: Props = $props();
+	
+	let containerRef: HTMLDivElement;
+	let svgRef: SVGSVGElement;
+	let isAnimating = $state(false);
+	let currentState = $state(animationState);
+	let currentAnimations: Animation[] = [];
+	
+	
+	let leftMainEl: SVGPathElement;
+	let crossStrokeEl: SVGPathElement;
+	let rightMainEl: SVGPathElement;
+	let tailStrokeEl: SVGPathElement;
+	
+	
+	function startAnimation() {
+		if (svgRef && !isAnimating) {
+			stopAnimation();
+			
+			isAnimating = true;
+			onAnimationStart?.();
+			
+			
+			if (svgRef) {
+				const svgAnimation = svgRef.animate([
+					{ transform: 'scale(1) rotate(0deg) translateY(0px)' },
+					{ transform: 'scale(1.06) rotate(-2deg) translateY(-1px)' },
+					{ transform: 'scale(1) rotate(2deg) translateY(0px)' },
+					{ transform: 'scale(1) rotate(0deg) translateY(0px)' }
+				], {
+					duration: Math.floor(duration * 0.75),
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
+					easing: 'ease-in-out'
+				});
+				currentAnimations.push(svgAnimation);
+			}
+			
+			
+			const animateStroke = (element: SVGPathElement, delay: number, opacity: string) => {
+				setTimeout(() => {
+					const length = element.getTotalLength();
+					element.style.strokeDasharray = length + ' ' + length;
+					element.style.strokeDashoffset = length.toString();
+					
+					const animation = element.animate([
+						{ strokeDashoffset: length, opacity },
+						{ strokeDashoffset: '0', opacity: '1' }
+					], {
+						duration: Math.floor(duration * 0.5),
+						iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
+						easing: 'ease-in-out'
+					});
+					currentAnimations.push(animation);
+				}, delay);
+			};
+			
+			if (leftMainEl) animateStroke(leftMainEl, Math.floor(duration * 0.04), '0.7');
+			if (crossStrokeEl) animateStroke(crossStrokeEl, Math.floor(duration * 0.15), '0.8');
+			if (rightMainEl) animateStroke(rightMainEl, Math.floor(duration * 0.25), '0.7');
+			
+			if (tailStrokeEl) {
+				setTimeout(() => {
+					const length = tailStrokeEl.getTotalLength();
+					tailStrokeEl.style.strokeDasharray = length + ' ' + length;
+					tailStrokeEl.style.strokeDashoffset = length.toString();
+					
+					const animation = tailStrokeEl.animate([
+						{ strokeDashoffset: length, opacity: '0.8' },
+						{ strokeDashoffset: '0', opacity: '1' }
+					], {
+						duration: Math.floor(duration * 0.5),
+						iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
+						easing: 'ease-in-out'
+					});
+					currentAnimations.push(animation);
+					
+					animation.addEventListener('finish', () => {
+						if (!loop && !autoPlay && currentState !== 'loading') {
+							if (currentAnimations.every(anim => anim.playState === 'finished')) {
+								stopAnimation();
+							}
+						}
+						onAnimationEnd?.();
+					});
+				}, Math.floor(duration * 0.35));
+			}
+		}
+	}
+	
+	function stopAnimation() {
+		currentAnimations.forEach(animation => animation.cancel());
+		currentAnimations = [];
+		
+		if (svgRef) {
+			isAnimating = false;
+			svgRef.style.transform = 'scale(1) rotate(0deg) translateY(0px)';
+			
+			[leftMainEl, crossStrokeEl, rightMainEl, tailStrokeEl].forEach(el => {
+				if (el) {
+					el.style.strokeDasharray = 'none';
+					el.style.strokeDashoffset = '';
+					el.style.opacity = '1';
+				}
+			});
+		}
+	}
+	
+	function toggleAnimation() {
+		if (isAnimating) stopAnimation();
+		else startAnimation();
+	}
+	
+	function setAnimationState(newState: string) {
+		currentState = newState as any;
+		switch (newState) {
+			case 'active': case 'loading': case 'success':
+				startAnimation(); break;
+			default: stopAnimation(); break;
+		}
+	}
+	
+	function handleMouseEnter() {
+		if (triggers.hover && !triggers.custom) startAnimation();
+	}
+	
+	function handleMouseLeave() {
+		if (triggers.hover && !triggers.custom) stopAnimation();
+	}
+	
+	function handleClick() {
+		if (triggers.click) toggleAnimation();
+	}
+	
+	function handleFocus() {
+		if (triggers.focus) startAnimation();
+	}
+	
+	function handleBlur() {
+		if (triggers.focus) stopAnimation();
+	}
+	
+	$effect(() => { if (svgRef) setAnimationState(animationState); });
+	$effect(() => { if (autoPlay && svgRef) startAnimation(); return () => stopAnimation(); });
+	
+	export function start() { startAnimation(); }
+	export function stop() { stopAnimation(); }
+	export function toggle() { toggleAnimation(); }
+	export function setState(state: string) { setAnimationState(state); }
+	export function getStatus() { return { isAnimating, currentState }; }
 </script>
 
 <div 
-  class={clsx("inline-flex", className)} 
-  onmouseenter={handleMouseEnter}
-  onmouseleave={handleMouseLeave}
-  {...restProps}
+	bind:this={containerRef}
+	class={clsx('inline-flex', className)}
+	onmouseenter={handleMouseEnter}
+	onmouseleave={handleMouseLeave}
+	onclick={handleClick}
+	onfocus={triggers.focus ? handleFocus : undefined}
+	onblur={triggers.focus ? handleBlur : undefined}
+	tabindex={triggers.focus ? 0 : undefined}
+	role={triggers.click || triggers.focus ? "button" : undefined}
+	{...restProps}
 >
-  <svg
-    bind:this={svgEl}
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    class="lucide lucide-saudi-riyal-icon lucide-saudi-riyal"
-  >
-    <g opacity="0.35">
-      <path d="m20 19.5-5.5 1.2" />
-      <path d="M14.5 4v11.22a1 1 0 0 0 1.242.97L20 15.2" />
-      <path d="m2.978 19.351 5.549-1.363A2 2 0 0 0 10 16V2" />
-      <path d="M20 10 4 13.5" />
-    </g>
+	<svg
+		bind:this={svgRef}
+		xmlns="http://www.w3.org/2000/svg"
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		class="lucide lucide-saudi-riyal-icon lucide-saudi-riyal"
+	>
+		<g opacity="0.35">
+			<path d="M2 12h6" />
+			<path d="M22 12h-6" />
+			<path d="M10 12V8.5c0-3.5 4-4.5 8 0v7c0 1.5-2 2.5-4 0-2 2.5-4 1.5-4 0" />
+			<path d="M2 20h2V8s1-1 3-1" />
+		</g>
 
-    <path
-      bind:this={leftMainEl}
-      d="m2.978 19.351 5.549-1.363A2 2 0 0 0 10 16V2"
-      stroke-dasharray={leftMainEl?.getTotalLength() || 35}
-      stroke-dashoffset={leftMainEl?.getTotalLength() || 35}
-    />
-    <path
-      bind:this={crossStrokeEl}
-      d="M20 10 4 13.5"
-      stroke-dasharray={crossStrokeEl?.getTotalLength() || 18}
-      stroke-dashoffset={crossStrokeEl?.getTotalLength() || 18}
-    />
-    <path
-      bind:this={rightMainEl}
-      d="M14.5 4v11.22a1 1 0 0 0 1.242.97L20 15.2"
-      stroke-dasharray={rightMainEl?.getTotalLength() || 25}
-      stroke-dashoffset={rightMainEl?.getTotalLength() || 25}
-    />
-    <path
-      bind:this={tailStrokeEl}
-      d="m20 19.5-5.5 1.2"
-      stroke-dasharray={tailStrokeEl?.getTotalLength() || 6}
-      stroke-dashoffset={tailStrokeEl?.getTotalLength() || 6}
-    />
-  </svg>
+		<path
+			bind:this={leftMainEl}
+			d="M2 12h6"
+		/>
+		<path
+			bind:this={crossStrokeEl}
+			d="M22 12h-6"
+		/>
+		<path
+			bind:this={rightMainEl}
+			d="M10 12V8.5c0-3.5 4-4.5 8 0v7c0 1.5-2 2.5-4 0-2 2.5-4 1.5-4 0"
+		/>
+		<path
+			bind:this={tailStrokeEl}
+			d="M2 20h2V8s1-1 3-1"
+		/>
+	</svg>
 </div>

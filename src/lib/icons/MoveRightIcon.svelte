@@ -1,86 +1,242 @@
 <script lang="ts">
-  import { clsx } from 'clsx';
+	import { clsx } from 'clsx';
+	
+	interface AnimationTriggers {
+		hover?: boolean;
+		click?: boolean;
+		focus?: boolean;
+		custom?: boolean;
+	}
+	
+	interface Props {
+		size?: number;
+		class?: string;
+		triggers?: AnimationTriggers;
+		animationState?: 'idle' | 'active' | 'loading' | 'success' | 'error';
+		autoPlay?: boolean;
+		loop?: boolean;
+		duration?: number;
+		onAnimationStart?: () => void;
+		onAnimationEnd?: () => void;
+		[key: string]: any;
+	}
+	
+	let {
+		size = 28,
+		class: className,
+		triggers = { hover: true },
+		animationState = 'idle',
+		autoPlay = false,
+		loop = false,
+		duration = 800,
+		onAnimationStart,
+		onAnimationEnd,
+		...restProps
+	}: Props = $props();
+	
+	let containerRef: HTMLDivElement;
+	let svgRef: SVGSVGElement;
+	let isAnimating = $state(false);
+	let currentState = $state(animationState);
+	let currentAnimations: Animation[] = [];
+	
+	
+	let arrowEl: SVGPathElement;
+	let lineEl: SVGPathElement;
   
-  interface Props {
-    size?: number;
-    class?: string;
-  }
-  
-  let { size = 28, class: className, ...restProps }: Props = $props();
-  
-  // Animation control
-  let isAnimating = $state(false);
-  
-  // Refs for animation elements
-  let arrowEl: SVGPathElement;
-  let lineEl: SVGPathElement;
-  
-  export function startAnimation() {
-    if (isAnimating) return;
-    isAnimating = true;
-    
-    // Arrow movement animation (continuous)
-    if (arrowEl) {
-      arrowEl.animate([
-        { transform: 'translateX(0px)' },
-        { transform: 'translateX(3px)' },
-        { transform: 'translateX(0px)' }
-      ], {
-        duration: 600,
-        iterations: Infinity
-      });
-    }
-    
-    // Line opacity animation (continuous)
-    if (lineEl) {
-      lineEl.animate([
-        { opacity: '1' },
-        { opacity: '0.5' },
-        { opacity: '1' }
-      ], {
-        duration: 800,
-        iterations: Infinity
-      });
-    }
-  }
-  
-  export function stopAnimation() {
-    isAnimating = false;
-    // Stop all animations
-    [arrowEl, lineEl].forEach(el => {
-      if (el) {
-        el.getAnimations().forEach(animation => animation.finish());
-      }
-    });
-  }
-  
-  function handleMouseEnter() {
-    startAnimation();
-  }
-  
-  function handleMouseLeave() {
-    stopAnimation();
-  }
+	
+	function startAnimation() {
+		if (svgRef && !isAnimating) {
+			stopAnimation(); 
+			
+			isAnimating = true;
+			onAnimationStart?.();
+			
+			
+			if (arrowEl) {
+				const arrowAnimation = arrowEl.animate([
+					{ transform: 'translateX(0px)' },
+					{ transform: 'translateX(3px)' },
+					{ transform: 'translateX(0px)' }
+				], {
+					duration: Math.floor(duration * 0.75),
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1
+				});
+				currentAnimations.push(arrowAnimation);
+			}
+			
+			
+			if (lineEl) {
+				const lineAnimation = lineEl.animate([
+					{ opacity: '1' },
+					{ opacity: '0.5' },
+					{ opacity: '1' }
+				], {
+					duration: duration,
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1
+				});
+				currentAnimations.push(lineAnimation);
+			}
+			
+			
+			const lastAnimation = currentAnimations[currentAnimations.length - 1];
+			lastAnimation?.addEventListener('finish', () => {
+				if (!loop && !autoPlay && currentState !== 'loading') {
+					if (currentAnimations.every(anim => anim.playState === 'finished')) {
+						stopAnimation();
+					}
+				}
+				onAnimationEnd?.();
+			});
+		}
+	}
+	
+	function stopAnimation() {
+		currentAnimations.forEach(animation => {
+			animation.cancel();
+		});
+		currentAnimations = [];
+		
+		if (svgRef) {
+			isAnimating = false;
+			
+			
+			if (arrowEl) {
+				arrowEl.style.transform = 'translateX(0px)';
+			}
+			
+			if (lineEl) {
+				lineEl.style.opacity = '1';
+			}
+		}
+	}
+	
+	function toggleAnimation() {
+		if (isAnimating) {
+			stopAnimation();
+		} else {
+			startAnimation();
+		}
+	}
+	
+	function setAnimationState(newState: string) {
+		currentState = newState as any;
+		
+		
+		switch (newState) {
+			case 'active':
+			case 'loading':
+			case 'success':
+				startAnimation();
+				break;
+			case 'idle':
+			case 'error':
+			default:
+				stopAnimation();
+				break;
+		}
+	}
+	
+	
+	function handleMouseEnter() {
+		if (triggers.hover && !triggers.custom) {
+			startAnimation();
+		}
+	}
+	
+	function handleMouseLeave() {
+		if (triggers.hover && !triggers.custom) {
+			stopAnimation();
+		}
+	}
+	
+	function handleClick() {
+		if (triggers.click) {
+			toggleAnimation();
+		}
+	}
+	
+	function handleFocus() {
+		if (triggers.focus) {
+			startAnimation();
+		}
+	}
+	
+	function handleBlur() {
+		if (triggers.focus) {
+			stopAnimation();
+		}
+	}
+	
+	
+	$effect(() => {
+		if (svgRef) {
+			setAnimationState(animationState);
+		}
+	});
+	
+	
+	$effect(() => {
+		if (autoPlay && svgRef) {
+			startAnimation();
+		}
+		
+		
+		return () => {
+			stopAnimation();
+		};
+	});
+	
+	
+	export function start() {
+		startAnimation();
+	}
+	
+	export function stop() {
+		stopAnimation();
+	}
+	
+	export function toggle() {
+		toggleAnimation();
+	}
+	
+	export function setState(state: string) {
+		setAnimationState(state);
+	}
+	
+	export function getStatus() {
+		return {
+			isAnimating,
+			currentState
+		};
+	}
 </script>
 
 <div 
-  class={clsx("inline-flex", className)} 
-  onmouseenter={handleMouseEnter}
-  onmouseleave={handleMouseLeave}
-  {...restProps}
+	bind:this={containerRef}
+	class={clsx('inline-flex', className)}
+	onmouseenter={handleMouseEnter}
+	onmouseleave={handleMouseLeave}
+	onclick={handleClick}
+	onfocus={triggers.focus ? handleFocus : undefined}
+	onblur={triggers.focus ? handleBlur : undefined}
+	tabindex={triggers.focus ? 0 : undefined}
+	role={triggers.click || triggers.focus ? "button" : undefined}
+	{...restProps}
 >
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  >
-    <path bind:this={arrowEl} d="M18 8L22 12L18 16" />
-    <path bind:this={lineEl} d="M2 12H22" />
-  </svg>
+	<svg
+		bind:this={svgRef}
+		xmlns="http://www.w3.org/2000/svg"
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+	>
+		<path bind:this={arrowEl} d="M18 8L22 12L18 16" />
+		<path bind:this={lineEl} d="M2 12H22" />
+	</svg>
 </div>

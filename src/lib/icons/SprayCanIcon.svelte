@@ -1,111 +1,198 @@
 <script lang="ts">
-  import { clsx } from 'clsx';
-  
-  interface Props {
-    size?: number;
-    class?: string;
-  }
-  
-  let { size = 28, class: className, ...restProps }: Props = $props();
-  
-  // Animation control
-  let isAnimating = $state(false);
-  
-  // Refs for animation elements
-  let svgEl: SVGSVGElement;
-  let sprayDots: SVGPathElement[] = [];
-  
-  const sprayPaths = [
-    "M3 3h.01",
-    "M7 5h.01", 
-    "M11 7h.01",
-    "M3 7h.01",
-    "M7 9h.01",
-    "M3 11h.01"
-  ];
-  
-  export function startAnimation() {
-    if (isAnimating) return;
-    isAnimating = true;
-    
-    // SVG rotation animation (continuous)
-    if (svgEl) {
-      svgEl.animate([
-        { transform: 'rotate(0deg)' },
-        { transform: 'rotate(-4deg)' },
-        { transform: 'rotate(4deg)' },
-        { transform: 'rotate(-2deg)' },
-        { transform: 'rotate(2deg)' },
-        { transform: 'rotate(0deg)' }
-      ], {
-        duration: 2000,
-        easing: 'ease-in-out',
-        iterations: Infinity
-      });
-    }
-    
-    // Spray dots animations (staggered, continuous)
-    sprayDots.forEach((dot, index) => {
-      if (dot) {
-        setTimeout(() => {
-          dot.animate([
-            { transform: 'scale(1) translateY(0px)', opacity: '1' },
-            { transform: 'scale(1.3) translateY(-2px)', opacity: '0.4' },
-            { transform: 'scale(0.7) translateY(2px)', opacity: '1' },
-            { transform: 'scale(1) translateY(0px)', opacity: '1' }
-          ], {
-            duration: 1000,
-            easing: 'ease-in-out',
-            iterations: Infinity
-          });
-        }, index * 200);
-      }
-    });
-  }
-  
-  export function stopAnimation() {
-    isAnimating = false;
-    // Stop all animations
-    [svgEl, ...sprayDots].forEach(el => {
-      if (el) {
-        el.getAnimations().forEach(animation => animation.finish());
-      }
-    });
-  }
-  
-  function handleMouseEnter() {
-    startAnimation();
-  }
-  
-  function handleMouseLeave() {
-    stopAnimation();
-  }
+	import { clsx } from 'clsx';
+	
+	interface AnimationTriggers {
+		hover?: boolean;
+		click?: boolean;
+		focus?: boolean;
+		custom?: boolean;
+	}
+	
+	interface Props {
+		size?: number;
+		class?: string;
+		triggers?: AnimationTriggers;
+		animationState?: 'idle' | 'active' | 'loading' | 'success' | 'error';
+		autoPlay?: boolean;
+		loop?: boolean;
+		duration?: number;
+		onAnimationStart?: () => void;
+		onAnimationEnd?: () => void;
+		[key: string]: any;
+	}
+	
+	let {
+		size = 28,
+		class: className,
+		triggers = { hover: true },
+		animationState = 'idle',
+		autoPlay = false,
+		loop = false,
+		duration = 1800,
+		onAnimationStart,
+		onAnimationEnd,
+		...restProps
+	}: Props = $props();
+	
+	let containerRef: HTMLDivElement;
+	let svgRef: SVGSVGElement;
+	let isAnimating = $state(false);
+	let currentState = $state(animationState);
+	let currentAnimations: Animation[] = [];
+	
+	const sprayPaths = [
+		"M3 3h.01",
+		"M7 5h.01", 
+		"M11 7h.01",
+		"M3 7h.01",
+		"M7 9h.01",
+		"M3 11h.01"
+	];
+	
+	function startAnimation() {
+		if (svgRef && !isAnimating) {
+			stopAnimation();
+			
+			isAnimating = true;
+			onAnimationStart?.();
+			
+			
+			const canAnimation = svgRef.animate([
+				{ transform: 'rotate(0deg) translateX(0px)' },
+				{ transform: 'rotate(-2deg) translateX(-1px)' },
+				{ transform: 'rotate(2deg) translateX(1px)' },
+				{ transform: 'rotate(0deg) translateX(0px)' }
+			], {
+				duration: Math.floor(duration * 0.67),
+				iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
+				easing: 'ease-in-out'
+			});
+			currentAnimations.push(canAnimation);
+			
+			
+			const sprayDots = svgRef.querySelectorAll('path[d*="h.01"]') as NodeListOf<SVGPathElement>;
+			sprayDots.forEach((dot, index) => {
+				setTimeout(() => {
+					const dotAnimation = dot.animate([
+						{ opacity: '0', transform: 'scale(0) translateY(0px)' },
+						{ opacity: '1', transform: 'scale(1.2) translateY(-2px)' },
+						{ opacity: '0.7', transform: 'scale(1) translateY(-4px)' },
+						{ opacity: '0', transform: 'scale(0.8) translateY(-6px)' }
+					], {
+						duration: Math.floor(duration * 0.44),
+						iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
+						easing: 'ease-out'
+					});
+					currentAnimations.push(dotAnimation);
+					
+					if (index === sprayDots.length - 1) {
+						dotAnimation.addEventListener('finish', () => {
+							if (!loop && !autoPlay && currentState !== 'loading') {
+								if (currentAnimations.every(anim => anim.playState === 'finished')) {
+									stopAnimation();
+								}
+							}
+							onAnimationEnd?.();
+						});
+					}
+				}, index * Math.floor(duration * 0.11));
+			});
+		}
+	}
+	
+	function stopAnimation() {
+		currentAnimations.forEach(animation => animation.cancel());
+		currentAnimations = [];
+		
+		if (svgRef) {
+			isAnimating = false;
+			svgRef.style.transform = 'rotate(0deg) translateX(0px)';
+			
+			const sprayDots = svgRef.querySelectorAll('path[d*="h.01"]');
+			sprayDots.forEach(dot => {
+				dot.style.opacity = '1';
+				dot.style.transform = 'scale(1) translateY(0px)';
+			});
+		}
+	}
+	
+	function toggleAnimation() {
+		if (isAnimating) stopAnimation();
+		else startAnimation();
+	}
+	
+	function setAnimationState(newState: string) {
+		currentState = newState as any;
+		switch (newState) {
+			case 'active': case 'loading': case 'success':
+				startAnimation(); break;
+			default: stopAnimation(); break;
+		}
+	}
+	
+	function handleMouseEnter() {
+		if (triggers.hover && !triggers.custom) startAnimation();
+	}
+	
+	function handleMouseLeave() {
+		if (triggers.hover && !triggers.custom) stopAnimation();
+	}
+	
+	function handleClick() {
+		if (triggers.click) toggleAnimation();
+	}
+	
+	function handleFocus() {
+		if (triggers.focus) startAnimation();
+	}
+	
+	function handleBlur() {
+		if (triggers.focus) stopAnimation();
+	}
+	
+	$effect(() => { if (svgRef) setAnimationState(animationState); });
+	$effect(() => { if (autoPlay && svgRef) startAnimation(); return () => stopAnimation(); });
+	
+	export function start() { startAnimation(); }
+	export function stop() { stopAnimation(); }
+	export function toggle() { toggleAnimation(); }
+	export function setState(state: string) { setAnimationState(state); }
+	export function getStatus() { return { isAnimating, currentState }; }
 </script>
 
 <div 
-  class={clsx("inline-flex", className)} 
-  onmouseenter={handleMouseEnter}
-  onmouseleave={handleMouseLeave}
-  {...restProps}
+	bind:this={containerRef}
+	class={clsx('inline-flex', className)}
+	onmouseenter={handleMouseEnter}
+	onmouseleave={handleMouseLeave}
+	onclick={handleClick}
+	onfocus={triggers.focus ? handleFocus : undefined}
+	onblur={triggers.focus ? handleBlur : undefined}
+	tabindex={triggers.focus ? 0 : undefined}
+	role={triggers.click || triggers.focus ? "button" : undefined}
+	{...restProps}
 >
-  <svg
-    bind:this={svgEl}
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  >
-    {#each sprayPaths as path, i}
-      <path bind:this={sprayDots[i]} d={path} />
-    {/each}
-    <rect width="4" height="4" x="15" y="5" />
-    <path d="m19 9 2 2v10c0 .6-.4 1-1 1h-6c-.6 0-1-.4-1-1V11l2-2" />
-    <path d="m13 14 8-2" />
-    <path d="m13 19 8-2" />
-  </svg>
+	<svg
+		bind:this={svgRef}
+		xmlns="http://www.w3.org/2000/svg"
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		class="lucide lucide-spray-can-icon lucide-spray-can"
+	>
+		<path d="M3 3h.01" />
+		<path d="M7 5h.01" />
+		<path d="M11 7h.01" />
+		<path d="M3 7h.01" />
+		<path d="M7 9h.01" />
+		<path d="M3 11h.01" />
+		<path d="M16 12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V12a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2Z" />
+		<path d="M12 6V4a2 2 0 0 1 2-2h3" />
+		<path d="M18 4v2" />
+	</svg>
 </div>

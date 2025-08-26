@@ -1,82 +1,201 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
 	
+	interface AnimationTriggers {
+		hover?: boolean;
+		click?: boolean;
+		focus?: boolean;
+		custom?: boolean;
+	}
+	
 	interface Props {
 		size?: number;
 		class?: string;
+		triggers?: AnimationTriggers;
+		animationState?: 'idle' | 'active' | 'loading' | 'success' | 'error';
+		autoPlay?: boolean;
+		loop?: boolean;
+		duration?: number;
+		onAnimationStart?: () => void;
+		onAnimationEnd?: () => void;
 		[key: string]: any;
 	}
 	
-	let { size = 28, class: className, ...restProps }: Props = $props();
-	
-	export interface SearchIcon {
-		startAnimation: () => void;
-		stopAnimation: () => void;
-	}
+	let {
+		size = 28,
+		class: className,
+		triggers = { hover: true },
+		animationState = 'idle',
+		autoPlay = false,
+		loop = false,
+		duration = 800,
+		onAnimationStart,
+		onAnimationEnd,
+		...restProps
+	}: Props = $props();
 	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
-	let isControlled = false;
+	let currentState = $state(animationState);
+	let currentAnimations: Animation[] = [];
 	
-	// Animation controls
+	
 	function startAnimation() {
-		if (svgRef) {
+		if (svgRef && !isAnimating) {
+			stopAnimation(); 
+			
 			isAnimating = true;
-			// Search zoom animation
-			svgRef.animate([
+			onAnimationStart?.();
+			
+			
+			const svgAnimation = svgRef.animate([
 				{ transform: 'scale(1)', opacity: '0.7' },
 				{ transform: 'scale(1.15)', opacity: '1' },
 				{ transform: 'scale(1)', opacity: '0.7' }
 			], {
-				duration: 800,
+				duration: duration,
+				iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 				easing: 'ease-in-out'
+			});
+			currentAnimations.push(svgAnimation);
+			
+			
+			svgAnimation.addEventListener('finish', () => {
+				if (!loop && !autoPlay && currentState !== 'loading') {
+					stopAnimation();
+				}
+				onAnimationEnd?.();
 			});
 		}
 	}
 	
 	function stopAnimation() {
+		currentAnimations.forEach(animation => {
+			animation.cancel();
+		});
+		currentAnimations = [];
+		
 		if (svgRef) {
 			isAnimating = false;
-			// Cancel all animations
-			svgRef.getAnimations().forEach(animation => animation.cancel());
-			const paths = svgRef.querySelectorAll('path');
-			paths.forEach(path => {
-				path.getAnimations().forEach(animation => animation.cancel());
-				// Reset stroke properties
-				path.style.strokeDasharray = '';
-				path.style.strokeDashoffset = '';
-			});
+			
+			
+			svgRef.style.transform = 'scale(1)';
+			svgRef.style.opacity = '1';
 		}
 	}
 	
+	function toggleAnimation() {
+		if (isAnimating) {
+			stopAnimation();
+		} else {
+			startAnimation();
+		}
+	}
+	
+	function setAnimationState(newState: string) {
+		currentState = newState as any;
+		
+		
+		switch (newState) {
+			case 'active':
+			case 'loading':
+			case 'success':
+				startAnimation();
+				break;
+			case 'idle':
+			case 'error':
+			default:
+				stopAnimation();
+				break;
+		}
+	}
+	
+	
 	function handleMouseEnter() {
-		if (!isControlled) {
+		if (triggers.hover && !triggers.custom) {
 			startAnimation();
 		}
 	}
 	
 	function handleMouseLeave() {
-		if (!isControlled) {
+		if (triggers.hover && !triggers.custom) {
 			stopAnimation();
 		}
 	}
 	
-	// Public API
-	export function getControls(): SearchIcon {
-		isControlled = true;
+	function handleClick() {
+		if (triggers.click) {
+			toggleAnimation();
+		}
+	}
+	
+	function handleFocus() {
+		if (triggers.focus) {
+			startAnimation();
+		}
+	}
+	
+	function handleBlur() {
+		if (triggers.focus) {
+			stopAnimation();
+		}
+	}
+	
+	
+	$effect(() => {
+		if (svgRef) {
+			setAnimationState(animationState);
+		}
+	});
+	
+	
+	$effect(() => {
+		if (autoPlay && svgRef) {
+			startAnimation();
+		}
+		
+		
+		return () => {
+			stopAnimation();
+		};
+	});
+	
+	
+	export function start() {
+		startAnimation();
+	}
+	
+	export function stop() {
+		stopAnimation();
+	}
+	
+	export function toggle() {
+		toggleAnimation();
+	}
+	
+	export function setState(state: string) {
+		setAnimationState(state);
+	}
+	
+	export function getStatus() {
 		return {
-			startAnimation,
-			stopAnimation
+			isAnimating,
+			currentState
 		};
 	}
 </script>
 
 <div 
 	bind:this={containerRef}
-	class={clsx(className)}
-	on:mouseenter={handleMouseEnter}
-	on:mouseleave={handleMouseLeave}
+	class={clsx('inline-flex', className)}
+	onmouseenter={handleMouseEnter}
+	onmouseleave={handleMouseLeave}
+	onclick={handleClick}
+	onfocus={triggers.focus ? handleFocus : undefined}
+	onblur={triggers.focus ? handleBlur : undefined}
+	tabindex={triggers.focus ? 0 : undefined}
+	role={triggers.click || triggers.focus ? "button" : undefined}
 	{...restProps}
 >
 	<svg

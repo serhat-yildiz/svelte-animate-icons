@@ -1,31 +1,51 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
 	
+	interface AnimationTriggers {
+		hover?: boolean;
+		click?: boolean;
+		focus?: boolean;
+		custom?: boolean;
+	}
+	
 	interface Props {
 		size?: number;
 		class?: string;
+		triggers?: AnimationTriggers;
+		animationState?: 'idle' | 'active' | 'loading' | 'success' | 'error';
+		autoPlay?: boolean;
+		loop?: boolean;
+		duration?: number;
+		onAnimationStart?: () => void;
+		onAnimationEnd?: () => void;
 		[key: string]: any;
 	}
 	
-	let { size = 28, class: className, ...restProps }: Props = $props();
-	
-	export interface BookmarkMinusIconHandle {
-		startAnimation: () => void;
-		stopAnimation: () => void;
-	}
+	let { 
+		size = 28, 
+		class: className, 
+		triggers = { hover: true },
+		animationState = 'idle',
+		autoPlay = false,
+		loop = false,
+		duration = 2000,
+		onAnimationStart,
+		onAnimationEnd,
+		...restProps 
+	}: Props = $props();
 	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
-	let isControlled = false;
+	let currentAnimations: Animation[] = [];
+	let currentState = $state(animationState);
 	
-	// Animation controls
+	
 	function startAnimation() {
 		if (svgRef) {
 			isAnimating = true;
-			
-			// Bookmark bounce animation
-			// React: scale: [1, 1.05, 0.95, 1], y: [0, -2, 0]
+
+
 			svgRef.animate([
 				{ transform: 'scale(1) translateY(0px)' },
 				{ transform: 'scale(1.05) translateY(-2px)' },
@@ -35,9 +55,8 @@
 				duration: 1200,
 				easing: 'ease-in-out'
 			});
-			
-			// Minus line scaling animation
-			// React: scaleX: [1, 0.7, 1.2, 1], opacity: [1, 0.6, 1]
+
+
 			const minusLine = svgRef.querySelector('line');
 			if (minusLine) {
 				minusLine.animate([
@@ -56,7 +75,7 @@
 	function stopAnimation() {
 		if (svgRef) {
 			isAnimating = false;
-			// Cancel all animations
+			
 			svgRef.getAnimations().forEach(animation => animation.cancel());
 			const minusLine = svgRef.querySelector('line');
 			if (minusLine) {
@@ -64,29 +83,108 @@
 				minusLine.style.transform = 'scaleX(1)';
 				minusLine.style.opacity = '1';
 			}
-			// Reset SVG transform
+			
 			svgRef.style.transform = 'scale(1) translateY(0px)';
 		}
 	}
 	
+	function toggleAnimation() {
+		if (isAnimating) {
+			stopAnimation();
+		} else {
+			startAnimation();
+		}
+	}
+	
+	function setAnimationState(newState: string) {
+		currentState = newState as any;
+		
+		
+		switch (newState) {
+			case 'active':
+			case 'loading':
+				startAnimation();
+				break;
+			case 'idle':
+			case 'success':
+			case 'error':
+			default:
+				stopAnimation();
+				break;
+		}
+	}
+	
+	
 	function handleMouseEnter() {
-		if (!isControlled) {
+		if (triggers.hover && !triggers.custom) {
 			startAnimation();
 		}
 	}
 	
 	function handleMouseLeave() {
-		if (!isControlled) {
+		if (triggers.hover && !triggers.custom) {
 			stopAnimation();
 		}
 	}
 	
-	// Public API
-	export function getControls(): BookmarkMinusIconHandle {
-		isControlled = true;
+	function handleClick() {
+		if (triggers.click) {
+			toggleAnimation();
+		}
+	}
+	
+	function handleFocus() {
+		if (triggers.focus) {
+			startAnimation();
+		}
+	}
+	
+	function handleBlur() {
+		if (triggers.focus) {
+			stopAnimation();
+		}
+	}
+	
+	
+	$effect(() => {
+		if (svgRef) {
+			setAnimationState(animationState);
+		}
+	});
+	
+	
+	$effect(() => {
+		if (autoPlay && svgRef) {
+			startAnimation();
+		}
+		
+		
+		return () => {
+			stopAnimation();
+		};
+	});
+	
+	
+	export function start() {
+		startAnimation();
+	}
+	
+	export function stop() {
+		stopAnimation();
+	}
+	
+	export function toggle() {
+		toggleAnimation();
+	}
+	
+	export function setState(state: string) {
+		setAnimationState(state);
+	}
+	
+	export function getStatus() {
 		return {
-			startAnimation,
-			stopAnimation
+			isAnimating,
+			currentState
 		};
 	}
 </script>
@@ -94,8 +192,13 @@
 <div 
 	bind:this={containerRef}
 	class={clsx('inline-flex', className)}
-	on:mouseenter={handleMouseEnter}
-	on:mouseleave={handleMouseLeave}
+	onmouseenter={handleMouseEnter}
+	onmouseleave={handleMouseLeave}
+	onclick={handleClick}
+	onfocus={triggers.focus ? handleFocus : undefined}
+	onblur={triggers.focus ? handleBlur : undefined}
+	tabindex={triggers.focus ? 0 : -1}
+	role={triggers.click || triggers.focus ? "button" : undefined}
 	{...restProps}
 >
 	<svg

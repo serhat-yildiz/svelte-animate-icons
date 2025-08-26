@@ -1,0 +1,242 @@
+# Svelte Animate Icons - LLM Context
+
+## Project Overview
+
+Svelte Animate Icons is a comprehensive animated SVG icon library specifically designed for Svelte 5 applications. The library provides 130+ beautifully animated icons with smooth hover effects, built using the Web Animations API for optimal performance.
+
+## Key Features
+
+- **130+ Animated Icons**: Professional SVG icons with built-in hover animations
+- **Svelte 5 Native**: Built with modern Svelte 5 runes and reactivity system
+- **Web Animations API**: 60fps smooth animations with optimal performance
+- **Tree-shakeable**: Import only the icons you need, minimal bundle impact
+- **TypeScript**: Full type safety and IntelliSense support
+- **CSS-friendly**: Easy styling with CSS classes and custom properties
+- **Accessible**: Respects prefers-reduced-motion and includes proper ARIA labels
+- **Zero Dependencies**: No runtime dependencies except Svelte
+
+## Architecture
+
+### Project Structure
+```
+src/
+├── lib/
+│   ├── components/          # Demo website components
+│   ├── icons/              # Individual icon components (130+ icons)
+│   ├── registry/           # Icon registry and metadata system
+│   ├── types/              # TypeScript type definitions
+│   └── index.ts            # Main export file
+├── routes/                 # SvelteKit routes for demo site
+└── static/                 # Static assets
+```
+
+### Icon Component Pattern
+Each icon follows a consistent pattern:
+```svelte
+<script lang="ts">
+  import type { IconProps } from '../types/index.js';
+  
+  let { size = 28, class: className = '', ...restProps }: IconProps = $props();
+</script>
+
+<svg
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  class="animate-icon {className}"
+  {...restProps}
+>
+  <!-- SVG content -->
+</svg>
+
+<style>
+  .animate-icon {
+    transition: all 0.2s ease;
+  }
+  
+  .animate-icon:hover {
+    /* Animation effects */
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    .animate-icon {
+      transition: none;
+    }
+  }
+</style>
+```
+
+## Icon Categories
+
+Icons are organized into logical categories:
+- **UI/Navigation**: Basic interface elements (Menu, Close, Arrow icons)
+- **Communication**: Social and messaging (Heart, Bell, Mail icons)
+- **Actions**: User actions (Download, Upload, Copy, Trash)
+- **Currency**: Financial symbols (Dollar, Euro, Bitcoin)
+- **Social**: Social media platforms (GitHub, Twitter, LinkedIn)
+- **Users**: User management (User, Users, Profile icons)
+- **System**: System and settings (Gear, Settings, Info)
+
+## Usage Patterns
+
+### Basic Usage
+```svelte
+<script>
+  import { HeartIcon, BellIcon } from 'svelte-animate-icons';
+</script>
+
+<HeartIcon size={24} />
+<BellIcon size={32} class="text-red-500" />
+```
+
+### Advanced Styling
+```svelte
+<HeartIcon 
+  size={28}
+  class="text-red-500 hover:text-red-600 transform hover:scale-110"
+  onclick={() => console.log('Liked!')}
+/>
+```
+
+### Props Interface
+```typescript
+interface IconProps {
+  size?: number;          // Icon size in pixels (default: 28)
+  class?: string;         // CSS classes
+  [key: string]: any;     // All other HTML attributes
+}
+```
+
+## Development Context
+
+### Technology Stack
+- **Svelte 5**: Latest version with runes
+- **SvelteKit**: Full-stack framework for demo site
+- **TypeScript**: Type safety throughout
+- **Vite**: Build tool and development server
+- **GitHub Actions**: CI/CD for npm publishing and GitHub Pages
+- **Web Animations API**: For smooth 60fps animations
+
+### Build Process
+1. **Development**: Local development with hot reload
+2. **Package Build**: `npm run package` - Creates dist/ for npm
+3. **Demo Build**: `npm run build` - Creates demo site for GitHub Pages
+4. **Publishing**: Automated npm publish on version tags
+
+### Key Files
+- `src/lib/index.ts`: Main export file, exports all icons
+- `src/lib/types/index.ts`: TypeScript definitions
+- `src/lib/registry/iconRegistry.ts`: Icon metadata and registry system
+- `package.json`: Package configuration and npm metadata
+- `svelte.config.js`: SvelteKit configuration with GitHub Pages setup
+
+## Icon Development Guidelines
+
+### Adding New Icons
+1. Create new `.svelte` file in `src/lib/icons/`
+2. Follow naming convention: `MyIconName.svelte` (PascalCase)
+3. Add export to `src/lib/index.ts`
+4. Add metadata to `src/lib/registry/iconRegistry.ts`
+5. Ensure accessibility with proper ARIA labels
+6. Test animations and performance
+
+### Animation Standards
+- Use CSS transitions for hover effects
+- Respect `prefers-reduced-motion`
+- Keep animations subtle and professional
+- Target 60fps performance
+- Use transform properties for best performance
+
+### SVG Requirements
+- 24x24 viewBox (standard)
+- Use `currentColor` for fills/strokes
+- Optimize path data
+- Include proper stroke properties
+- Maintain consistent visual weight
+
+## API Reference
+
+### Icon Component Props
+```typescript
+interface IconProps {
+  size?: number;          // Icon size in pixels
+  class?: string;         // CSS classes for styling
+  onclick?: () => void;   // Click handler
+  // ... all standard HTML attributes
+}
+```
+
+### Registry Functions
+```typescript
+// Get all available icons
+getAvailableIcons(): IconMetadata[]
+
+// Get total icon count
+getTotalIconCount(): number
+
+// Get icons by category
+getCategoriesWithCounts(): CategoryCount[]
+
+// Search icons
+searchIcons(query: string): IconMetadata[]
+```
+
+## Performance Considerations
+
+- **Bundle Size**: Each icon ~2KB gzipped
+- **Tree Shaking**: Only imported icons are bundled
+- **Animation Performance**: Web Animations API for GPU acceleration
+- **Memory Usage**: Minimal runtime overhead
+- **Loading**: Instant (no external dependencies)
+
+## Browser Support
+
+- Modern browsers supporting Svelte 5
+- Web Animations API support
+- ES2020+ support
+- CSS custom properties support
+
+## Common Use Cases
+
+1. **UI Libraries**: Building design systems
+2. **Web Applications**: Interactive interfaces
+3. **Landing Pages**: Marketing and promotional sites
+4. **Dashboards**: Admin and analytics interfaces
+5. **Mobile Web**: Responsive web applications
+
+## Deployment
+
+- **npm Package**: Published as `svelte-animate-icons`
+- **Demo Site**: https://serhat-yildiz.github.io/svelte-animate-icons/
+- **Documentation**: https://serhat-yildiz.github.io/svelte-animate-icons/docs
+- **Repository**: https://github.com/serhat-yildiz/svelte-animate-icons
+
+## Future Roadmap
+
+- Icon customization system (colors, animations, transforms)
+- More icon variants and styles
+- Integration with popular CSS frameworks
+- Advanced animation presets
+- Icon builder/generator tools
+
+## Contributing
+
+The project welcomes contributions:
+- New icon designs
+- Animation improvements
+- Performance optimizations
+- Documentation updates
+- Bug fixes and feature requests
+
+## License
+
+MIT License - Free for commercial and personal use.
+
+---
+
+This document provides comprehensive context for LLMs to understand and assist with the Svelte Animate Icons project. The library aims to be the premier animated icon solution for Svelte 5 applications.

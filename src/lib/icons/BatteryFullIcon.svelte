@@ -1,114 +1,232 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
 	
+	interface AnimationTriggers {
+		hover?: boolean;
+		click?: boolean;
+		focus?: boolean;
+		custom?: boolean;
+	}
+	
 	interface Props {
 		size?: number;
 		class?: string;
+		triggers?: AnimationTriggers;
+		animationState?: 'idle' | 'active' | 'loading' | 'success' | 'error';
+		autoPlay?: boolean;
+		loop?: boolean;
+		duration?: number;
+		onAnimationStart?: () => void;
+		onAnimationEnd?: () => void;
 		[key: string]: any;
 	}
 	
-	let { size = 28, class: className, ...restProps }: Props = $props();
-	
-	export interface BatteryFullIconHandle {
-		startAnimation: () => void;
-		stopAnimation: () => void;
-	}
+	let { 
+		size = 28, 
+		class: className, 
+		triggers = { hover: true },
+		animationState = 'idle',
+		autoPlay = false,
+		loop = false,
+		duration = 2000,
+		onAnimationStart,
+		onAnimationEnd,
+		...restProps 
+	}: Props = $props();
 	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
-	let isControlled = false;
+	let currentAnimations: Animation[] = [];
+	let currentState = $state(animationState);
 	
-	// Animation controls
+	
 	function startAnimation() {
-		if (svgRef) {
-			isAnimating = true;
+		if (svgRef && !isAnimating) {
+			stopAnimation(); 
 			
-			// Battery full animation - SVG rotate and scale
-			// React: rotate: [0, -2, 2, 0], scale: [1, 1.05, 0.95, 1]
-			svgRef.animate([
+			isAnimating = true;
+			onAnimationStart?.();
+			
+			
+			const svgAnimation = svgRef.animate([
 				{ transform: 'rotate(0deg) scale(1)' },
 				{ transform: 'rotate(-2deg) scale(1.05)' },
 				{ transform: 'rotate(2deg) scale(0.95)' },
 				{ transform: 'rotate(0deg) scale(1)' }
 			], {
-				duration: 1500,
-				iterations: Infinity,
+				duration: duration,
+				iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 				easing: 'cubic-bezier(0.42, 0, 0.58, 1)'
 			});
+			currentAnimations.push(svgAnimation);
 			
-			// Battery bars animation - each with different delay
-			const bars = svgRef.querySelectorAll('path[d*="v4"]'); // bars with "v4" pattern
+			
+			const bars = svgRef.querySelectorAll('path[d*="v4"]'); 
 			bars.forEach((bar, i) => {
-				// React: opacity: [0.4, 1, 0.8], scaleY: [0.6, 1, 0.8], delay: i * 0.25
-				bar.animate([
+				const barAnimation = bar.animate([
 					{ opacity: '0.4', transform: 'scaleY(0.6)' },
 					{ opacity: '1', transform: 'scaleY(1)' },
 					{ opacity: '0.8', transform: 'scaleY(0.8)' }
 				], {
-					duration: 1000,
-					delay: i * 250, // i * 0.25 * 1000
-					iterations: Infinity,
+					duration: Math.floor(duration * 0.5),
+					delay: i * 250,
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 					easing: 'cubic-bezier(0.42, 0, 0.58, 1)'
 				});
+				currentAnimations.push(barAnimation);
 			});
 			
-			// Battery shell and tip opacity animation
+			
 			const rect = svgRef.querySelector('rect');
-			const tip = svgRef.querySelector('path[d*="22"]'); // tip path
+			const tip = svgRef.querySelector('path[d*="22"]'); 
 			
 			[rect, tip].forEach(element => {
 				if (element) {
-					element.animate([
+					const elementAnimation = element.animate([
 						{ opacity: '0.6' },
 						{ opacity: '1' },
 						{ opacity: '0.7' },
 						{ opacity: '1' }
 					], {
-						duration: 1200,
-						iterations: Infinity,
+						duration: Math.floor(duration * 0.6),
+						iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 						easing: 'cubic-bezier(0.42, 0, 0.58, 1)'
 					});
+					currentAnimations.push(elementAnimation);
 				}
+			});
+			
+			
+			const lastAnimation = currentAnimations[currentAnimations.length - 1];
+			lastAnimation?.addEventListener('finish', () => {
+				if (!loop && !autoPlay && currentState !== 'loading') {
+					if (currentAnimations.every(anim => anim.playState === 'finished')) {
+						stopAnimation();
+					}
+				}
+				onAnimationEnd?.();
 			});
 		}
 	}
 	
 	function stopAnimation() {
+		currentAnimations.forEach(animation => {
+			animation.cancel();
+		});
+		currentAnimations = [];
+		
 		if (svgRef) {
 			isAnimating = false;
-			// Cancel all animations
-			svgRef.getAnimations().forEach(animation => animation.cancel());
+			
+			
 			const allElements = svgRef.querySelectorAll('*');
 			allElements.forEach(element => {
-				element.getAnimations().forEach(animation => animation.cancel());
-				// Reset styles
 				element.style.transform = '';
 				element.style.opacity = '1';
 			});
-			// Reset SVG transform
+			
 			svgRef.style.transform = 'rotate(0deg) scale(1)';
 		}
 	}
 	
+	function toggleAnimation() {
+		if (isAnimating) {
+			stopAnimation();
+		} else {
+			startAnimation();
+		}
+	}
+	
+	function setAnimationState(newState: string) {
+		currentState = newState as any;
+		
+		
+		switch (newState) {
+			case 'active':
+			case 'loading':
+				startAnimation();
+				break;
+			case 'idle':
+			case 'success':
+			case 'error':
+			default:
+				stopAnimation();
+				break;
+		}
+	}
+	
+	
 	function handleMouseEnter() {
-		if (!isControlled) {
+		if (triggers.hover && !triggers.custom) {
 			startAnimation();
 		}
 	}
 	
 	function handleMouseLeave() {
-		if (!isControlled) {
+		if (triggers.hover && !triggers.custom) {
 			stopAnimation();
 		}
 	}
 	
-	// Public API
-	export function getControls(): BatteryFullIconHandle {
-		isControlled = true;
+	function handleClick() {
+		if (triggers.click) {
+			toggleAnimation();
+		}
+	}
+	
+	function handleFocus() {
+		if (triggers.focus) {
+			startAnimation();
+		}
+	}
+	
+	function handleBlur() {
+		if (triggers.focus) {
+			stopAnimation();
+		}
+	}
+	
+	
+	$effect(() => {
+		if (svgRef) {
+			setAnimationState(animationState);
+		}
+	});
+	
+	
+	$effect(() => {
+		if (autoPlay && svgRef) {
+			startAnimation();
+		}
+		
+		
+		return () => {
+			stopAnimation();
+		};
+	});
+	
+	
+	export function start() {
+		startAnimation();
+	}
+	
+	export function stop() {
+		stopAnimation();
+	}
+	
+	export function toggle() {
+		toggleAnimation();
+	}
+	
+	export function setState(state: string) {
+		setAnimationState(state);
+	}
+	
+	export function getStatus() {
 		return {
-			startAnimation,
-			stopAnimation
+			isAnimating,
+			currentState
 		};
 	}
 </script>
@@ -116,8 +234,13 @@
 <div 
 	bind:this={containerRef}
 	class={clsx('inline-flex', className)}
-	on:mouseenter={handleMouseEnter}
-	on:mouseleave={handleMouseLeave}
+	onmouseenter={handleMouseEnter}
+	onmouseleave={handleMouseLeave}
+	onclick={handleClick}
+	onfocus={triggers.focus ? handleFocus : undefined}
+	onblur={triggers.focus ? handleBlur : undefined}
+	tabindex={triggers.focus ? 0 : -1}
+	role={triggers.click || triggers.focus ? "button" : undefined}
 	{...restProps}
 >
 	<svg

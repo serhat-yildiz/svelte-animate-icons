@@ -1,135 +1,299 @@
 <script lang="ts">
-  import { clsx } from 'clsx';
+	import { clsx } from 'clsx';
+	
+	interface AnimationTriggers {
+		hover?: boolean;
+		click?: boolean;
+		focus?: boolean;
+		custom?: boolean;
+	}
+	
+	interface Props {
+		size?: number;
+		class?: string;
+		triggers?: AnimationTriggers;
+		animationState?: 'idle' | 'active' | 'loading' | 'success' | 'error';
+		autoPlay?: boolean;
+		loop?: boolean;
+		duration?: number;
+		onAnimationStart?: () => void;
+		onAnimationEnd?: () => void;
+		[key: string]: any;
+	}
+	
+	let {
+		size = 28,
+		class: className,
+		triggers = { hover: true },
+		animationState = 'idle',
+		autoPlay = false,
+		loop = false,
+		duration = 1600,
+		onAnimationStart,
+		onAnimationEnd,
+		...restProps
+	}: Props = $props();
+	
+	let containerRef: HTMLDivElement;
+	let svgRef: SVGSVGElement;
+	let isAnimating = $state(false);
+	let currentState = $state(animationState);
+	let currentAnimations: Animation[] = [];
+	
+	
+	let flapEl: SVGPathElement;
+	let outlinePath1El: SVGPathElement;
+	let outlineRectEl: SVGRectElement;
   
-  interface Props {
-    size?: number;
-    class?: string;
-  }
-  
-  let { size = 28, class: className, ...restProps }: Props = $props();
-  
-  // Animation control
-  let isAnimating = $state(false);
-  
-  // Refs for animation elements
-  let svgEl: SVGSVGElement;
-  let flapEl: SVGPathElement;
-  let outlinePath1El: SVGPathElement;
-  let outlineRectEl: SVGRectElement;
-  
-  export function startAnimation() {
-    if (isAnimating) return;
-    isAnimating = true;
-    
-    // SVG bounce animation (continuous)
-    if (svgEl) {
-      svgEl.animate([
-        { transform: 'translateY(0px) scale(1)' },
-        { transform: 'translateY(-3px) scale(1.05)' },
-        { transform: 'translateY(3px) scale(0.95)' },
-        { transform: 'translateY(-2px) scale(1)' },
-        { transform: 'translateY(0px) scale(1)' }
-      ], {
-        duration: 1600,
-        easing: 'cubic-bezier(0.42, 0, 0.58, 1)',
-        iterations: Infinity
-      });
-    }
-    
-    // Flap animation (continuous)
-    if (flapEl) {
-      flapEl.animate([
-        { transform: 'rotate(-4deg)', opacity: '1' },
-        { transform: 'rotate(4deg)', opacity: '0.7' },
-        { transform: 'rotate(-3deg)', opacity: '1' },
-        { transform: 'rotate(0deg)', opacity: '1' }
-      ], {
-        duration: 1200,
-        easing: 'cubic-bezier(0.42, 0, 0.58, 1)',
-        iterations: Infinity
-      });
-    }
-    
-    // Outline animations (continuous)
-    if (outlinePath1El) {
-      outlinePath1El.animate([
-        { opacity: '0.7' },
-        { opacity: '1' },
-        { opacity: '0.5' },
-        { opacity: '1' }
-      ], {
-        duration: 1400,
-        easing: 'cubic-bezier(0.42, 0, 0.58, 1)',
-        iterations: Infinity
-      });
-    }
-    
-    if (outlineRectEl) {
-      outlineRectEl.animate([
-        { opacity: '0.7' },
-        { opacity: '1' },
-        { opacity: '0.5' },
-        { opacity: '1' }
-      ], {
-        duration: 1400,
-        easing: 'cubic-bezier(0.42, 0, 0.58, 1)',
-        iterations: Infinity
-      });
-    }
-  }
-  
-  export function stopAnimation() {
-    isAnimating = false;
-    // Stop all animations
-    [svgEl, flapEl, outlinePath1El, outlineRectEl].forEach(el => {
-      if (el) {
-        el.getAnimations().forEach(animation => animation.finish());
-      }
-    });
-  }
-  
-  function handleMouseEnter() {
-    startAnimation();
-  }
-  
-  function handleMouseLeave() {
-    stopAnimation();
-  }
+	
+	function startAnimation() {
+		if (svgRef && !isAnimating) {
+			stopAnimation(); 
+			
+			isAnimating = true;
+			onAnimationStart?.();
+			
+			
+			if (svgRef) {
+				const svgAnimation = svgRef.animate([
+					{ transform: 'translateY(0px) scale(1)' },
+					{ transform: 'translateY(-3px) scale(1.05)' },
+					{ transform: 'translateY(3px) scale(0.95)' },
+					{ transform: 'translateY(-2px) scale(1)' },
+					{ transform: 'translateY(0px) scale(1)' }
+				], {
+					duration: duration,
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
+					easing: 'cubic-bezier(0.42, 0, 0.58, 1)'
+				});
+				currentAnimations.push(svgAnimation);
+			}
+			
+			
+			if (flapEl) {
+				const flapAnimation = flapEl.animate([
+					{ transform: 'rotate(-4deg)', opacity: '1' },
+					{ transform: 'rotate(4deg)', opacity: '0.7' },
+					{ transform: 'rotate(-3deg)', opacity: '1' },
+					{ transform: 'rotate(0deg)', opacity: '1' }
+				], {
+					duration: Math.floor(duration * 0.75),
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
+					easing: 'cubic-bezier(0.42, 0, 0.58, 1)'
+				});
+				currentAnimations.push(flapAnimation);
+			}
+			
+			
+			if (outlinePath1El) {
+				const outlineAnimation = outlinePath1El.animate([
+					{ opacity: '0.7' },
+					{ opacity: '1' },
+					{ opacity: '0.5' },
+					{ opacity: '1' }
+				], {
+					duration: Math.floor(duration * 0.875),
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
+					easing: 'cubic-bezier(0.42, 0, 0.58, 1)'
+				});
+				currentAnimations.push(outlineAnimation);
+			}
+			
+			
+			if (outlineRectEl) {
+				const rectAnimation = outlineRectEl.animate([
+					{ opacity: '0.7' },
+					{ opacity: '1' },
+					{ opacity: '0.5' },
+					{ opacity: '1' }
+				], {
+					duration: Math.floor(duration * 0.875),
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
+					easing: 'cubic-bezier(0.42, 0, 0.58, 1)'
+				});
+				currentAnimations.push(rectAnimation);
+			}
+			
+			
+			const lastAnimation = currentAnimations[currentAnimations.length - 1];
+			lastAnimation?.addEventListener('finish', () => {
+				if (!loop && !autoPlay && currentState !== 'loading') {
+					if (currentAnimations.every(anim => anim.playState === 'finished')) {
+						stopAnimation();
+					}
+				}
+				onAnimationEnd?.();
+			});
+		}
+	}
+	
+	function stopAnimation() {
+		currentAnimations.forEach(animation => {
+			animation.cancel();
+		});
+		currentAnimations = [];
+		
+		if (svgRef) {
+			isAnimating = false;
+			
+			
+			svgRef.style.transform = 'translateY(0px) scale(1)';
+			
+			if (flapEl) {
+				flapEl.style.transform = 'rotate(0deg)';
+				flapEl.style.opacity = '1';
+			}
+			
+			if (outlinePath1El) {
+				outlinePath1El.style.opacity = '1';
+			}
+			
+			if (outlineRectEl) {
+				outlineRectEl.style.opacity = '1';
+			}
+		}
+	}
+	
+	function toggleAnimation() {
+		if (isAnimating) {
+			stopAnimation();
+		} else {
+			startAnimation();
+		}
+	}
+	
+	function setAnimationState(newState: string) {
+		currentState = newState as any;
+		
+		
+		switch (newState) {
+			case 'active':
+			case 'loading':
+			case 'success':
+				startAnimation();
+				break;
+			case 'idle':
+			case 'error':
+			default:
+				stopAnimation();
+				break;
+		}
+	}
+	
+	
+	function handleMouseEnter() {
+		if (triggers.hover && !triggers.custom) {
+			startAnimation();
+		}
+	}
+	
+	function handleMouseLeave() {
+		if (triggers.hover && !triggers.custom) {
+			stopAnimation();
+		}
+	}
+	
+	function handleClick() {
+		if (triggers.click) {
+			toggleAnimation();
+		}
+	}
+	
+	function handleFocus() {
+		if (triggers.focus) {
+			startAnimation();
+		}
+	}
+	
+	function handleBlur() {
+		if (triggers.focus) {
+			stopAnimation();
+		}
+	}
+	
+	
+	$effect(() => {
+		if (svgRef) {
+			setAnimationState(animationState);
+		}
+	});
+	
+	
+	$effect(() => {
+		if (autoPlay && svgRef) {
+			startAnimation();
+		}
+		
+		
+		return () => {
+			stopAnimation();
+		};
+	});
+	
+	
+	export function start() {
+		startAnimation();
+	}
+	
+	export function stop() {
+		stopAnimation();
+	}
+	
+	export function toggle() {
+		toggleAnimation();
+	}
+	
+	export function setState(state: string) {
+		setAnimationState(state);
+	}
+	
+	export function getStatus() {
+		return {
+			isAnimating,
+			currentState
+		};
+	}
 </script>
 
 <div 
-  class={clsx("inline-flex", className)} 
-  onmouseenter={handleMouseEnter}
-  onmouseleave={handleMouseLeave}
-  {...restProps}
+	bind:this={containerRef}
+	class={clsx('inline-flex', className)}
+	onmouseenter={handleMouseEnter}
+	onmouseleave={handleMouseLeave}
+	onclick={handleClick}
+	onfocus={triggers.focus ? handleFocus : undefined}
+	onblur={triggers.focus ? handleBlur : undefined}
+	tabindex={triggers.focus ? 0 : undefined}
+	role={triggers.click || triggers.focus ? "button" : undefined}
+	{...restProps}
 >
-  <svg
-    bind:this={svgEl}
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  >
-    <path
-      bind:this={outlinePath1El}
-      d="M17 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 1-1.732"
-    />
-    <path
-      bind:this={flapEl}
-      d="m22 5.5-6.419 4.179a2 2 0 0 1-2.162 0L7 5.5"
-    />
-    <rect
-      bind:this={outlineRectEl}
-      x="7"
-      y="3"
-      width="15"
-      height="12"
-      rx="2"
-    />
-  </svg>
+	<svg
+		bind:this={svgRef}
+		xmlns="http://www.w3.org/2000/svg"
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+	>
+		<path
+			bind:this={outlinePath1El}
+			d="M17 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 1-1.732"
+		/>
+		<path
+			bind:this={flapEl}
+			d="m22 5.5-6.419 4.179a2 2 0 0 1-2.162 0L7 5.5"
+		/>
+		<rect
+			bind:this={outlineRectEl}
+			x="7"
+			y="3"
+			width="15"
+			height="12"
+			rx="2"
+		/>
+	</svg>
 </div>

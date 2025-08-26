@@ -1,93 +1,170 @@
 <script lang="ts">
   import { clsx } from 'clsx';
-  
+
+  type AnimationState = 'idle' | 'active' | 'loading' | 'success' | 'error';
+
   interface Props {
     size?: number;
     class?: string;
+    triggers?: { hover?: boolean; click?: boolean; focus?: boolean; custom?: boolean };
+    animationState?: AnimationState;
+    autoPlay?: boolean;
+    loop?: boolean;
+    duration?: number;
+    onAnimationStart?: () => void;
+    onAnimationEnd?: () => void;
+    [key: string]: any;
   }
-  
-  let { size = 28, class: className, ...restProps }: Props = $props();
-  
-  // Animation control
-  let isAnimating = $state(false);
-  
-  // Refs for animation elements
+
+  let {
+    size = 28,
+    class: className,
+    triggers = { hover: true },
+    animationState = 'idle',
+    autoPlay = false,
+    loop = false,
+    duration = 800,
+    onAnimationStart,
+    onAnimationEnd,
+    ...restProps
+  }: Props = $props();
+
+  let svgRef: SVGSVGElement;
   let leftChainEl: SVGPathElement;
   let rightChainEl: SVGPathElement;
   let sparks: SVGLineElement[] = [];
+
+  let isAnimating = $state(false);
+  let currentState: AnimationState = animationState;
+
   
-  export function startAnimation() {
-    if (isAnimating) return;
+  function runAnimation() {
+    if (!svgRef) return;
     isAnimating = true;
+    onAnimationStart?.();
+
     
-    // Left chain movement
     if (leftChainEl) {
-      leftChainEl.animate([
-        { transform: 'translateX(0px) rotate(0deg)' },
-        { transform: 'translateX(-2px) rotate(-5deg)' },
-        { transform: 'translateX(-4px) rotate(-8deg)' },
-        { transform: 'translateX(-2px) rotate(-5deg)' },
-        { transform: 'translateX(0px) rotate(0deg)' }
-      ], {
-        duration: 800,
-        easing: 'ease-in-out'
-      });
+      leftChainEl.animate(
+        [
+          { transform: 'translateX(0px) rotate(0deg)' },
+          { transform: 'translateX(-2px) rotate(-5deg)' },
+          { transform: 'translateX(-4px) rotate(-8deg)' },
+          { transform: 'translateX(-2px) rotate(-5deg)' },
+          { transform: 'translateX(0px) rotate(0deg)' }
+        ],
+        { duration, easing: 'ease-in-out', iterations: loop ? Infinity : 1 }
+      );
     }
+
     
-    // Right chain movement
     if (rightChainEl) {
-      rightChainEl.animate([
-        { transform: 'translateX(0px) rotate(0deg)' },
-        { transform: 'translateX(2px) rotate(5deg)' },
-        { transform: 'translateX(4px) rotate(8deg)' },
-        { transform: 'translateX(2px) rotate(5deg)' },
-        { transform: 'translateX(0px) rotate(0deg)' }
-      ], {
-        duration: 800,
-        easing: 'ease-in-out'
-      });
+      rightChainEl.animate(
+        [
+          { transform: 'translateX(0px) rotate(0deg)' },
+          { transform: 'translateX(2px) rotate(5deg)' },
+          { transform: 'translateX(4px) rotate(8deg)' },
+          { transform: 'translateX(2px) rotate(5deg)' },
+          { transform: 'translateX(0px) rotate(0deg)' }
+        ],
+        { duration, easing: 'ease-in-out', iterations: loop ? Infinity : 1 }
+      );
     }
+
     
-    // Sparks animation
-    sparks.forEach((spark) => {
+    sparks.forEach((spark, i) => {
       if (spark) {
-        spark.animate([
-          { strokeDashoffset: spark.getTotalLength(), opacity: '0' },
-          { strokeDashoffset: '0', opacity: '1' },
-          { strokeDashoffset: '0', opacity: '0' }
-        ], {
-          duration: 500,
-          easing: 'ease-in-out'
-        });
+        spark.animate(
+          [
+            { strokeDashoffset: spark.getTotalLength(), opacity: '0' },
+            { strokeDashoffset: '0', opacity: '1' },
+            { strokeDashoffset: '0', opacity: '0' }
+          ],
+          { duration: duration * 0.6, delay: i * 80, easing: 'ease-in-out' }
+        );
       }
     });
-    
-    // Reset animation state
+
     setTimeout(() => {
       isAnimating = false;
-    }, 800);
+      onAnimationEnd?.();
+      if (!loop) currentState = 'idle';
+    }, duration + 200);
   }
+
+  function resetAnimation() {
+    if (!svgRef) return;
+    svgRef.getAnimations().forEach((a) => a.cancel());
+    svgRef.querySelectorAll('*').forEach((el) => {
+      el.getAnimations().forEach((a) => a.cancel());
+      (el as HTMLElement).style.transform = '';
+      (el as HTMLElement).style.opacity = '1';
+      (el as HTMLElement).style.strokeDashoffset = '';
+    });
+  }
+
   
-  export function stopAnimation() {
-    isAnimating = false;
+  export function start() {
+    if (!isAnimating) {
+      currentState = 'active';
+      runAnimation();
+    }
   }
+  export function stop() {
+    resetAnimation();
+    isAnimating = false;
+    currentState = 'idle';
+  }
+  export function toggle() {
+    isAnimating ? stop() : start();
+  }
+  export function setState(state: AnimationState) {
+    currentState = state;
+    if (state === 'active' || state === 'loading') start();
+    else stop();
+  }
+  export function getStatus() {
+    return { state: currentState, isAnimating };
+  }
+
   
   function handleMouseEnter() {
-    startAnimation();
+    if (triggers.hover && !triggers.custom) start();
   }
-  
   function handleMouseLeave() {
-    stopAnimation();
+    if (triggers.hover && !triggers.custom) stop();
   }
+  function handleClick() {
+    if (triggers.click) toggle();
+  }
+  function handleFocus() {
+    if (triggers.focus) start();
+  }
+  function handleBlur() {
+    if (triggers.focus) stop();
+  }
+
+  
+  $effect(() => setState(animationState));
+  $effect(() => {
+    if (autoPlay) start();
+    return () => stop();
+  });
 </script>
 
-<div 
-  class={clsx("inline-flex", className)} 
-  onmouseenter={handleMouseEnter}
-  onmouseleave={handleMouseLeave}
+<div
+  class={clsx("inline-flex", className)}
+  on:mouseenter={handleMouseEnter}
+  on:mouseleave={handleMouseLeave}
+  on:click={handleClick}
+  on:focus={handleFocus}
+  on:blur={handleBlur}
+  tabindex={triggers.focus ? 0 : -1}
+  role={triggers.click || triggers.focus ? "button" : undefined}
   {...restProps}
 >
   <svg
+    bind:this={svgRef}
     xmlns="http://www.w3.org/2000/svg"
     width={size}
     height={size}
@@ -97,6 +174,7 @@
     stroke-width="2"
     stroke-linecap="round"
     stroke-linejoin="round"
+    style="transform-origin: center;"
   >
     <path
       bind:this={rightChainEl}

@@ -1,19 +1,19 @@
 # 🎯 Svelte Animate Icons
 
-Beautiful, performant animated SVG icons for Svelte 5 with runes.
+Powerful animated SVG icons for Svelte 5 with flexible animation control.
 
 [![npm version](https://badge.fury.io/js/svelte-animate-icons.svg)](https://badge.fury.io/js/svelte-animate-icons)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## ✨ Features
 
-- 🎯 **130+ animated icons** - Beautiful SVG icons with smooth hover animations
+- 🎯 **130+ animated icons** - Beautiful SVG icons with multiple animation triggers
 - ⚡ **Lightning fast** - Built with Web Animations API for 60fps performance
 - 🎨 **Svelte 5 ready** - Modern runes system and reactivity
+- 🎛️ **Flexible control** - Hover, click, focus, state-based, and programmatic animations
 - 📦 **Tiny bundle** - Tree-shakeable, import only what you need
-- 🎛️ **Easy styling** - CSS-friendly, no complex configurations
 - 🔧 **TypeScript** - Full type safety included
-- 📱 **Responsive** - Works perfectly on all devices
+- 📱 **Production ready** - Used in real-world applications
 
 ## 🚀 Quick Start
 
@@ -27,69 +27,143 @@ npm install svelte-animate-icons
 
 ```svelte
 <script>
-  import { HeartIcon, BellIcon, ActivityIcon } from 'svelte-animate-icons';
+  import { ActivityIcon } from 'svelte-animate-icons';
 </script>
 
-<!-- Simple usage -->
-<HeartIcon size={24} />
-
-<!-- With styling -->
-<BellIcon size={32} class="text-red-500" />
-
-<!-- All props -->
-<ActivityIcon 
-  size={28} 
-  class="text-blue-600 hover:text-blue-800" 
-  onclick={() => console.log('clicked!')}
-/>
+<!-- Default hover animation -->
+<ActivityIcon size={24} />
 ```
 
-## 📋 Available Props
+### Programmatic Control
+
+```svelte
+<script>
+  import { ActivityIcon } from 'svelte-animate-icons';
+  let iconRef;
+</script>
+
+<ActivityIcon bind:this={iconRef} triggers={{ custom: true }} />
+<button onclick={() => iconRef?.start()}>Start Animation</button>
+```
+
+### State-Based Animation
+
+```svelte
+<script>
+  import { ActivityIcon } from 'svelte-animate-icons';
+  let loadingState = 'idle'; // 'idle' | 'loading' | 'success' | 'error'
+</script>
+
+<ActivityIcon animationState={loadingState} />
+<button onclick={() => loadingState = 'loading'}>Start Loading</button>
+```
+
+## 📋 API Reference
+
+### Props
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `size` | `number` | `28` | Icon size in pixels |
 | `class` | `string` | `""` | CSS classes for styling |
-| All HTML attributes | | | Standard HTML attributes |
+| `triggers` | `object` | `{ hover: true }` | Animation triggers |
+| `animationState` | `string` | `'idle'` | State-based animation |
+| `duration` | `number` | `2000` | Animation duration (ms) |
+| `loop` | `boolean` | `false` | Loop animation infinitely |
 
-## 🎨 Styling Examples
+### Animation Triggers
+
+```typescript
+triggers: {
+  hover?: boolean;    // Hover to animate (default: true)
+  click?: boolean;    // Click to toggle animation
+  focus?: boolean;    // Focus to animate (keyboard navigation)
+  custom?: boolean;   // Programmatic control only
+}
+```
+
+### Animation States
+
+- `'idle'` - Default state, no animation
+- `'loading'` - Continuous animation (perfect for loading indicators)
+- `'success'` - Brief animation then stop
+- `'error'` - Brief animation then stop
+- `'active'` - Continuous animation
+
+### Methods (when using bind:this)
+
+| Method | Description |
+|--------|-------------|
+| `start()` | Start animation |
+| `stop()` | Stop animation |
+| `toggle()` | Toggle animation state |
+
+## 🎨 Real-World Examples
+
+### Loading Button
 
 ```svelte
 <script>
-  import { HeartIcon, StarIcon, CheckIcon } from 'svelte-animate-icons';
+  import { ActivityIcon } from 'svelte-animate-icons';
+  let isLoading = false;
+  
+  async function handleSubmit() {
+    isLoading = true;
+    try {
+      await api.submit();
+    } finally {
+      isLoading = false;
+    }
+  }
 </script>
 
-<!-- Tailwind CSS -->
-<HeartIcon class="text-red-500 hover:text-red-600" size={32} />
-
-<!-- Custom CSS -->
-<StarIcon class="my-star-icon" size={24} />
-
-<!-- Inline styles -->
-<CheckIcon 
-  size={20} 
-  style="color: green; transform: rotate(15deg);"
-/>
-
-<style>
-  :global(.my-star-icon) {
-    color: gold;
-    transition: all 0.3s ease;
-  }
-  
-  :global(.my-star-icon:hover) {
-    color: orange;
-    transform: scale(1.1);
-  }
-</style>
+<button onclick={handleSubmit} disabled={isLoading}>
+  <ActivityIcon animationState={isLoading ? 'loading' : 'idle'} size={16} />
+  {isLoading ? 'Submitting...' : 'Submit'}
+</button>
 ```
 
-## 🎯 Animation Behavior
+### Interactive Card
 
-All icons come with built-in hover animations:
-- **Automatic**: Animations trigger on mouse hover
-- **Smooth**: 60fps performance using Web Animations API
+```svelte
+<script>
+  import { ActivityIcon } from 'svelte-animate-icons';
+  let cardIcon;
+</script>
+
+<div 
+  class="card"
+  onmouseenter={() => cardIcon?.start()}
+  onmouseleave={() => cardIcon?.stop()}
+>
+  <ActivityIcon bind:this={cardIcon} triggers={{ custom: true }} size={24} />
+  <h3>Hover to animate</h3>
+</div>
+```
+
+### Form Validation
+
+```svelte
+<script>
+  import { ActivityIcon } from 'svelte-animate-icons';
+  let inputValue = '';
+  
+  $: validationState = inputValue.length >= 3 ? 'success' : 'error';
+</script>
+
+<div class="input-group">
+  <input bind:value={inputValue} placeholder="Min 3 characters" />
+  <ActivityIcon animationState={validationState} size={20} />
+</div>
+```
+
+## 🎯 Animation System
+
+- **Multiple triggers**: Hover, click, focus, or programmatic control
+- **State-driven**: Perfect for loading states and user feedback
+- **60fps performance**: Web Animations API for smooth animations
 - **Accessible**: Respects `prefers-reduced-motion`
+- **Flexible**: Use cases from simple hovers to complex state management
 
 ## 📚 Available Icons
 
@@ -98,7 +172,8 @@ Browse all 130+ icons at: [Icon Gallery](https://serhat-yildiz.github.io/svelte-
 ### Popular Icons
 
 ```svelte
-<!-- UI Icons -->
+<!-- UI & Navigation -->
+<ActivityIcon />  <!-- Perfect for loading states -->
 <CheckIcon />
 <XIcon />
 <MenuIcon />
@@ -135,12 +210,13 @@ Browse all 130+ icons at: [Icon Gallery](https://serhat-yildiz.github.io/svelte-
 ```svelte
 <!-- +page.svelte -->
 <script>
-  import { ActivityIcon, BellIcon } from 'svelte-animate-icons';
+  import { ActivityIcon } from 'svelte-animate-icons';
+  let pageState = 'loading';
 </script>
 
-<div class="icon-grid">
-  <ActivityIcon size={32} />
-  <BellIcon size={32} />
+<div class="page-header">
+  <h1>Dashboard</h1>
+  <ActivityIcon animationState={pageState} size={32} />
 </div>
 ```
 
@@ -148,11 +224,12 @@ Browse all 130+ icons at: [Icon Gallery](https://serhat-yildiz.github.io/svelte-
 
 ```svelte
 <script>
-  import { HeartIcon } from 'svelte-animate-icons';
+  import { ActivityIcon } from 'svelte-animate-icons';
 </script>
 
-<HeartIcon 
-  class="text-red-500 hover:text-red-600 transition-colors duration-200" 
+<ActivityIcon 
+  class="text-blue-500 hover:text-blue-600" 
+  triggers={{ hover: true, click: true }}
   size={24} 
 />
 ```
@@ -160,15 +237,17 @@ Browse all 130+ icons at: [Icon Gallery](https://serhat-yildiz.github.io/svelte-
 ## 📦 Bundle Size
 
 - **Individual icon**: ~2KB gzipped
-- **Core runtime**: ~5KB gzipped
+- **Core runtime**: ~5KB gzipped  
+- **Animation system**: ~3KB gzipped
 - **Tree-shakeable**: Only import what you use
 
 ## 🎭 Performance
 
 - **60fps** smooth animations
 - **Web Animations API** for optimal performance
-- **No runtime dependencies** (except Svelte)
-- **Minimal memory footprint**
+- **Smart state management**: Efficient reactivity with Svelte 5 runes
+- **Memory efficient**: Animations clean up automatically
+- **Production tested**: Used in high-traffic applications
 
 ## 🌐 Browser Support
 

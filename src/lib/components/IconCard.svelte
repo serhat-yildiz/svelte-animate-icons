@@ -8,6 +8,22 @@
 	
 	let { icon }: Props = $props();
 	
+	// Icon ref for manual control
+	let iconRef: any;
+	
+	// Card hover handlers
+	function handleCardMouseEnter() {
+		if (iconRef && iconRef.start) {
+			iconRef.start();
+		}
+	}
+	
+	function handleCardMouseLeave() {
+		if (iconRef && iconRef.stop) {
+			iconRef.stop();
+		}
+	}
+	
 
 	
 	// Generate component name for copy actions
@@ -18,27 +34,37 @@
 	const copyOptions = [
 		{
 			label: 'Import',
-			code: `import { ${componentName} } from '$lib';`,
+			code: `import { ${componentName} } from 'svelte-animate-icons';`,
 			type: 'import' as const
 		},
 		{
-			label: 'Component',
+			label: 'Basic',
 			code: `<${componentName} size={24} />`,
 			type: 'component' as const
 		},
 		{
-			label: 'npm install',
+			label: 'Advanced',
+			code: `<${componentName} triggers={{ click: true }} animationState="loading" autoPlay />`,
+			type: 'component' as const
+		},
+		{
+			label: 'Install',
 			code: `npm install svelte-animate-icons`,
 			type: 'install' as const
 		}
 	];
 </script>
 
-<div class="icon-card glass">
+<div class="icon-card glass" onmouseenter={handleCardMouseEnter} onmouseleave={handleCardMouseLeave}>
 	<div class="card-header">
 		<!-- Icon Preview -->
 		<div class="icon-preview">
-			<svelte:component this={icon.component} size={40} />
+			<svelte:component 
+				this={icon.component}
+				bind:this={iconRef}
+				size={40} 
+				triggers={{ custom: true }}
+			/>
 		</div>
 		
 		<!-- Icon Info -->
@@ -58,9 +84,9 @@
 		</div>
 	</div>
 	
-	<!-- Animation happens on hover -->
-	<div class="animation-note">
-		<span class="note-text">Hover to see animation</span>
+	<!-- Animation Info -->
+	<div class="animation-info">
+		<span class="info-text">Hover to see animation • Check docs for advanced usage</span>
 	</div>
 	
 	<!-- Copy Actions -->
@@ -133,12 +159,12 @@
 		flex-shrink: 0;
 	}
 	
-	.animation-note {
+	.animation-info {
 		text-align: center;
 		margin: var(--space-sm) 0;
 	}
 	
-	.note-text {
+	.info-text {
 		font-size: 0.75rem;
 		color: var(--text-tertiary);
 		font-style: italic;
@@ -164,6 +190,7 @@
 		line-height: 1.4;
 		display: -webkit-box;
 		-webkit-line-clamp: 2;
+		line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 	}
@@ -195,60 +222,13 @@
 		font-weight: 600;
 	}
 	
-	.animation-controls {
-		display: flex;
-		gap: var(--space-sm);
-	}
+
 	
-	.control-btn {
-		display: flex;
-		align-items: center;
-		gap: var(--space-xs);
-		padding: var(--space-sm) var(--space-md);
-		border: 1px solid var(--glass-border);
-		border-radius: var(--radius-md);
-		background: rgba(255, 255, 255, 0.05);
-		color: var(--text-secondary);
-		font-size: 0.8rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: all var(--transition-normal);
-		flex: 1;
-		justify-content: center;
-	}
 	
-	.control-btn:hover:not(.disabled) {
-		background: rgba(255, 255, 255, 0.1);
-		color: var(--text-primary);
-		border-color: rgba(255, 255, 255, 0.3);
-	}
-	
-	.control-btn.disabled {
-		opacity: 0.4;
-		cursor: not-allowed;
-	}
-	
-	.play-btn:not(.disabled) {
-		color: #4ade80;
-		border-color: rgba(74, 222, 128, 0.3);
-	}
-	
-	.play-btn:hover:not(.disabled) {
-		background: rgba(74, 222, 128, 0.1);
-	}
-	
-	.stop-btn:not(.disabled) {
-		color: #f87171;
-		border-color: rgba(248, 113, 113, 0.3);
-	}
-	
-	.stop-btn:hover:not(.disabled) {
-		background: rgba(248, 113, 113, 0.1);
-	}
 	
 	.copy-actions {
 		display: grid;
-		grid-template-columns: 1fr 1fr 1fr;
+		grid-template-columns: 1fr 1fr;
 		gap: var(--space-xs);
 	}
 	
@@ -272,9 +252,7 @@
 			gap: var(--space-xs);
 		}
 		
-		.copy-actions :last-child {
-			grid-column: 1 / -1;
-		}
+
 	}
 	
 	@media (max-width: 480px) {
@@ -295,6 +273,7 @@
 		.icon-description {
 			font-size: 0.8rem;
 			-webkit-line-clamp: 1;
+			line-clamp: 1;
 		}
 		
 		.copy-actions {
