@@ -4,6 +4,11 @@
 	import { base } from '$app/paths';
 	const currentYear = new Date().getFullYear();
 	const totalIcons = $derived(() => getTotalIconCount());
+	
+	let githubIconRef: any;
+	let linkedinIconRef: any;
+	let xIconRef: any;
+	let heartIconRef: any;
 </script>
 
 <footer class="footer">
@@ -13,7 +18,7 @@
 			<div class="footer-section main">
 				<div class="footer-brand">
 					<div class="brand-logo">
-						<BicepsFlexedIcon size={28} />
+						<BicepsFlexedIcon size={28} triggers={{ hover: true }} />
 						<h3>AnimateIcons</h3>
 					</div>
 					<p>Beautiful, performant animated icons for modern Svelte applications. Transform static designs into engaging user experiences.</p>
@@ -81,24 +86,51 @@
 					</a>
 				</div>
 				<div class="social-links">
-					<a href="https://github.com/serhat-yildiz" target="_blank" rel="noopener" class="social-link">
-						<GithubIcon size={16} />
+					<a 
+						href="https://github.com/serhat-yildiz" 
+						target="_blank" 
+						rel="noopener" 
+						class="social-link"
+						onmouseenter={() => githubIconRef?.start()}
+						onmouseleave={() => githubIconRef?.stop()}
+					>
+						<GithubIcon bind:this={githubIconRef} size={16} triggers={{ custom: true }} />
 						<span>GitHub</span>
 					</a>
-					<a href="https://www.linkedin.com/in/serhat-yldz/" target="_blank" rel="noopener" class="social-link">
-						<LinkedinIcon size={16} />
+					<a 
+						href="https://www.linkedin.com/in/serhat-yldz/" 
+						target="_blank" 
+						rel="noopener" 
+						class="social-link"
+						onmouseenter={() => linkedinIconRef?.start()}
+						onmouseleave={() => linkedinIconRef?.stop()}
+					>
+						<LinkedinIcon bind:this={linkedinIconRef} size={16} triggers={{ custom: true }} />
 						<span>LinkedIn</span>
 					</a>
-					<a href="https://x.com/themedess" target="_blank" rel="noopener" class="social-link">
-						<XIcon size={16} />
+					<a 
+						href="https://x.com/themedess" 
+						target="_blank" 
+						rel="noopener" 
+						class="social-link"
+						onmouseenter={() => xIconRef?.start()}
+						onmouseleave={() => xIconRef?.stop()}
+					>
+						<XIcon bind:this={xIconRef} size={16} triggers={{ custom: true }} />
 						<span>Twitter</span>
 					</a>
 				</div>
 			</div>
 			
-			<div class="tech-badge">
+			<div 
+				class="tech-badge"
+				role="button"
+				tabindex="0"
+				onmouseenter={() => heartIconRef?.start()}
+				onmouseleave={() => heartIconRef?.stop()}
+			>
 				<span>Powered by</span>
-				<HeartIcon size={16} />
+				<HeartIcon bind:this={heartIconRef} size={16} triggers={{ custom: true }} />
 				<span>Svelte 5</span>
 			</div>
 		</div>

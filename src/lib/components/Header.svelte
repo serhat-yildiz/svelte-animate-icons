@@ -6,6 +6,9 @@
 	let totalIcons = $derived(() => getTotalIconCount());
 	let mobileMenuOpen = $state(false);
 	let starCount = $state(0);
+	let logoIconRef: any;
+	let githubIconRef: any;
+	let heartIconRef: any;
 	
 	// GitHub API'den gerçek yıldız sayısını al
 	async function fetchStarCount() {
@@ -43,9 +46,14 @@
 	<div class="container">
 		<div class="header-content">
 					<!-- Logo -->
-		<a href="{base}/" class="logo">
+		<a 
+			href="{base}/" 
+			class="logo"
+			onmouseenter={() => logoIconRef?.start()}
+			onmouseleave={() => logoIconRef?.stop()}
+		>
 				<div class="logo-icon">
-					<BicepsFlexedIcon size={32} />
+					<BicepsFlexedIcon bind:this={logoIconRef} size={32} triggers={{ custom: true }} />
 				</div>
 				<div class="logo-text">
 					<h1>AnimateIcons</h1>
@@ -73,17 +81,25 @@
 					target="_blank" 
 					rel="noopener noreferrer"
 					class="github-link btn-secondary"
+					onmouseenter={() => {
+						githubIconRef?.start();
+						heartIconRef?.start();
+					}}
+					onmouseleave={() => {
+						githubIconRef?.stop();
+						heartIconRef?.stop();
+					}}
 				>
-					<GithubIcon size={20} />
+					<GithubIcon bind:this={githubIconRef} size={20} triggers={{ custom: true }} />
 					<span class="hide-mobile">GitHub</span>
 					<div class="star-count">
-						<HeartIcon size={14} />
+						<HeartIcon bind:this={heartIconRef} size={14} triggers={{ custom: true }} />
 						<span>{starCount}</span>
 					</div>
 				</a>
 				
 				<!-- Mobile Menu Button -->
-				<button class="mobile-menu-btn show-mobile" onclick={toggleMobileMenu}>
+				<button class="mobile-menu-btn show-mobile" aria-label="Toggle mobile menu" onclick={toggleMobileMenu}>
 					<div class="hamburger" class:open={mobileMenuOpen}>
 						<span></span>
 						<span></span>

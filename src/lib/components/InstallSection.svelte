@@ -8,6 +8,15 @@
 	let copied = $state(false);
 	let copyTimeout: number;
 	
+	// Icon references for animations
+	let titleIconRef = $state<any>();
+	let boltIconRef = $state<any>();
+	let checkIconRef = $state<any>();
+	let blocksIconRef = $state<any>();
+	let chevronIconRef = $state<any>();
+	let copyIconRef1 = $state<any>();
+	let copyIconRef2 = $state<any>();
+	
 	// Get random icon for demo
 	const availableIcons = getAvailableIcons();
 	const randomIcon = availableIcons[Math.floor(Math.random() * availableIcons.length)];
@@ -46,8 +55,14 @@
 	<div class="container">
 		<div class="section-header">
 			<h2 class="section-title">
-				<div class="title-icon">
-					<BicepsFlexedIcon size={32} />
+				<div 
+					class="title-icon"
+					role="button"
+					tabindex="0"
+					onmouseenter={() => titleIconRef?.start()}
+					onmouseleave={() => titleIconRef?.stop()}
+				>
+					<BicepsFlexedIcon bind:this={titleIconRef} size={32} triggers={{ custom: true }} />
 				</div>
 				<span class="text-gradient">Quick Start</span>
 			</h2>
@@ -94,12 +109,14 @@
 							<button 
 								class="copy-btn"
 								onclick={() => copyToClipboard(commands[activeTab])}
+								onmouseenter={() => copyIconRef1?.start()}
+								onmouseleave={() => copyIconRef1?.stop()}
 								aria-label="Copy command"
 							>
 								{#if copied}
-									<CopyIcon size={16} />
+									<CopyIcon bind:this={copyIconRef1} size={16} triggers={{ custom: true }} />
 								{:else}
-									<CopyIcon size={16} />
+									<CopyIcon bind:this={copyIconRef1} size={16} triggers={{ custom: true }} />
 								{/if}
 							</button>
 						</div>
@@ -115,12 +132,14 @@
 					<button 
 						class="copy-btn"
 						onclick={() => copyToClipboard(usageExample)}
+						onmouseenter={() => copyIconRef2?.start()}
+						onmouseleave={() => copyIconRef2?.stop()}
 						aria-label="Copy usage example"
 					>
 						{#if copied}
-							<CopyIcon size={16} />
+							<CopyIcon bind:this={copyIconRef2} size={16} triggers={{ custom: true }} />
 						{:else}
-							<CopyIcon size={16} />
+							<CopyIcon bind:this={copyIconRef2} size={16} triggers={{ custom: true }} />
 						{/if}
 					</button>
 				</div>
@@ -129,33 +148,57 @@
 		
 		<!-- Features Grid -->
 		<div class="features-grid">
-			<div class="feature-card glass">
+			<div 
+				class="feature-card glass"
+				role="button"
+				tabindex="0"
+				onmouseenter={() => boltIconRef?.start()}
+				onmouseleave={() => boltIconRef?.stop()}
+			>
 				<div class="feature-icon">
-					<BoltIcon size={24} />
+					<BoltIcon bind:this={boltIconRef} size={24} triggers={{ custom: true }} />
 				</div>
 				<h4>Purposeful Motion</h4>
 				<p>Smooth, meaningful animations that enhance user experience without distraction.</p>
 			</div>
 			
-			<div class="feature-card glass">
+			<div 
+				class="feature-card glass"
+				role="button"
+				tabindex="0"
+				onmouseenter={() => checkIconRef?.start()}
+				onmouseleave={() => checkIconRef?.stop()}
+			>
 				<div class="feature-icon">
-					<CircleCheckBigIcon size={24} />
+					<CircleCheckBigIcon bind:this={checkIconRef} size={24} triggers={{ custom: true }} />
 				</div>
 				<h4>Lightweight & Fast</h4>
 				<p>Built on Web Animations API for optimal performance and minimal bundle size.</p>
 			</div>
 			
-			<div class="feature-card glass">
+			<div 
+				class="feature-card glass"
+				role="button"
+				tabindex="0"
+				onmouseenter={() => blocksIconRef?.start()}
+				onmouseleave={() => blocksIconRef?.stop()}
+			>
 				<div class="feature-icon">
-					<BlocksIcon size={24} />
+					<BlocksIcon bind:this={blocksIconRef} size={24} triggers={{ custom: true }} />
 				</div>
 				<h4>130+ Icons</h4>
 				<p>Comprehensive icon library covering all common use cases and design needs.</p>
 			</div>
 			
-			<div class="feature-card glass">
+			<div 
+				class="feature-card glass"
+				role="button"
+				tabindex="0"
+				onmouseenter={() => chevronIconRef?.start()}
+				onmouseleave={() => chevronIconRef?.stop()}
+			>
 				<div class="feature-icon">
-					<CircleChevronRightIcon size={24} />
+					<CircleChevronRightIcon bind:this={chevronIconRef} size={24} triggers={{ custom: true }} />
 				</div>
 				<h4>Svelte 5 Ready</h4>
 				<p>Built specifically for Svelte 5 with runes and modern patterns.</p>

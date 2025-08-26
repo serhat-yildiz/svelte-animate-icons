@@ -5,16 +5,25 @@
 	let totalIcons = $derived(() => getTotalIconCount());
 	
 	// Demo icons with refs for programmatic control
-	let heartRef: any;
-	let bellRef: any;
-	let loaderRef: any;
-	let activityRef: any;
+	let heartRef = $state<any>();
+	let bellRef = $state<any>();
+	let loaderRef = $state<any>();
+	let activityRef = $state<any>();
+	let searchIconRef = $state<any>();
+	let githubIconRef = $state<any>();
 	
 	function startDemoAnimations() {
-		heartRef?.startAnimation();
-		bellRef?.startAnimation();
-		loaderRef?.startAnimation();
-		activityRef?.startAnimation();
+		heartRef?.start();
+		bellRef?.start();
+		loaderRef?.start();
+		activityRef?.start();
+	}
+	
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault();
+			startDemoAnimations();
+		}
 	}
 	
 	function scrollToGallery() {
@@ -53,17 +62,53 @@
 			<!-- Demo Icons -->
 			<div class="demo-icons animate-slide-up">
 				<div class="icon-showcase">
-					<div class="demo-icon" onclick={startDemoAnimations}>
-						<HeartIcon bind:this={heartRef} size={48} />
+					<div 
+						class="demo-icon" 
+						role="button"
+						tabindex="0"
+						aria-label="Heart icon demo"
+						onclick={startDemoAnimations}
+						onkeydown={handleKeydown}
+						onmouseenter={() => heartRef?.start()}
+						onmouseleave={() => heartRef?.stop()}
+					>
+						<HeartIcon bind:this={heartRef} size={48} triggers={{ custom: true }} />
 					</div>
-					<div class="demo-icon" onclick={startDemoAnimations}>
-						<BellRingIcon bind:this={bellRef} size={48} />
+					<div 
+						class="demo-icon" 
+						role="button"
+						tabindex="0"
+						aria-label="Bell ring icon demo"
+						onclick={startDemoAnimations}
+						onkeydown={handleKeydown}
+						onmouseenter={() => bellRef?.start()}
+						onmouseleave={() => bellRef?.stop()}
+					>
+						<BellRingIcon bind:this={bellRef} size={48} triggers={{ custom: true }} />
 					</div>
-					<div class="demo-icon" onclick={startDemoAnimations}>
-						<LoaderCircleIcon bind:this={loaderRef} size={48} />
+					<div 
+						class="demo-icon" 
+						role="button"
+						tabindex="0"
+						aria-label="Loader circle icon demo"
+						onclick={startDemoAnimations}
+						onkeydown={handleKeydown}
+						onmouseenter={() => loaderRef?.start()}
+						onmouseleave={() => loaderRef?.stop()}
+					>
+						<LoaderCircleIcon bind:this={loaderRef} size={48} triggers={{ custom: true }} />
 					</div>
-					<div class="demo-icon" onclick={startDemoAnimations}>
-						<ActivityIcon bind:this={activityRef} size={48} />
+					<div 
+						class="demo-icon" 
+						role="button"
+						tabindex="0"
+						aria-label="Activity icon demo"
+						onclick={startDemoAnimations}
+						onkeydown={handleKeydown}
+						onmouseenter={() => activityRef?.start()}
+						onmouseleave={() => activityRef?.stop()}
+					>
+						<ActivityIcon bind:this={activityRef} size={48} triggers={{ custom: true }} />
 					</div>
 				</div>
 				<button class="demo-button btn-primary" onclick={startDemoAnimations}>
@@ -73,8 +118,13 @@
 			
 			<!-- CTA Buttons -->
 			<div class="hero-actions animate-slide-up">
-				<button class="btn-primary" onclick={scrollToGallery}>
-					<SearchIcon size={18} />
+				<button 
+					class="btn-primary" 
+					onclick={scrollToGallery}
+					onmouseenter={() => searchIconRef?.start()}
+					onmouseleave={() => searchIconRef?.stop()}
+				>
+					<SearchIcon bind:this={searchIconRef} size={18} triggers={{ custom: true }} />
 					Browse {totalIcons()} Icons
 				</button>
 				<a 
@@ -82,8 +132,10 @@
 					target="_blank" 
 					rel="noopener noreferrer"
 					class="btn-secondary"
+					onmouseenter={() => githubIconRef?.start()}
+					onmouseleave={() => githubIconRef?.stop()}
 				>
-					<GithubIcon size={18} />
+					<GithubIcon bind:this={githubIconRef} size={18} triggers={{ custom: true }} />
 					View on GitHub
 				</a>
 			</div>
