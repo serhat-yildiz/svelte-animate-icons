@@ -42,6 +42,9 @@
 		readonly isAnimating: boolean;
 	}
 	
+	// Element references for animation
+	let rightPathEl = $state<SVGPathElement>();
+	let leftPathEl = $state<SVGPathElement>();
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);

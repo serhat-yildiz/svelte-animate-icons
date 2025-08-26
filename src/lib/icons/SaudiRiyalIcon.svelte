@@ -201,6 +201,11 @@
 			currentState
 		};
 	}
+	// Element references for animation
+	let leftMainEl = $state<SVGPathElement>();
+	let crossStrokeEl = $state<SVGPathElement>();
+	let rightMainEl = $state<SVGPathElement>();
+	let tailStrokeEl = $state<SVGPathElement>();
 </script>
 <div 
   bind:this={containerRef}

@@ -201,6 +201,8 @@
 			currentState
 		};
 	}
+	// Element references for animation
+	let pathRef = $state<SVGPathElement>();
 </script>
 <div 
   bind:this={containerRef}

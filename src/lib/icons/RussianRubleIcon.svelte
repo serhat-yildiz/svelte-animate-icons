@@ -201,6 +201,9 @@
 			currentState
 		};
 	}
+	// Element references for animation
+	let mainStrokeEl = $state<SVGPathElement>();
+	let midStrokeEl = $state<SVGPathElement>();
 </script>
 <div 
   bind:this={containerRef}

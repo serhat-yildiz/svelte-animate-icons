@@ -201,6 +201,10 @@
 			currentState
 		};
 	}
+	// Element references for animation
+	let outlinePath1El = $state<SVGPathElement>();
+	let flapEl = $state<SVGPathElement>();
+	let outlineRectEl = $state<SVGRectElement>();
 </script>
 <div 
   bind:this={containerRef}

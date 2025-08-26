@@ -201,6 +201,10 @@
 			currentState
 		};
 	}
+	// Element references for animation
+	let bodyEl = $state<SVGPathElement>();
+	let headEl = $state<SVGCircleElement>();
+	let plusGroupEl = $state<SVGGElement>();
 </script>
 <div 
   bind:this={containerRef}

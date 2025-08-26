@@ -201,6 +201,10 @@
 			currentState
 		};
 	}
+	// Element references for animation
+	let bodyEl = $state<SVGPathElement>();
+	let flapGroupEl = $state<SVGGElement>();
+	let swipeEl = $state<SVGLineElement>();
 </script>
 <div 
   bind:this={containerRef}

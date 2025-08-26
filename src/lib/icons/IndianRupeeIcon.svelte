@@ -47,6 +47,14 @@
 	let isAnimating = $state(false);
 	let currentAnimation: Animation | null = null;
 	let currentState = $state(animationState);
+	
+	// Element references for animation
+	let topLineEl = $state<SVGPathElement>();
+	let midLineEl = $state<SVGPathElement>();
+	let curveEl = $state<SVGPathElement>();
+	let notchEl = $state<SVGPathElement>();
+	let diagonalEl = $state<SVGPathElement>();
+	let groupEl = $state<SVGGElement>();
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
 			stopAnimation(); 

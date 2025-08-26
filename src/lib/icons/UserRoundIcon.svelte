@@ -201,6 +201,10 @@
 			currentState
 		};
 	}
+
+	// Element references for animation
+	let headEl = $state<SVGCircleElement>();
+	let curveEl = $state<SVGPathElement>();
 </script>
 <div 
   bind:this={containerRef}

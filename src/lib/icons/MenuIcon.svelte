@@ -201,6 +201,10 @@
 			currentState
 		};
 	}
+	// Element references for animation
+	let line1El = $state<SVGPathElement>();
+	let line2El = $state<SVGPathElement>();
+	let line3El = $state<SVGPathElement>();
 </script>
 <div 
   bind:this={containerRef}

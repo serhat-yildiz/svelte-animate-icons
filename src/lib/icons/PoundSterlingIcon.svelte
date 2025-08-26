@@ -201,6 +201,11 @@
 			currentState
 		};
 	}
+	// Element references for animation
+	let curveEl = $state<SVGPathElement>();
+	let midEl = $state<SVGPathElement>();
+	let vertEl = $state<SVGPathElement>();
+	let baseEl = $state<SVGPathElement>();
 </script>
 <div 
   bind:this={containerRef}

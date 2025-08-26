@@ -201,6 +201,12 @@
 			currentState
 		};
 	}
+	// Element references for animation
+	let bodyEl = $state<SVGPathElement>();
+	let headEl = $state<SVGCircleElement>();
+	let crossGroupEl = $state<SVGGElement>();
+	let crossLine1El = $state<SVGLineElement>();
+	let crossLine2El = $state<SVGLineElement>();	
 </script>
 <div 
   bind:this={containerRef}

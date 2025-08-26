@@ -201,6 +201,11 @@
 			currentState
 		};
 	}
+
+	// Element references for animation
+	let bodyEl = $state<SVGPathElement>();
+	let headEl = $state<SVGCircleElement>();
+	let minusEl = $state<SVGLineElement>();
 </script>
 <div 
   bind:this={containerRef}

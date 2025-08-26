@@ -201,6 +201,9 @@
 			currentState
 		};
 	}
+	// Element references for animation
+	let paperPlaneEl = $state<SVGPathElement>();
+	let trailEl = $state<SVGPathElement>();
 </script>
 <div 
   bind:this={containerRef}
