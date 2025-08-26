@@ -34,7 +34,7 @@
 	  ...restProps
 	}: Props = $props();
   
-	export interface EllipsisIconHandle {
+	export interface IconHandle {
 	  startAnimation: () => void;
 	  stopAnimation: () => void;
 	  toggleAnimation: () => void;
@@ -148,7 +148,7 @@
 	export function setState(state: string) {
 	  setAnimationState(state);
 	}
-	export function getStatus() {
+	export function getIconStatus() {
 	  return { isAnimating, currentState };
 	}
   </script>
@@ -156,12 +156,11 @@
   <div
 	bind:this={containerRef}
 	class={clsx('inline-flex', className)}
-	on:mouseenter={handleMouseEnter}
-	on:mouseleave={handleMouseLeave}
-	on:click={handleClick}
-	on:focus={triggers.focus ? handleFocus : undefined}
-	on:blur={triggers.focus ? handleBlur : undefined}
-	tabindex={triggers.focus ? 0 : -1}
+	onmouseenter={handleMouseEnter}
+	onmouseleave={handleMouseLeave}
+	onclick={handleClick}
+	onfocus={triggers.focus ? handleFocus : undefined}
+	onblur={triggers.focus ? handleBlur : undefined}
 	role={triggers.click || triggers.focus ? 'button' : undefined}
 	{...restProps}
   >

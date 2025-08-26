@@ -34,79 +34,71 @@
 		...restProps 
 	}: Props = $props();
 	
+	export interface IconHandle {
+		startAnimation: () => void;
+		stopAnimation: () => void;
+		toggleAnimation: () => void;
+		setAnimationState: (newState: string) => void;
+		readonly isAnimating: boolean;
+	}
+	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
 	let currentAnimation: Animation | null = null;
 	let currentState = $state(animationState);
-	
-	
 	function startAnimation() {
-		if (svgRef) {
+		if (svgRef && !isAnimating) {
+			stopAnimation(); 
+			
 			isAnimating = true;
-
-
-			svgRef.animate([
-				{ transform: 'scale(1) rotate(0deg)' },
-				{ transform: 'scale(1.08) rotate(-2deg)' },
-				{ transform: 'scale(0.95) rotate(2deg)' },
-				{ transform: 'scale(1) rotate(0deg)' }
-			], {
-				duration: 1200,
-				iterations: Infinity,
-				easing: 'ease-in-out'
-			});
-
-
+			onAnimationStart?.();
+			
 			const path = svgRef.querySelector('path');
 			if (path) {
-				const pathLength = path.getTotalLength();
-				path.style.strokeDasharray = pathLength + ' ' + pathLength;
-				path.style.strokeDashoffset = pathLength;
 				
-				path.animate([
-					{ strokeDashoffset: pathLength },
-					{ strokeDashoffset: 0 }
+				path.style.strokeDasharray = '80 80';
+				path.style.strokeDashoffset = '80';
+				path.style.opacity = '0.6';
+				
+				
+				currentAnimation = path.animate([
+					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
 				], {
-					duration: 1300,
-					iterations: Infinity,
+					duration: duration,
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 					easing: 'ease-in-out'
 				});
-			}
-
-
-			const circle = svgRef.querySelector('circle');
-			if (circle) {
-				circle.animate([
-					{ transform: 'scale(1)', opacity: '1' },
-					{ transform: 'scale(1.3)', opacity: '0.6' },
-					{ transform: 'scale(0.9)', opacity: '1' },
-					{ transform: 'scale(1)', opacity: '1' }
-				], {
-					duration: 1100,
-					iterations: Infinity,
-					easing: 'ease-in-out'
+				
+				
+				currentAnimation.addEventListener('finish', () => {
+					if (!loop && !autoPlay && currentState !== 'loading') {
+						stopAnimation();
+					}
+					onAnimationEnd?.();
 				});
 			}
 		}
 	}
 	
 	function stopAnimation() {
+		if (currentAnimation) {
+			currentAnimation.cancel();
+			currentAnimation = null;
+		}
+		
 		if (svgRef) {
 			isAnimating = false;
 			
-			svgRef.getAnimations().forEach(animation => animation.cancel());
-			const allElements = svgRef.querySelectorAll('*');
-			allElements.forEach(element => {
-				element.getAnimations().forEach(animation => animation.cancel());
+			const path = svgRef.querySelector('path');
+			if (path) {
 				
-				element.style.transform = '';
-				element.style.strokeDasharray = '';
-				element.style.strokeDashoffset = '';
-				element.style.opacity = '1';
-			});
-			
-			svgRef.style.transform = 'scale(1) rotate(0deg)';
+				path.style.strokeDasharray = 'none';
+				path.style.strokeDashoffset = '';
+				path.style.opacity = '1';
+			}
 		}
 	}
 	
@@ -203,39 +195,38 @@
 		setAnimationState(state);
 	}
 	
-	export function getStatus() {
+	export function getIconStatus() {
 		return {
 			isAnimating,
 			currentState
 		};
 	}
 </script>
-
 <div 
-	bind:this={containerRef}
-	class={clsx('inline-flex', className)}
-	onmouseenter={handleMouseEnter}
-	onmouseleave={handleMouseLeave}
-	onclick={handleClick}
-	onfocus={triggers.focus ? handleFocus : undefined}
-	onblur={triggers.focus ? handleBlur : undefined}
-	tabindex={triggers.focus ? 0 : -1}
-	role={triggers.click || triggers.focus ? "button" : undefined}
-	{...restProps}
+  bind:this={containerRef}
+  class={clsx('inline-flex', className)}
+  onmouseenter={handleMouseEnter}
+  onmouseleave={handleMouseLeave}
+  onclick={handleClick}
+  onfocus={handleFocus}
+  onblur={handleBlur}
+  role={triggers.click || triggers.focus ? 'button' : 'img'}
+  aria-label="bolt-icon icon"
+  {...restProps}
 >
-	<svg
-		bind:this={svgRef}
-		xmlns="http://www.w3.org/2000/svg"
-		width={size}
-		height={size}
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-	>
-		<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+  <svg
+    bind:this={svgRef}
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
 		<circle cx="12" cy="12" r="4" style="transform-origin: center;" />
-	</svg>
+  </svg>
 </div>

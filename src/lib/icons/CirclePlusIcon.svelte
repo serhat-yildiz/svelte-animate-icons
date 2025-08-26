@@ -34,64 +34,86 @@
 		...restProps 
 	}: Props = $props();
 	
+	export interface IconHandle {
+		startAnimation: () => void;
+		stopAnimation: () => void;
+		toggleAnimation: () => void;
+		setAnimationState: (newState: string) => void;
+		readonly isAnimating: boolean;
+	}
+	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
-	let currentAnimation: Animation[] = [];
+	let currentAnimation: Animation | null = null;
 	let currentState = $state(animationState);
-	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
-			stopAnimation();
+			stopAnimation(); 
+			
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			const circle = svgRef.querySelector('circle');
-			if (circle) {
-				currentAnimation.push(circle.animate([
-					{ transform: 'scale(1) rotate(0deg)' },
-					{ transform: 'scale(1.1) rotate(180deg)' },
-					{ transform: 'scale(1) rotate(360deg)' }
-				], { duration, iterations: loop || autoPlay || currentState === 'loading' ? Infinity : 1, easing: 'linear' }));
-			}
-			
-			const plusLines = svgRef.querySelectorAll('path');
-			plusLines.forEach(line => {
-				currentAnimation.push(line.animate([
-					{ opacity: '1' },
-					{ opacity: '0.4' },
-					{ opacity: '1' }
-				], { duration: 1000, iterations: loop || autoPlay || currentState === 'loading' ? Infinity : 1 }));
-			});
-			
-			currentAnimation.forEach(anim => {
-				anim.addEventListener('finish', () => {
-					if (!loop && !autoPlay && currentState !== 'loading') stopAnimation();
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = '80 80';
+				path.style.strokeDashoffset = '80';
+				path.style.opacity = '0.6';
+				
+				
+				currentAnimation = path.animate([
+					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
+				], {
+					duration: duration,
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
+					easing: 'ease-in-out'
+				});
+				
+				
+				currentAnimation.addEventListener('finish', () => {
+					if (!loop && !autoPlay && currentState !== 'loading') {
+						stopAnimation();
+					}
 					onAnimationEnd?.();
 				});
-			});
+			}
 		}
 	}
 	
 	function stopAnimation() {
-		currentAnimation.forEach(anim => anim.cancel());
-		currentAnimation = [];
+		if (currentAnimation) {
+			currentAnimation.cancel();
+			currentAnimation = null;
+		}
+		
 		if (svgRef) {
 			isAnimating = false;
-			svgRef.querySelectorAll('*').forEach(el => {
-				el.getAnimations().forEach(a => a.cancel());
-				el.style.transform = '';
-				el.style.opacity = '1';
-			});
+			
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = 'none';
+				path.style.strokeDashoffset = '';
+				path.style.opacity = '1';
+			}
 		}
 	}
 	
 	function toggleAnimation() {
-		isAnimating ? stopAnimation() : startAnimation();
+		if (isAnimating) {
+			stopAnimation();
+		} else {
+			startAnimation();
+		}
 	}
 	
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
+		
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
@@ -106,69 +128,106 @@
 		}
 	}
 	
+	
 	function handleMouseEnter() {
-		if (triggers.hover && !triggers.custom) startAnimation();
+		if (triggers.hover && !triggers.custom) {
+			startAnimation();
+		}
 	}
 	
 	function handleMouseLeave() {
-		if (triggers.hover && !triggers.custom) stopAnimation();
+		if (triggers.hover && !triggers.custom) {
+			stopAnimation();
+		}
 	}
 	
 	function handleClick() {
-		if (triggers.click) toggleAnimation();
+		if (triggers.click) {
+			toggleAnimation();
+		}
 	}
 	
 	function handleFocus() {
-		if (triggers.focus) startAnimation();
+		if (triggers.focus) {
+			startAnimation();
+		}
 	}
 	
 	function handleBlur() {
-		if (triggers.focus) stopAnimation();
+		if (triggers.focus) {
+			stopAnimation();
+		}
 	}
 	
-	$effect(() => {
-		if (svgRef) setAnimationState(animationState);
-	});
 	
 	$effect(() => {
-		if (autoPlay && svgRef) startAnimation();
-		return () => stopAnimation();
+		if (svgRef) {
+			setAnimationState(animationState);
+		}
 	});
 	
 	
-	export function start() { startAnimation(); }
-	export function stop() { stopAnimation(); }
-	export function toggle() { toggleAnimation(); }
-	export function setState(state: string) { setAnimationState(state); }
-	export function getStatus() { return { isAnimating, currentState }; }
+	$effect(() => {
+		if (autoPlay && svgRef) {
+			startAnimation();
+		}
+		
+		
+		return () => {
+			stopAnimation();
+		};
+	});
+	
+	
+	export function start() {
+		startAnimation();
+	}
+	
+	export function stop() {
+		stopAnimation();
+	}
+	
+	export function toggle() {
+		toggleAnimation();
+	}
+	
+	export function setState(state: string) {
+		setAnimationState(state);
+	}
+	
+	export function getIconStatus() {
+		return {
+			isAnimating,
+			currentState
+		};
+	}
 </script>
-
 <div 
-	bind:this={containerRef}
-	class={clsx('inline-flex', className)}
-	onmouseenter={handleMouseEnter}
-	onmouseleave={handleMouseLeave}
-	onclick={handleClick}
-	onfocus={triggers.focus ? handleFocus : undefined}
-	onblur={triggers.focus ? handleBlur : undefined}
-	tabindex={triggers.focus ? 0 : -1}
-	role={triggers.click || triggers.focus ? "button" : undefined}
-	{...restProps}
+  bind:this={containerRef}
+  class={clsx('inline-flex', className)}
+  onmouseenter={handleMouseEnter}
+  onmouseleave={handleMouseLeave}
+  onclick={handleClick}
+  onfocus={handleFocus}
+  onblur={handleBlur}
+  role={triggers.click || triggers.focus ? 'button' : 'img'}
+  aria-label="circle-plus-icon icon"
+  {...restProps}
 >
-	<svg
-		bind:this={svgRef}
-		xmlns="http://www.w3.org/2000/svg"
-		width={size}
-		height={size}
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-	>
-		<circle cx="12" cy="12" r="10" style="transform-origin: center;" />
-		<path d="M8 12h8" />
-		<path d="M12 8v8" />
-	</svg>
+  <svg
+    bind:this={svgRef}
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+<circle cx="12" cy="12" r="10" />
+		<path d="M8 12h8"  />
+		<path d="M12 8v8"  />
+  </svg>
 </div>

@@ -1,13 +1,11 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
-
 	interface AnimationTriggers {
 		hover?: boolean;
 		click?: boolean;
 		focus?: boolean;
 		custom?: boolean;
 	}
-
 	interface Props {
 		size?: number;
 		class?: string;
@@ -20,7 +18,6 @@
 		onAnimationEnd?: () => void;
 		[key: string]: any;
 	}
-
 	let {
 		size = 28,
 		class: className,
@@ -33,7 +30,6 @@
 		onAnimationEnd,
 		...restProps
 	}: Props = $props();
-
 	export interface HeadphonesOffIconHandle {
 		start: () => void;
 		stop: () => void;
@@ -41,19 +37,16 @@
 		setState: (newState: string) => void;
 		getStatus: () => { isAnimating: boolean; currentState: string };
 	}
-
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
 	let currentAnimations: Animation[] = [];
 	let currentState = $state(animationState);
-
 	function startAnimation() {
 		if (!svgRef || isAnimating) return;
 		stopAnimation();
 		isAnimating = true;
 		onAnimationStart?.();
-
 		
 		const svgAnim = svgRef.animate([
 			{ transform: 'scale(1) rotate(0deg)' },
@@ -67,7 +60,6 @@
 			iterations: loop || autoPlay || currentState === 'loading' ? Infinity : 1
 		});
 		currentAnimations.push(svgAnim);
-
 		
 		const headphonesPath = svgRef.querySelector('path[d*="M3 14h3"]');
 		if (headphonesPath) {
@@ -83,13 +75,11 @@
 			});
 			currentAnimations.push(hpAnim);
 		}
-
 		
 		const slashPath = svgRef.querySelector('path[d*="M22 2L2 22"]');
 		if (slashPath) {
 			const pathLength = slashPath.getTotalLength();
 			slashPath.style.strokeDasharray = pathLength + ' ' + pathLength;
-
 			const slashAnim = slashPath.animate([
 				{ strokeDashoffset: pathLength },
 				{ strokeDashoffset: 0 }
@@ -100,7 +90,6 @@
 			});
 			currentAnimations.push(slashAnim);
 		}
-
 		if (!(loop || autoPlay || currentState === 'loading')) {
 			setTimeout(() => {
 				stopAnimation();
@@ -108,12 +97,10 @@
 			}, duration + 100);
 		}
 	}
-
 	function stopAnimation() {
 		isAnimating = false;
 		currentAnimations.forEach(a => a.cancel());
 		currentAnimations = [];
-
 		if (svgRef) {
 			svgRef.getAnimations().forEach(a => a.cancel());
 			const paths = svgRef.querySelectorAll('path');
@@ -127,11 +114,9 @@
 			svgRef.style.transform = '';
 		}
 	}
-
 	function toggleAnimation() {
 		isAnimating ? stopAnimation() : startAnimation();
 	}
-
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		switch (newState) {
@@ -144,7 +129,6 @@
 				break;
 		}
 	}
-
 	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) startAnimation();
@@ -161,31 +145,27 @@
 	function handleBlur() {
 		if (triggers.focus) stopAnimation();
 	}
-
 	
 	$effect(() => setAnimationState(animationState));
 	$effect(() => {
 		if (autoPlay) startAnimation();
 		return () => stopAnimation();
 	});
-
 	
 	export function start() { startAnimation(); }
 	export function stop() { stopAnimation(); }
 	export function toggle() { toggleAnimation(); }
 	export function setState(state: string) { setAnimationState(state); }
-	export function getStatus() { return { isAnimating, currentState }; }
+	export function getIconStatus() { return { isAnimating, currentState }; }
 </script>
-
 <div 
 	bind:this={containerRef}
 	class={clsx('inline-flex', className)}
-	on:mouseenter={handleMouseEnter}
-	on:mouseleave={handleMouseLeave}
-	on:click={handleClick}
-	on:focus={triggers.focus ? handleFocus : undefined}
-	on:blur={triggers.focus ? handleBlur : undefined}
-	tabindex={triggers.focus ? 0 : -1}
+	onmouseenter={handleMouseEnter}
+	onmouseleave={handleMouseLeave}
+	onclick={handleClick}
+	onfocus={triggers.focus ? handleFocus : undefined}
+	onblur={triggers.focus ? handleBlur : undefined}
 	role={triggers.click || triggers.focus ? 'button' : undefined}
 	{...restProps}
 >

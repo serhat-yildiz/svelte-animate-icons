@@ -34,13 +34,19 @@
 		...restProps 
 	}: Props = $props();
 	
+	export interface IconHandle {
+		startAnimation: () => void;
+		stopAnimation: () => void;
+		toggleAnimation: () => void;
+		setAnimationState: (newState: string) => void;
+		readonly isAnimating: boolean;
+	}
+	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
-	let currentAnimations: Animation[] = [];
+	let currentAnimation: Animation | null = null;
 	let currentState = $state(animationState);
-	
-	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
 			stopAnimation(); 
@@ -48,84 +54,50 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			
-			const svgAnimation = svgRef.animate([
-				{ transform: 'rotate(0deg)' },
-				{ transform: 'rotate(-3deg)' },
-				{ transform: 'rotate(3deg)' },
-				{ transform: 'rotate(-2deg)' },
-				{ transform: 'rotate(0deg)' }
-			], {
-				duration: Math.floor(duration * 0.25),
-				iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-				easing: 'cubic-bezier(0.42, 0, 0.58, 1)'
-			});
-			currentAnimations.push(svgAnimation);
-			
-			
-			const rect = svgRef.querySelector('rect');
-			if (rect) {
-				const rectAnimation = rect.animate([
-					{ stroke: '#ef4444', opacity: '0.6' },
-					{ stroke: '#dc2626', opacity: '1' },
-					{ stroke: '#ef4444', opacity: '0.6' }
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = '80 80';
+				path.style.strokeDashoffset = '80';
+				path.style.opacity = '0.6';
+				
+				
+				currentAnimation = path.animate([
+					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
 				], {
-					duration: Math.floor(duration * 0.45),
+					duration: duration,
 					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-					easing: 'cubic-bezier(0.42, 0, 0.58, 1)'
+					easing: 'ease-in-out'
 				});
-				currentAnimations.push(rectAnimation);
-			}
-			
-			
-			const tip = svgRef.querySelector('path');
-			if (tip) {
-				const tipAnimation = tip.animate([
-					{ stroke: '#ef4444', opacity: '0.4' },
-					{ stroke: '#dc2626', opacity: '1' },
-					{ stroke: '#ef4444', opacity: '0.4' }
-				], {
-					duration: Math.floor(duration * 0.35),
-					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-					easing: 'cubic-bezier(0.42, 0, 0.58, 1)'
-				});
-				currentAnimations.push(tipAnimation);
-			}
-			
-			
-			const lastAnimation = currentAnimations[currentAnimations.length - 1];
-			lastAnimation?.addEventListener('finish', () => {
-				if (!loop && !autoPlay && currentState !== 'loading') {
-					if (currentAnimations.every(anim => anim.playState === 'finished')) {
+				
+				
+				currentAnimation.addEventListener('finish', () => {
+					if (!loop && !autoPlay && currentState !== 'loading') {
 						stopAnimation();
 					}
-				}
-				onAnimationEnd?.();
-			});
+					onAnimationEnd?.();
+				});
+			}
 		}
 	}
 	
 	function stopAnimation() {
-		currentAnimations.forEach(animation => {
-			animation.cancel();
-		});
-		currentAnimations = [];
+		if (currentAnimation) {
+			currentAnimation.cancel();
+			currentAnimation = null;
+		}
 		
 		if (svgRef) {
 			isAnimating = false;
 			
-			
-			svgRef.style.transform = 'rotate(0deg)';
-			const rect = svgRef.querySelector('rect');
-			const tip = svgRef.querySelector('path');
-			
-			if (rect) {
-				rect.style.stroke = 'currentColor';
-				rect.style.opacity = '1';
-			}
-			if (tip) {
-				tip.style.stroke = 'currentColor';
-				tip.style.opacity = '1';
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = 'none';
+				path.style.strokeDashoffset = '';
+				path.style.opacity = '1';
 			}
 		}
 	}
@@ -223,39 +195,38 @@
 		setAnimationState(state);
 	}
 	
-	export function getStatus() {
+	export function getIconStatus() {
 		return {
 			isAnimating,
 			currentState
 		};
 	}
 </script>
-
 <div 
-	bind:this={containerRef}
-	class={clsx('inline-flex', className)}
-	onmouseenter={handleMouseEnter}
-	onmouseleave={handleMouseLeave}
-	onclick={handleClick}
-	onfocus={triggers.focus ? handleFocus : undefined}
-	onblur={triggers.focus ? handleBlur : undefined}
-	tabindex={triggers.focus ? 0 : -1}
-	role={triggers.click || triggers.focus ? "button" : undefined}
-	{...restProps}
+  bind:this={containerRef}
+  class={clsx('inline-flex', className)}
+  onmouseenter={handleMouseEnter}
+  onmouseleave={handleMouseLeave}
+  onclick={handleClick}
+  onfocus={handleFocus}
+  onblur={handleBlur}
+  role={triggers.click || triggers.focus ? 'button' : 'img'}
+  aria-label="battery-icon icon"
+  {...restProps}
 >
-	<svg
-		bind:this={svgRef}
-		xmlns="http://www.w3.org/2000/svg"
-		width={size}
-		height={size}
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-	>
-		<path d="M22 14L22 10" />
+  <svg
+    bind:this={svgRef}
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+<path d="M22 14L22 10" />
 		<rect x="2" y="6" width="16" height="12" rx="2" />
-	</svg>
+  </svg>
 </div>

@@ -21,171 +21,222 @@
 		[key: string]: any;
 	}
 	
-	let {
-		size = 28,
-		class: className,
+	let { 
+		size = 28, 
+		class: className, 
 		triggers = { hover: true },
 		animationState = 'idle',
 		autoPlay = false,
 		loop = false,
-		duration = 1000,
+		duration = 2000,
 		onAnimationStart,
 		onAnimationEnd,
-		...restProps
+		...restProps 
 	}: Props = $props();
+	
+	export interface IconHandle {
+		startAnimation: () => void;
+		stopAnimation: () => void;
+		toggleAnimation: () => void;
+		setAnimationState: (newState: string) => void;
+		readonly isAnimating: boolean;
+	}
 	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
+	let currentAnimation: Animation | null = null;
 	let currentState = $state(animationState);
-	let currentAnimations: Animation[] = [];
-	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
-			stopAnimation();
+			stopAnimation(); 
 			
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			
-			const svgAnimation = svgRef.animate([
-				{ transform: 'rotate(0deg) scale(1)' },
-				{ transform: 'rotate(10deg) scale(1.05)' },
-				{ transform: 'rotate(-10deg) scale(1.05)' },
-				{ transform: 'rotate(0deg) scale(1)' }
-			], {
-				duration: duration,
-				iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-				easing: 'ease-in-out'
-			});
-			currentAnimations.push(svgAnimation);
-			
-			
-			const paths = svgRef.querySelectorAll('path') as NodeListOf<SVGPathElement>;
-			paths.forEach((path, index) => {
-				setTimeout(() => {
-					const pathAnimation = path.animate([
-						{ opacity: '0.4', strokeWidth: '1' },
-						{ opacity: '1', strokeWidth: '2' },
-						{ opacity: '0.7', strokeWidth: '1.5' },
-						{ opacity: '1', strokeWidth: '2' }
-					], {
-						duration: Math.floor(duration * 0.8),
-						iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-						easing: 'ease-in-out'
-					});
-					currentAnimations.push(pathAnimation);
-					
-					if (index === paths.length - 1) {
-						pathAnimation.addEventListener('finish', () => {
-							if (!loop && !autoPlay && currentState !== 'loading') {
-								if (currentAnimations.every(anim => anim.playState === 'finished')) {
-									stopAnimation();
-								}
-							}
-							onAnimationEnd?.();
-						});
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = '80 80';
+				path.style.strokeDashoffset = '80';
+				path.style.opacity = '0.6';
+				
+				
+				currentAnimation = path.animate([
+					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
+				], {
+					duration: duration,
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
+					easing: 'ease-in-out'
+				});
+				
+				
+				currentAnimation.addEventListener('finish', () => {
+					if (!loop && !autoPlay && currentState !== 'loading') {
+						stopAnimation();
 					}
-				}, index * Math.floor(duration * 0.1));
-			});
+					onAnimationEnd?.();
+				});
+			}
 		}
 	}
 	
 	function stopAnimation() {
-		currentAnimations.forEach(animation => animation.cancel());
-		currentAnimations = [];
+		if (currentAnimation) {
+			currentAnimation.cancel();
+			currentAnimation = null;
+		}
 		
 		if (svgRef) {
 			isAnimating = false;
-			svgRef.style.transform = 'rotate(0deg) scale(1)';
 			
-			const paths = svgRef.querySelectorAll('path');
-			paths.forEach(path => {
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = 'none';
+				path.style.strokeDashoffset = '';
 				path.style.opacity = '1';
-				path.style.strokeWidth = '2';
-			});
+			}
 		}
 	}
 	
 	function toggleAnimation() {
-		if (isAnimating) stopAnimation();
-		else startAnimation();
+		if (isAnimating) {
+			stopAnimation();
+		} else {
+			startAnimation();
+		}
 	}
 	
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
+		
+		
 		switch (newState) {
-			case 'active': case 'loading': case 'success':
-				startAnimation(); break;
-			default: stopAnimation(); break;
+			case 'active':
+			case 'loading':
+				startAnimation();
+				break;
+			case 'idle':
+			case 'success':
+			case 'error':
+			default:
+				stopAnimation();
+				break;
 		}
 	}
 	
+	
 	function handleMouseEnter() {
-		if (triggers.hover && !triggers.custom) startAnimation();
+		if (triggers.hover && !triggers.custom) {
+			startAnimation();
+		}
 	}
 	
 	function handleMouseLeave() {
-		if (triggers.hover && !triggers.custom) stopAnimation();
+		if (triggers.hover && !triggers.custom) {
+			stopAnimation();
+		}
 	}
 	
 	function handleClick() {
-		if (triggers.click) toggleAnimation();
+		if (triggers.click) {
+			toggleAnimation();
+		}
 	}
 	
 	function handleFocus() {
-		if (triggers.focus) startAnimation();
+		if (triggers.focus) {
+			startAnimation();
+		}
 	}
 	
 	function handleBlur() {
-		if (triggers.focus) stopAnimation();
+		if (triggers.focus) {
+			stopAnimation();
+		}
 	}
 	
-	$effect(() => { if (svgRef) setAnimationState(animationState); });
-	$effect(() => { if (autoPlay && svgRef) startAnimation(); return () => stopAnimation(); });
 	
-	export function start() { startAnimation(); }
-	export function stop() { stopAnimation(); }
-	export function toggle() { toggleAnimation(); }
-	export function setState(state: string) { setAnimationState(state); }
-	export function getStatus() { return { isAnimating, currentState }; }
+	$effect(() => {
+		if (svgRef) {
+			setAnimationState(animationState);
+		}
+	});
+	
+	
+	$effect(() => {
+		if (autoPlay && svgRef) {
+			startAnimation();
+		}
+		
+		
+		return () => {
+			stopAnimation();
+		};
+	});
+	
+	
+	export function start() {
+		startAnimation();
+	}
+	
+	export function stop() {
+		stopAnimation();
+	}
+	
+	export function toggle() {
+		toggleAnimation();
+	}
+	
+	export function setState(state: string) {
+		setAnimationState(state);
+	}
+	
+	export function getIconStatus() {
+		return {
+			isAnimating,
+			currentState
+		};
+	}
 </script>
-
 <div 
-	bind:this={containerRef}
-	class={clsx('inline-flex', className)}
-	onmouseenter={handleMouseEnter}
-	onmouseleave={handleMouseLeave}
-	onclick={handleClick}
-	onfocus={triggers.focus ? handleFocus : undefined}
-	onblur={triggers.focus ? handleBlur : undefined}
-	tabindex={triggers.focus ? 0 : undefined}
-	role={triggers.click || triggers.focus ? "button" : undefined}
-	{...restProps}
+  bind:this={containerRef}
+  class={clsx('inline-flex', className)}
+  onmouseenter={handleMouseEnter}
+  onmouseleave={handleMouseLeave}
+  onclick={handleClick}
+  onfocus={handleFocus}
+  onblur={handleBlur}
+  role={triggers.click || triggers.focus ? 'button' : 'img'}
+  aria-label="snow-flake-icon icon"
+  {...restProps}
 >
-	<svg
-		bind:this={svgRef}
-		xmlns="http://www.w3.org/2000/svg"
-		width={size}
-		height={size}
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-		class="lucide lucide-snowflake-icon lucide-snowflake"
-	>
-		<path d="M12 2v20" />
-		<path d="M5.636 5.636 18.364 18.364" />
-		<path d="M18.364 5.636 5.636 18.364" />
-		<path d="M9 9 6 6" />
-		<path d="M15 15l3 3" />
-		<path d="M15 9l3-3" />
-		<path d="M9 15 6 18" />
-		<path d="M4 12h3" />
-		<path d="M17 12h3" />
-		<path d="M12 4v3" />
-		<path d="M12 17v3" />
-	</svg>
+  <svg
+    bind:this={svgRef}
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+<path d="m10 20-1.25-2.5L6 18" />
+		<path d="M10 4 8.75 6.5 6 6" />
+		<path d="m14 20 1.25-2.5L18 18" />
+		<path d="m14 4 1.25 2.5L18 6" />
+		<path d="m17 21-3-6h-4" />
+		<path d="m17 3-3 6 1.5 3" />
+		<path d="M2 12h6.5L10 9" />
+		<path d="m20 10-1.5 2 1.5 2" />
+		<path d="M22 12h-6.5L14 15" />
+		<path d="m4 10 1.5 2L4 14" />
+		<path d="m7 21 3-6-1.5-3" />
+		<path d="m7 3 3 6h4" />
+  </svg>
 </div>

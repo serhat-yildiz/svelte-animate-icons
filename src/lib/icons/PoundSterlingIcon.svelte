@@ -21,32 +21,32 @@
 		[key: string]: any;
 	}
 	
-	let {
-		size = 28,
-		class: className,
+	let { 
+		size = 28, 
+		class: className, 
 		triggers = { hover: true },
 		animationState = 'idle',
 		autoPlay = false,
 		loop = false,
-		duration = 1500,
+		duration = 2000,
 		onAnimationStart,
 		onAnimationEnd,
-		...restProps
+		...restProps 
 	}: Props = $props();
+	
+	export interface IconHandle {
+		startAnimation: () => void;
+		stopAnimation: () => void;
+		toggleAnimation: () => void;
+		setAnimationState: (newState: string) => void;
+		readonly isAnimating: boolean;
+	}
 	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
+	let currentAnimation: Animation | null = null;
 	let currentState = $state(animationState);
-	let currentAnimations: Animation[] = [];
-	
-	
-	let curveEl: SVGPathElement;
-	let midEl: SVGPathElement;
-	let vertEl: SVGPathElement;
-	let baseEl: SVGPathElement;
-	
-	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
 			stopAnimation(); 
@@ -54,129 +54,51 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			
-			if (svgRef) {
-				const svgAnimation = svgRef.animate([
-					{ transform: 'scale(1) rotate(0deg) translateY(0px)' },
-					{ transform: 'scale(1.06) rotate(-2deg) translateY(-1px)' },
-					{ transform: 'scale(1) rotate(2deg) translateY(0px)' },
-					{ transform: 'scale(1) rotate(0deg) translateY(0px)' }
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = '80 80';
+				path.style.strokeDashoffset = '80';
+				path.style.opacity = '0.6';
+				
+				
+				currentAnimation = path.animate([
+					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
 				], {
-					duration: Math.floor(duration * 0.8),
+					duration: duration,
 					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 					easing: 'ease-in-out'
 				});
-				currentAnimations.push(svgAnimation);
-			}
-			
-			
-			if (curveEl) {
-				setTimeout(() => {
-					const curveLength = curveEl.getTotalLength();
-					curveEl.style.strokeDasharray = curveLength + ' ' + curveLength;
-					curveEl.style.strokeDashoffset = curveLength.toString();
-					
-					const curveAnimation = curveEl.animate([
-						{ strokeDashoffset: curveLength, opacity: '0.7' },
-						{ strokeDashoffset: '0', opacity: '1' }
-					], {
-						duration: Math.floor(duration * 0.4),
-						iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-						easing: 'ease-in-out'
-					});
-					currentAnimations.push(curveAnimation);
-				}, Math.floor(duration * 0.04));
-			}
-			
-			
-			if (midEl) {
-				setTimeout(() => {
-					const midLength = midEl.getTotalLength();
-					midEl.style.strokeDasharray = midLength + ' ' + midLength;
-					midEl.style.strokeDashoffset = midLength.toString();
-					
-					const midAnimation = midEl.animate([
-						{ strokeDashoffset: midLength, opacity: '0.7' },
-						{ strokeDashoffset: '0', opacity: '1' }
-					], {
-						duration: Math.floor(duration * 0.37),
-						iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-						easing: 'ease-in-out'
-					});
-					currentAnimations.push(midAnimation);
-				}, Math.floor(duration * 0.11));
-			}
-			
-			
-			if (vertEl) {
-				setTimeout(() => {
-					const vertLength = vertEl.getTotalLength();
-					vertEl.style.strokeDasharray = vertLength + ' ' + vertLength;
-					vertEl.style.strokeDashoffset = vertLength.toString();
-					
-					const vertAnimation = vertEl.animate([
-						{ strokeDashoffset: vertLength, opacity: '0.8' },
-						{ strokeDashoffset: '0', opacity: '1' }
-					], {
-						duration: Math.floor(duration * 0.37),
-						iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-						easing: 'ease-in-out'
-					});
-					currentAnimations.push(vertAnimation);
-				}, Math.floor(duration * 0.17));
-			}
-			
-			
-			if (baseEl) {
-				setTimeout(() => {
-					const baseLength = baseEl.getTotalLength();
-					baseEl.style.strokeDasharray = baseLength + ' ' + baseLength;
-					baseEl.style.strokeDashoffset = baseLength.toString();
-					
-					const baseAnimation = baseEl.animate([
-						{ strokeDashoffset: baseLength, opacity: '0.8' },
-						{ strokeDashoffset: '0', opacity: '1' }
-					], {
-						duration: Math.floor(duration * 0.37),
-						iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-						easing: 'ease-in-out'
-					});
-					currentAnimations.push(baseAnimation);
-					
-					
-					baseAnimation.addEventListener('finish', () => {
-						if (!loop && !autoPlay && currentState !== 'loading') {
-							if (currentAnimations.every(anim => anim.playState === 'finished')) {
-								stopAnimation();
-							}
-						}
-						onAnimationEnd?.();
-					});
-				}, Math.floor(duration * 0.24));
+				
+				
+				currentAnimation.addEventListener('finish', () => {
+					if (!loop && !autoPlay && currentState !== 'loading') {
+						stopAnimation();
+					}
+					onAnimationEnd?.();
+				});
 			}
 		}
 	}
 	
 	function stopAnimation() {
-		currentAnimations.forEach(animation => {
-			animation.cancel();
-		});
-		currentAnimations = [];
+		if (currentAnimation) {
+			currentAnimation.cancel();
+			currentAnimation = null;
+		}
 		
 		if (svgRef) {
 			isAnimating = false;
 			
-			
-			svgRef.style.transform = 'scale(1) rotate(0deg) translateY(0px)';
-			
-			
-			[curveEl, midEl, vertEl, baseEl].forEach(el => {
-				if (el) {
-					el.style.strokeDasharray = 'none';
-					el.style.strokeDashoffset = '';
-					el.style.opacity = '1';
-				}
-			});
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = 'none';
+				path.style.strokeDashoffset = '';
+				path.style.opacity = '1';
+			}
 		}
 	}
 	
@@ -195,10 +117,10 @@
 		switch (newState) {
 			case 'active':
 			case 'loading':
-			case 'success':
 				startAnimation();
 				break;
 			case 'idle':
+			case 'success':
 			case 'error':
 			default:
 				stopAnimation();
@@ -273,46 +195,43 @@
 		setAnimationState(state);
 	}
 	
-	export function getStatus() {
+	export function getIconStatus() {
 		return {
 			isAnimating,
 			currentState
 		};
 	}
 </script>
-
 <div 
-	bind:this={containerRef}
-	class={clsx('inline-flex', className)}
-	onmouseenter={handleMouseEnter}
-	onmouseleave={handleMouseLeave}
-	onclick={handleClick}
-	onfocus={triggers.focus ? handleFocus : undefined}
-	onblur={triggers.focus ? handleBlur : undefined}
-	tabindex={triggers.focus ? 0 : undefined}
-	role={triggers.click || triggers.focus ? "button" : undefined}
-	{...restProps}
+  bind:this={containerRef}
+  class={clsx('inline-flex', className)}
+  onmouseenter={handleMouseEnter}
+  onmouseleave={handleMouseLeave}
+  onclick={handleClick}
+  onfocus={handleFocus}
+  onblur={handleBlur}
+  role={triggers.click || triggers.focus ? 'button' : 'img'}
+  aria-label="pound-sterling-icon icon"
+  {...restProps}
 >
-	<svg
-		bind:this={svgRef}
-		xmlns="http://www.w3.org/2000/svg"
-		width={size}
-		height={size}
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-		class="lucide lucide-pound-sterling-icon lucide-pound-sterling"
-	>
-		<g opacity="0.35">
+  <svg
+    bind:this={svgRef}
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+<g opacity="0.35">
 			<path d="M18 7c0-5.333-8-5.333-8 0" />
 			<path d="M10 7v14" />
 			<path d="M6 21h12" />
 			<path d="M6 13h10" />
 		</g>
-
 		<path
 			bind:this={curveEl}
 			d="M18 7c0-5.333-8-5.333-8 0"
@@ -329,5 +248,5 @@
 			bind:this={baseEl}
 			d="M6 21h12"
 		/>
-	</svg>
+  </svg>
 </div>

@@ -21,165 +21,213 @@
 		[key: string]: any;
 	}
 	
-	let {
-		size = 28,
-		class: className,
+	let { 
+		size = 28, 
+		class: className, 
 		triggers = { hover: true },
 		animationState = 'idle',
 		autoPlay = false,
 		loop = false,
-		duration = 1600,
+		duration = 2000,
 		onAnimationStart,
 		onAnimationEnd,
-		...restProps
+		...restProps 
 	}: Props = $props();
+	
+	export interface IconHandle {
+		startAnimation: () => void;
+		stopAnimation: () => void;
+		toggleAnimation: () => void;
+		setAnimationState: (newState: string) => void;
+		readonly isAnimating: boolean;
+	}
 	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
+	let currentAnimation: Animation | null = null;
 	let currentState = $state(animationState);
-	let currentAnimations: Animation[] = [];
-	
-	
-	let wheel1El: SVGCircleElement;
-	let wheel2El: SVGCircleElement;
-	let cartEl: SVGPathElement;
-	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
-			stopAnimation();
+			stopAnimation(); 
 			
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			
-			if (cartEl) {
-				const cartAnimation = cartEl.animate([
-					{ transform: 'translateY(0px) rotate(0deg)' },
-					{ transform: 'translateY(-3px) rotate(-4deg)' },
-					{ transform: 'translateY(0px) rotate(3deg)' },
-					{ transform: 'translateY(-1px) rotate(-2deg)' },
-					{ transform: 'translateY(0px) rotate(0deg)' }
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = '80 80';
+				path.style.strokeDashoffset = '80';
+				path.style.opacity = '0.6';
+				
+				
+				currentAnimation = path.animate([
+					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
 				], {
-					duration: Math.floor(duration * 0.94),
+					duration: duration,
 					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 					easing: 'ease-in-out'
 				});
-				currentAnimations.push(cartAnimation);
-			}
-			
-			
-			[wheel1El, wheel2El].forEach((wheel, index) => {
-				if (wheel) {
-					const wheelAnimation = wheel.animate([
-						{ transform: 'rotate(0deg)' },
-						{ transform: 'rotate(360deg)' }
-					], {
-						duration: Math.floor(duration * 0.75),
-						iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-						easing: 'linear'
-					});
-					currentAnimations.push(wheelAnimation);
-					
-					if (index === 1) {
-						wheelAnimation.addEventListener('finish', () => {
-							if (!loop && !autoPlay && currentState !== 'loading') {
-								if (currentAnimations.every(anim => anim.playState === 'finished')) {
-									stopAnimation();
-								}
-							}
-							onAnimationEnd?.();
-						});
+				
+				
+				currentAnimation.addEventListener('finish', () => {
+					if (!loop && !autoPlay && currentState !== 'loading') {
+						stopAnimation();
 					}
-				}
-			});
+					onAnimationEnd?.();
+				});
+			}
 		}
 	}
 	
 	function stopAnimation() {
-		currentAnimations.forEach(animation => animation.cancel());
-		currentAnimations = [];
+		if (currentAnimation) {
+			currentAnimation.cancel();
+			currentAnimation = null;
+		}
 		
 		if (svgRef) {
 			isAnimating = false;
 			
-			if (cartEl) cartEl.style.transform = 'translateY(0px) rotate(0deg)';
-			[wheel1El, wheel2El].forEach(wheel => {
-				if (wheel) wheel.style.transform = 'rotate(0deg)';
-			});
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = 'none';
+				path.style.strokeDashoffset = '';
+				path.style.opacity = '1';
+			}
 		}
 	}
 	
 	function toggleAnimation() {
-		if (isAnimating) stopAnimation();
-		else startAnimation();
+		if (isAnimating) {
+			stopAnimation();
+		} else {
+			startAnimation();
+		}
 	}
 	
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
+		
+		
 		switch (newState) {
-			case 'active': case 'loading': case 'success':
-				startAnimation(); break;
-			default: stopAnimation(); break;
+			case 'active':
+			case 'loading':
+				startAnimation();
+				break;
+			case 'idle':
+			case 'success':
+			case 'error':
+			default:
+				stopAnimation();
+				break;
 		}
 	}
 	
+	
 	function handleMouseEnter() {
-		if (triggers.hover && !triggers.custom) startAnimation();
+		if (triggers.hover && !triggers.custom) {
+			startAnimation();
+		}
 	}
 	
 	function handleMouseLeave() {
-		if (triggers.hover && !triggers.custom) stopAnimation();
+		if (triggers.hover && !triggers.custom) {
+			stopAnimation();
+		}
 	}
 	
 	function handleClick() {
-		if (triggers.click) toggleAnimation();
+		if (triggers.click) {
+			toggleAnimation();
+		}
 	}
 	
 	function handleFocus() {
-		if (triggers.focus) startAnimation();
+		if (triggers.focus) {
+			startAnimation();
+		}
 	}
 	
 	function handleBlur() {
-		if (triggers.focus) stopAnimation();
+		if (triggers.focus) {
+			stopAnimation();
+		}
 	}
 	
-	$effect(() => { if (svgRef) setAnimationState(animationState); });
-	$effect(() => { if (autoPlay && svgRef) startAnimation(); return () => stopAnimation(); });
 	
-	export function start() { startAnimation(); }
-	export function stop() { stopAnimation(); }
-	export function toggle() { toggleAnimation(); }
-	export function setState(state: string) { setAnimationState(state); }
-	export function getStatus() { return { isAnimating, currentState }; }
+	$effect(() => {
+		if (svgRef) {
+			setAnimationState(animationState);
+		}
+	});
+	
+	
+	$effect(() => {
+		if (autoPlay && svgRef) {
+			startAnimation();
+		}
+		
+		
+		return () => {
+			stopAnimation();
+		};
+	});
+	
+	
+	export function start() {
+		startAnimation();
+	}
+	
+	export function stop() {
+		stopAnimation();
+	}
+	
+	export function toggle() {
+		toggleAnimation();
+	}
+	
+	export function setState(state: string) {
+		setAnimationState(state);
+	}
+	
+	export function getIconStatus() {
+		return {
+			isAnimating,
+			currentState
+		};
+	}
 </script>
-
 <div 
-	bind:this={containerRef}
-	class={clsx('inline-flex', className)}
-	onmouseenter={handleMouseEnter}
-	onmouseleave={handleMouseLeave}
-	onclick={handleClick}
-	onfocus={triggers.focus ? handleFocus : undefined}
-	onblur={triggers.focus ? handleBlur : undefined}
-	tabindex={triggers.focus ? 0 : undefined}
-	role={triggers.click || triggers.focus ? "button" : undefined}
-	{...restProps}
+  bind:this={containerRef}
+  class={clsx('inline-flex', className)}
+  onmouseenter={handleMouseEnter}
+  onmouseleave={handleMouseLeave}
+  onclick={handleClick}
+  onfocus={handleFocus}
+  onblur={handleBlur}
+  role={triggers.click || triggers.focus ? 'button' : 'img'}
+  aria-label="shopping-cart-icon icon"
+  {...restProps}
 >
-	<svg
-		bind:this={svgRef}
-		xmlns="http://www.w3.org/2000/svg"
-		width={size}
-		height={size}
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-	>
-		<circle bind:this={wheel1El} cx="8" cy="21" r="1" />
-		<circle bind:this={wheel2El} cx="19" cy="21" r="1" />
-		<path bind:this={cartEl} d="M4 1h2.5L9 7h12.5l-1.5 6H8L6 4H4z" />
-	</svg>
+  <svg
+    bind:this={svgRef}
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+<path
+			d="M6.29977 5H21L19 12H7.37671M20 16H8L6 3H3M9 20C9 20.5523 8.55228 21 8 21C7.44772 21 7 20.5523 7 20C7 19.4477 7.44772 19 8 19C8.55228 19 9 19.4477 9 20ZM20 20C20 20.5523 19.5523 21 19 21C18.4477 21 18 20.5523 18 20C18 19.4477 18.4477 19 19 19C19.5523 19 20 19.4477 20 20Z"
+		/>
+  </svg>
 </div>

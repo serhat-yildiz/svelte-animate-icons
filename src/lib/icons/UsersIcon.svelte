@@ -1,170 +1,217 @@
 <script lang="ts">
-  import { clsx } from 'clsx';
-
-  interface AnimationTriggers {
-    hover?: boolean;
-    click?: boolean;
-    focus?: boolean;
-    custom?: boolean;
-  }
-
-  interface Props {
-    size?: number;
-    class?: string;
-    triggers?: AnimationTriggers;
-    animationState?: 'idle' | 'active' | 'loading' | 'success' | 'error';
-    autoPlay?: boolean;
-    loop?: boolean;
-    duration?: number;
-    onAnimationStart?: () => void;
-    onAnimationEnd?: () => void;
-    [key: string]: any;
-  }
-
-  let {
-    size = 28,
-    class: className,
-    triggers = { hover: true },
-    animationState = 'idle',
-    autoPlay = false,
-    loop = false,
-    duration = 2000,
-    onAnimationStart,
-    onAnimationEnd,
-    ...restProps
-  }: Props = $props();
-
-  let containerRef: HTMLDivElement;
-  let svgRef: SVGSVGElement;
-
-  
-  let arcEl: SVGPathElement;
-  let headEl: SVGCircleElement;
-  let sideArc1El: SVGPathElement;
-  let sideArc2El: SVGPathElement;
-
-  let isAnimating = $state(false);
-  let currentAnimation: Animation | null = null;
-  let currentState = $state(animationState);
-
-  function startAnimation() {
-    if (isAnimating) return;
-    isAnimating = true;
-    onAnimationStart?.();
-
-    
-    if (arcEl) {
-      arcEl.animate(
-        [
-          { strokeDashoffset: '50', opacity: '0.3' },
-          { strokeDashoffset: '0', opacity: '1' }
-        ],
-        { duration: 700, easing: 'ease-in-out' }
-      );
-    }
-
-    
-    if (headEl) {
-      headEl.animate(
-        [
-          { transform: 'scale(0.6)', opacity: '0' },
-          { transform: 'scale(1.2)', opacity: '1' },
-          { transform: 'scale(1)', opacity: '1' }
-        ],
-        { duration: 600, easing: 'ease-out' }
-      );
-    }
-
-    
-    [sideArc1El, sideArc2El].forEach((arc) => {
-      if (arc) {
-        setTimeout(() => {
-          arc.animate(
-            [
-              { strokeDashoffset: '40', opacity: '0.2' },
-              { strokeDashoffset: '0', opacity: '1' }
-            ],
-            { duration: 700, easing: 'ease-in-out' }
-          );
-        }, 300);
-      }
-    });
-
-    setTimeout(() => {
-      isAnimating = false;
-      onAnimationEnd?.();
-    }, 1000);
-  }
-
-  function stopAnimation() {
-    if (currentAnimation) {
-      currentAnimation.cancel();
-      currentAnimation = null;
-    }
-    isAnimating = false;
-  }
-
-  function toggleAnimation() {
-    if (isAnimating) stopAnimation();
-    else startAnimation();
-  }
-
-  function setAnimationState(newState: string) {
-    currentState = newState as any;
-    switch (newState) {
-      case 'active':
-      case 'loading':
-        startAnimation();
-        break;
-      default:
-        stopAnimation();
-        break;
-    }
-  }
-
-  function handleMouseEnter() {
-    if (triggers.hover && !triggers.custom) startAnimation();
-  }
-  function handleMouseLeave() {
-    if (triggers.hover && !triggers.custom) stopAnimation();
-  }
-  function handleClick() {
-    if (triggers.click) toggleAnimation();
-  }
-  function handleFocus() {
-    if (triggers.focus) startAnimation();
-  }
-  function handleBlur() {
-    if (triggers.focus) stopAnimation();
-  }
-
-  $effect(() => {
-    if (svgRef) setAnimationState(animationState);
-  });
-
-  $effect(() => {
-    if (autoPlay && svgRef) startAnimation();
-    return () => stopAnimation();
-  });
-
-  
-  export function start() { startAnimation(); }
-  export function stop() { stopAnimation(); }
-  export function toggle() { toggleAnimation(); }
-  export function setState(state: string) { setAnimationState(state); }
-  export function getStatus() { return { isAnimating, currentState }; }
+	import { clsx } from 'clsx';
+	
+	interface AnimationTriggers {
+		hover?: boolean;
+		click?: boolean;
+		focus?: boolean;
+		custom?: boolean;
+	}
+	
+	interface Props {
+		size?: number;
+		class?: string;
+		triggers?: AnimationTriggers;
+		animationState?: 'idle' | 'active' | 'loading' | 'success' | 'error';
+		autoPlay?: boolean;
+		loop?: boolean;
+		duration?: number;
+		onAnimationStart?: () => void;
+		onAnimationEnd?: () => void;
+		[key: string]: any;
+	}
+	
+	let { 
+		size = 28, 
+		class: className, 
+		triggers = { hover: true },
+		animationState = 'idle',
+		autoPlay = false,
+		loop = false,
+		duration = 2000,
+		onAnimationStart,
+		onAnimationEnd,
+		...restProps 
+	}: Props = $props();
+	
+	export interface IconHandle {
+		startAnimation: () => void;
+		stopAnimation: () => void;
+		toggleAnimation: () => void;
+		setAnimationState: (newState: string) => void;
+		readonly isAnimating: boolean;
+	}
+	
+	let containerRef: HTMLDivElement;
+	let svgRef: SVGSVGElement;
+	let isAnimating = $state(false);
+	let currentAnimation: Animation | null = null;
+	let currentState = $state(animationState);
+	function startAnimation() {
+		if (svgRef && !isAnimating) {
+			stopAnimation(); 
+			
+			isAnimating = true;
+			onAnimationStart?.();
+			
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = '80 80';
+				path.style.strokeDashoffset = '80';
+				path.style.opacity = '0.6';
+				
+				
+				currentAnimation = path.animate([
+					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
+				], {
+					duration: duration,
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
+					easing: 'ease-in-out'
+				});
+				
+				
+				currentAnimation.addEventListener('finish', () => {
+					if (!loop && !autoPlay && currentState !== 'loading') {
+						stopAnimation();
+					}
+					onAnimationEnd?.();
+				});
+			}
+		}
+	}
+	
+	function stopAnimation() {
+		if (currentAnimation) {
+			currentAnimation.cancel();
+			currentAnimation = null;
+		}
+		
+		if (svgRef) {
+			isAnimating = false;
+			
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = 'none';
+				path.style.strokeDashoffset = '';
+				path.style.opacity = '1';
+			}
+		}
+	}
+	
+	function toggleAnimation() {
+		if (isAnimating) {
+			stopAnimation();
+		} else {
+			startAnimation();
+		}
+	}
+	
+	function setAnimationState(newState: string) {
+		currentState = newState as any;
+		
+		
+		switch (newState) {
+			case 'active':
+			case 'loading':
+				startAnimation();
+				break;
+			case 'idle':
+			case 'success':
+			case 'error':
+			default:
+				stopAnimation();
+				break;
+		}
+	}
+	
+	
+	function handleMouseEnter() {
+		if (triggers.hover && !triggers.custom) {
+			startAnimation();
+		}
+	}
+	
+	function handleMouseLeave() {
+		if (triggers.hover && !triggers.custom) {
+			stopAnimation();
+		}
+	}
+	
+	function handleClick() {
+		if (triggers.click) {
+			toggleAnimation();
+		}
+	}
+	
+	function handleFocus() {
+		if (triggers.focus) {
+			startAnimation();
+		}
+	}
+	
+	function handleBlur() {
+		if (triggers.focus) {
+			stopAnimation();
+		}
+	}
+	
+	
+	$effect(() => {
+		if (svgRef) {
+			setAnimationState(animationState);
+		}
+	});
+	
+	
+	$effect(() => {
+		if (autoPlay && svgRef) {
+			startAnimation();
+		}
+		
+		
+		return () => {
+			stopAnimation();
+		};
+	});
+	
+	
+	export function start() {
+		startAnimation();
+	}
+	
+	export function stop() {
+		stopAnimation();
+	}
+	
+	export function toggle() {
+		toggleAnimation();
+	}
+	
+	export function setState(state: string) {
+		setAnimationState(state);
+	}
+	
+	export function getIconStatus() {
+		return {
+			isAnimating,
+			currentState
+		};
+	}
 </script>
-
-<div
+<div 
   bind:this={containerRef}
-  class={clsx("inline-flex", className)}
+  class={clsx('inline-flex', className)}
   onmouseenter={handleMouseEnter}
   onmouseleave={handleMouseLeave}
   onclick={handleClick}
-  onfocus={triggers.focus ? handleFocus : undefined}
-  onblur={triggers.focus ? handleBlur : undefined}
-  tabindex={triggers.focus ? 0 : -1}
-  role={triggers.click || triggers.focus ? "button" : undefined}
+  onfocus={handleFocus}
+  onblur={handleBlur}
+  role={triggers.click || triggers.focus ? 'button' : 'img'}
+  aria-label="users-icon icon"
   {...restProps}
 >
   <svg
@@ -178,26 +225,10 @@
     stroke-width="2"
     stroke-linecap="round"
     stroke-linejoin="round"
-    class="lucide lucide-users"
   >
-    <path
-      bind:this={arcEl}
-      d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
-      stroke-dasharray="50"
-      stroke-dashoffset="50"
-    />
-    <path
-      bind:this={sideArc1El}
-      d="M16 3.128a4 4 0 0 1 0 7.744"
-      stroke-dasharray="40"
-      stroke-dashoffset="40"
-    />
-    <path
-      bind:this={sideArc2El}
-      d="M22 21v-2a4 4 0 0 0-3-3.87"
-      stroke-dasharray="40"
-      stroke-dashoffset="40"
-    />
-    <circle bind:this={headEl} cx="9" cy="7" r="4" />
+<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+		<circle cx="9" cy="7" r="4" />
+		<path d="M22 21v-2a4 4 0 0 0-3-3.87" class="users-path" />
+		<path d="M16 3.13a4 4 0 0 1 0 7.75" class="users-path" />
   </svg>
 </div>

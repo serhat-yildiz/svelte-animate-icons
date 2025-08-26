@@ -34,7 +34,7 @@
 		...restProps 
 	}: Props = $props();
 	
-	export interface ActivityIconHandle {
+	export interface IconHandle {
 		startAnimation: () => void;
 		stopAnimation: () => void;
 		toggleAnimation: () => void;
@@ -47,8 +47,6 @@
 	let isAnimating = $state(false);
 	let currentAnimation: Animation | null = null;
 	let currentState = $state(animationState);
-
-
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
 			stopAnimation(); 
@@ -197,14 +195,13 @@
 		setAnimationState(state);
 	}
 	
-	export function getStatus() {
+	export function getIconStatus() {
 		return {
 			isAnimating,
 			currentState
 		};
 	}
 </script>
-
 <div 
 	bind:this={containerRef}
 	class={clsx('inline-flex', className)}
@@ -213,7 +210,6 @@
 	onclick={handleClick}
 	onfocus={triggers.focus ? handleFocus : undefined}
 	onblur={triggers.focus ? handleBlur : undefined}
-	tabindex={triggers.focus ? 0 : -1}
 	role={triggers.click || triggers.focus ? "button" : undefined}
 	{...restProps}
 >

@@ -34,57 +34,71 @@
 		...restProps 
 	}: Props = $props();
 	
+	export interface IconHandle {
+		startAnimation: () => void;
+		stopAnimation: () => void;
+		toggleAnimation: () => void;
+		setAnimationState: (newState: string) => void;
+		readonly isAnimating: boolean;
+	}
+	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
-	let currentAnimations: Animation[] = [];
+	let currentAnimation: Animation | null = null;
 	let currentState = $state(animationState);
-	
-	
 	function startAnimation() {
-		if (svgRef) {
+		if (svgRef && !isAnimating) {
+			stopAnimation(); 
+			
 			isAnimating = true;
-
-
-			svgRef.animate([
-				{ transform: 'scale(1) translateY(0px)' },
-				{ transform: 'scale(1.05) translateY(-2px)' },
-				{ transform: 'scale(0.95) translateY(0px)' },
-				{ transform: 'scale(1) translateY(0px)' }
-			], {
-				duration: 1200,
-				easing: 'ease-in-out'
-			});
-
-
-			const minusLine = svgRef.querySelector('line');
-			if (minusLine) {
-				minusLine.animate([
-					{ transform: 'scaleX(1)', opacity: '1' },
-					{ transform: 'scaleX(0.7)', opacity: '0.6' },
-					{ transform: 'scaleX(1.2)', opacity: '1' },
-					{ transform: 'scaleX(1)', opacity: '1' }
+			onAnimationStart?.();
+			
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = '80 80';
+				path.style.strokeDashoffset = '80';
+				path.style.opacity = '0.6';
+				
+				
+				currentAnimation = path.animate([
+					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
 				], {
-					duration: 800,
+					duration: duration,
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 					easing: 'ease-in-out'
+				});
+				
+				
+				currentAnimation.addEventListener('finish', () => {
+					if (!loop && !autoPlay && currentState !== 'loading') {
+						stopAnimation();
+					}
+					onAnimationEnd?.();
 				});
 			}
 		}
 	}
 	
 	function stopAnimation() {
+		if (currentAnimation) {
+			currentAnimation.cancel();
+			currentAnimation = null;
+		}
+		
 		if (svgRef) {
 			isAnimating = false;
 			
-			svgRef.getAnimations().forEach(animation => animation.cancel());
-			const minusLine = svgRef.querySelector('line');
-			if (minusLine) {
-				minusLine.getAnimations().forEach(animation => animation.cancel());
-				minusLine.style.transform = 'scaleX(1)';
-				minusLine.style.opacity = '1';
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = 'none';
+				path.style.strokeDashoffset = '';
+				path.style.opacity = '1';
 			}
-			
-			svgRef.style.transform = 'scale(1) translateY(0px)';
 		}
 	}
 	
@@ -181,39 +195,38 @@
 		setAnimationState(state);
 	}
 	
-	export function getStatus() {
+	export function getIconStatus() {
 		return {
 			isAnimating,
 			currentState
 		};
 	}
 </script>
-
 <div 
-	bind:this={containerRef}
-	class={clsx('inline-flex', className)}
-	onmouseenter={handleMouseEnter}
-	onmouseleave={handleMouseLeave}
-	onclick={handleClick}
-	onfocus={triggers.focus ? handleFocus : undefined}
-	onblur={triggers.focus ? handleBlur : undefined}
-	tabindex={triggers.focus ? 0 : -1}
-	role={triggers.click || triggers.focus ? "button" : undefined}
-	{...restProps}
+  bind:this={containerRef}
+  class={clsx('inline-flex', className)}
+  onmouseenter={handleMouseEnter}
+  onmouseleave={handleMouseLeave}
+  onclick={handleClick}
+  onfocus={handleFocus}
+  onblur={handleBlur}
+  role={triggers.click || triggers.focus ? 'button' : 'img'}
+  aria-label="bookmark-minus-icon icon"
+  {...restProps}
 >
-	<svg
-		bind:this={svgRef}
-		xmlns="http://www.w3.org/2000/svg"
-		width={size}
-		height={size}
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-	>
-		<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
+  <svg
+    bind:this={svgRef}
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
 		<line x1="15" x2="9" y1="10" y2="10" style="transform-origin: center;" />
-	</svg>
+  </svg>
 </div>

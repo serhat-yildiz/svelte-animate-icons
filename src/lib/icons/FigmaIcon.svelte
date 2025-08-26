@@ -34,7 +34,7 @@
 	  ...restProps
 	}: Props = $props();
   
-	export interface FigmaIconHandle {
+	export interface IconHandle {
 	  startAnimation: () => void;
 	  stopAnimation: () => void;
 	  toggleAnimation: () => void;
@@ -47,13 +47,13 @@
 	let isAnimating = $state(false);
 	let currentAnimations: Animation[] = [];
 	let currentState = $state(animationState);
-  
+	// Figma logo paths
 	const paths = [
-	  "M5 5.5A3.5 3.5 0 0 1 8.5 2H12v7H8.5A3.5 3.5 0 0 1 5 5.5z",
-	  "M12 2h3.5a3.5 3.5 0 1 1 0 7H12V2z",
-	  "M12 12.5a3.5 3.5 0 1 1 7 0 3.5 3.5 0 1 1-7 0z",
-	  "M5 19.5A3.5 3.5 0 0 1 8.5 16H12v3.5a3.5 3.5 0 1 1-7 0z",
-	  "M5 12.5A3.5 3.5 0 0 1 8.5 9H12v7H8.5A3.5 3.5 0 0 1 5 12.5z"
+		'M5 5.5A3.5 3.5 0 0 1 8.5 2H12v7H8.5A3.5 3.5 0 0 1 5 5.5z',
+		'M12 2h3.5a3.5 3.5 0 1 1 0 7H12V2z',
+		'M12 12.5a3.5 3.5 0 1 1 7 0 3.5 3.5 0 1 1-7 0z',
+		'M5 19.5A3.5 3.5 0 0 1 8.5 16H12v3.5a3.5 3.5 0 1 1-7 0z',
+		'M5 12.5A3.5 3.5 0 0 1 8.5 9H12v7H8.5A3.5 3.5 0 0 1 5 12.5z'
 	];
   
 	function startAnimation() {
@@ -171,18 +171,17 @@
 	export function stop() { stopAnimation(); }
 	export function toggle() { toggleAnimation(); }
 	export function setState(state: string) { setAnimationState(state); }
-	export function getStatus() { return { isAnimating, currentState }; }
+	export function getIconStatus() { return { isAnimating, currentState }; }
   </script>
   
   <div
 	bind:this={containerRef}
 	class={clsx('inline-flex', className)}
-	on:mouseenter={handleMouseEnter}
-	on:mouseleave={handleMouseLeave}
-	on:click={handleClick}
-	on:focus={triggers.focus ? handleFocus : undefined}
-	on:blur={triggers.focus ? handleBlur : undefined}
-	tabindex={triggers.focus ? 0 : -1}
+	onmouseenter={handleMouseEnter}
+	onmouseleave={handleMouseLeave}
+	onclick={handleClick}
+	onfocus={triggers.focus ? handleFocus : undefined}
+	onblur={triggers.focus ? handleBlur : undefined}
 	role={triggers.click || triggers.focus ? 'button' : undefined}
 	{...restProps}
   >

@@ -34,13 +34,19 @@
 		...restProps 
 	}: Props = $props();
 	
+	export interface IconHandle {
+		startAnimation: () => void;
+		stopAnimation: () => void;
+		toggleAnimation: () => void;
+		setAnimationState: (newState: string) => void;
+		readonly isAnimating: boolean;
+	}
+	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
-	let currentAnimations: Animation[] = [];
+	let currentAnimation: Animation | null = null;
 	let currentState = $state(animationState);
-	
-	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
 			stopAnimation(); 
@@ -48,85 +54,51 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			
-			const svgAnimation = svgRef.animate([
-				{ transform: 'rotate(0deg) scale(1)' },
-				{ transform: 'rotate(-2deg) scale(1.05)' },
-				{ transform: 'rotate(2deg) scale(0.95)' },
-				{ transform: 'rotate(0deg) scale(1)' }
-			], {
-				duration: duration,
-				iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-				easing: 'cubic-bezier(0.42, 0, 0.58, 1)'
-			});
-			currentAnimations.push(svgAnimation);
-			
-			
-			const bars = svgRef.querySelectorAll('path[d*="v4"]'); 
-			bars.forEach((bar, i) => {
-				const barAnimation = bar.animate([
-					{ opacity: '0.4', transform: 'scaleY(0.6)' },
-					{ opacity: '1', transform: 'scaleY(1)' },
-					{ opacity: '0.8', transform: 'scaleY(0.8)' }
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = '80 80';
+				path.style.strokeDashoffset = '80';
+				path.style.opacity = '0.6';
+				
+				
+				currentAnimation = path.animate([
+					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
 				], {
-					duration: Math.floor(duration * 0.5),
-					delay: i * 250,
+					duration: duration,
 					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-					easing: 'cubic-bezier(0.42, 0, 0.58, 1)'
+					easing: 'ease-in-out'
 				});
-				currentAnimations.push(barAnimation);
-			});
-			
-			
-			const rect = svgRef.querySelector('rect');
-			const tip = svgRef.querySelector('path[d*="22"]'); 
-			
-			[rect, tip].forEach(element => {
-				if (element) {
-					const elementAnimation = element.animate([
-						{ opacity: '0.6' },
-						{ opacity: '1' },
-						{ opacity: '0.7' },
-						{ opacity: '1' }
-					], {
-						duration: Math.floor(duration * 0.6),
-						iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-						easing: 'cubic-bezier(0.42, 0, 0.58, 1)'
-					});
-					currentAnimations.push(elementAnimation);
-				}
-			});
-			
-			
-			const lastAnimation = currentAnimations[currentAnimations.length - 1];
-			lastAnimation?.addEventListener('finish', () => {
-				if (!loop && !autoPlay && currentState !== 'loading') {
-					if (currentAnimations.every(anim => anim.playState === 'finished')) {
+				
+				
+				currentAnimation.addEventListener('finish', () => {
+					if (!loop && !autoPlay && currentState !== 'loading') {
 						stopAnimation();
 					}
-				}
-				onAnimationEnd?.();
-			});
+					onAnimationEnd?.();
+				});
+			}
 		}
 	}
 	
 	function stopAnimation() {
-		currentAnimations.forEach(animation => {
-			animation.cancel();
-		});
-		currentAnimations = [];
+		if (currentAnimation) {
+			currentAnimation.cancel();
+			currentAnimation = null;
+		}
 		
 		if (svgRef) {
 			isAnimating = false;
 			
-			
-			const allElements = svgRef.querySelectorAll('*');
-			allElements.forEach(element => {
-				element.style.transform = '';
-				element.style.opacity = '1';
-			});
-			
-			svgRef.style.transform = 'rotate(0deg) scale(1)';
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = 'none';
+				path.style.strokeDashoffset = '';
+				path.style.opacity = '1';
+			}
 		}
 	}
 	
@@ -223,42 +195,41 @@
 		setAnimationState(state);
 	}
 	
-	export function getStatus() {
+	export function getIconStatus() {
 		return {
 			isAnimating,
 			currentState
 		};
 	}
 </script>
-
 <div 
-	bind:this={containerRef}
-	class={clsx('inline-flex', className)}
-	onmouseenter={handleMouseEnter}
-	onmouseleave={handleMouseLeave}
-	onclick={handleClick}
-	onfocus={triggers.focus ? handleFocus : undefined}
-	onblur={triggers.focus ? handleBlur : undefined}
-	tabindex={triggers.focus ? 0 : -1}
-	role={triggers.click || triggers.focus ? "button" : undefined}
-	{...restProps}
+  bind:this={containerRef}
+  class={clsx('inline-flex', className)}
+  onmouseenter={handleMouseEnter}
+  onmouseleave={handleMouseLeave}
+  onclick={handleClick}
+  onfocus={handleFocus}
+  onblur={handleBlur}
+  role={triggers.click || triggers.focus ? 'button' : 'img'}
+  aria-label="battery-full-icon icon"
+  {...restProps}
 >
-	<svg
-		bind:this={svgRef}
-		xmlns="http://www.w3.org/2000/svg"
-		width={size}
-		height={size}
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-	>
-		<path d="M10 10v4" style="transform-origin: center;" />
-		<path d="M14 10v4" style="transform-origin: center;" />
-		<path d="M6 10v4" style="transform-origin: center;" />
-		<rect x="2" y="6" width="16" height="12" rx="2" />
-		<path d="M22 14v-4" />
-	</svg>
+  <svg
+    bind:this={svgRef}
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+<rect width="16" height="10" x="2" y="7" rx="2" ry="2" />
+		<line x1="22" x2="22" y1="11" y2="13" />
+		<line x1="6" x2="6" y1="11" y2="13"  />
+		<line x1="10" x2="10" y1="11" y2="13"  />
+		<line x1="14" x2="14" y1="11" y2="13"  />
+  </svg>
 </div>

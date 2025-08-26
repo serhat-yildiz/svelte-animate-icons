@@ -8,8 +8,8 @@
 	
 	let { icon }: Props = $props();
 	
-	// Icon ref for manual control
-	let iconRef: any;
+	  // Icon ref for manual control
+  let iconRef = $state<any>();
 	
 	// Card hover handlers
 	function handleCardMouseEnter() {
@@ -55,16 +55,18 @@
 	];
 </script>
 
-<div class="icon-card glass" onmouseenter={handleCardMouseEnter} onmouseleave={handleCardMouseLeave}>
+<div class="icon-card glass" role="button" tabindex="0" onmouseenter={handleCardMouseEnter} onmouseleave={handleCardMouseLeave}>
 	<div class="card-header">
 		<!-- Icon Preview -->
 		<div class="icon-preview">
-			<svelte:component 
-				this={icon.component}
-				bind:this={iconRef}
-				size={40} 
-				triggers={{ custom: true }}
-			/>
+			{#if icon.component}
+				{@const IconComponent = icon.component}
+				<IconComponent 
+					bind:this={iconRef}
+					size={40} 
+					triggers={{ custom: true }}
+				/>
+			{/if}
 		</div>
 		
 		<!-- Icon Info -->
@@ -278,11 +280,6 @@
 		
 		.copy-actions {
 			grid-template-columns: 1fr;
-		}
-		
-		.control-btn {
-			padding: var(--space-xs) var(--space-sm);
-			font-size: 0.75rem;
 		}
 	}
 </style>

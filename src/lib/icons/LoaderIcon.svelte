@@ -21,26 +21,32 @@
 		[key: string]: any;
 	}
 	
-	let {
-		size = 28,
-		class: className,
+	let { 
+		size = 28, 
+		class: className, 
 		triggers = { hover: true },
 		animationState = 'idle',
 		autoPlay = false,
 		loop = false,
-		duration = 1000,
+		duration = 2000,
 		onAnimationStart,
 		onAnimationEnd,
-		...restProps
+		...restProps 
 	}: Props = $props();
+	
+	export interface IconHandle {
+		startAnimation: () => void;
+		stopAnimation: () => void;
+		toggleAnimation: () => void;
+		setAnimationState: (newState: string) => void;
+		readonly isAnimating: boolean;
+	}
 	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
+	let currentAnimation: Animation | null = null;
 	let currentState = $state(animationState);
-	let currentAnimations: Animation[] = [];
-  
-	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
 			stopAnimation(); 
@@ -48,36 +54,28 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			
-			if (svgRef) {
-				const rotationAnimation = svgRef.animate([
-					{ transform: 'rotate(0deg)' },
-					{ transform: 'rotate(360deg)' }
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = '80 80';
+				path.style.strokeDashoffset = '80';
+				path.style.opacity = '0.6';
+				
+				
+				currentAnimation = path.animate([
+					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
 				], {
 					duration: duration,
 					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-					easing: 'linear'
+					easing: 'ease-in-out'
 				});
-				currentAnimations.push(rotationAnimation);
 				
 				
-				const scaleAnimation = svgRef.animate([
-					{ transform: 'scale(1)' },
-					{ transform: 'scale(1.1)' },
-					{ transform: 'scale(1)' }
-				], {
-					duration: Math.floor(duration * 0.6),
-					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-					direction: 'alternate'
-				});
-				currentAnimations.push(scaleAnimation);
-				
-				
-				rotationAnimation.addEventListener('finish', () => {
+				currentAnimation.addEventListener('finish', () => {
 					if (!loop && !autoPlay && currentState !== 'loading') {
-						if (currentAnimations.every(anim => anim.playState === 'finished')) {
-							stopAnimation();
-						}
+						stopAnimation();
 					}
 					onAnimationEnd?.();
 				});
@@ -86,14 +84,21 @@
 	}
 	
 	function stopAnimation() {
-		currentAnimations.forEach(animation => {
-			animation.cancel();
-		});
-		currentAnimations = [];
+		if (currentAnimation) {
+			currentAnimation.cancel();
+			currentAnimation = null;
+		}
 		
 		if (svgRef) {
 			isAnimating = false;
-			svgRef.style.transform = 'rotate(0deg) scale(1)';
+			
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = 'none';
+				path.style.strokeDashoffset = '';
+				path.style.opacity = '1';
+			}
 		}
 	}
 	
@@ -112,10 +117,10 @@
 		switch (newState) {
 			case 'active':
 			case 'loading':
-			case 'success':
 				startAnimation();
 				break;
 			case 'idle':
+			case 'success':
 			case 'error':
 			default:
 				stopAnimation();
@@ -190,39 +195,38 @@
 		setAnimationState(state);
 	}
 	
-	export function getStatus() {
+	export function getIconStatus() {
 		return {
 			isAnimating,
 			currentState
 		};
 	}
 </script>
-
 <div 
-	bind:this={containerRef}
-	class={clsx('inline-flex', className)}
-	onmouseenter={handleMouseEnter}
-	onmouseleave={handleMouseLeave}
-	onclick={handleClick}
-	onfocus={triggers.focus ? handleFocus : undefined}
-	onblur={triggers.focus ? handleBlur : undefined}
-	tabindex={triggers.focus ? 0 : undefined}
-	role={triggers.click || triggers.focus ? "button" : undefined}
-	{...restProps}
+  bind:this={containerRef}
+  class={clsx('inline-flex', className)}
+  onmouseenter={handleMouseEnter}
+  onmouseleave={handleMouseLeave}
+  onclick={handleClick}
+  onfocus={handleFocus}
+  onblur={handleBlur}
+  role={triggers.click || triggers.focus ? 'button' : 'img'}
+  aria-label="loader-icon icon"
+  {...restProps}
 >
-	<svg
-		bind:this={svgRef}
-		xmlns="http://www.w3.org/2000/svg"
-		width={size}
-		height={size}
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-	>
-		<path d="M12 2v4" />
+  <svg
+    bind:this={svgRef}
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+<path d="M12 2v4" />
 		<path d="m16.2 7.8 2.9-2.9" />
 		<path d="M18 12h4" />
 		<path d="m16.2 16.2 2.9 2.9" />
@@ -230,5 +234,5 @@
 		<path d="m4.9 19.1 2.9-2.9" />
 		<path d="M2 12h4" />
 		<path d="m4.9 4.9 2.9 2.9" />
-	</svg>
+  </svg>
 </div>

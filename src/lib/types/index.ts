@@ -1,4 +1,11 @@
 // Animation system types
+export interface AnimationTriggers {
+	hover?: boolean;
+	click?: boolean;
+	focus?: boolean;
+	custom?: boolean;
+}
+
 export interface AnimationDefinition {
 	keyframes: Keyframe[];
 	options: KeyframeAnimationOptions;

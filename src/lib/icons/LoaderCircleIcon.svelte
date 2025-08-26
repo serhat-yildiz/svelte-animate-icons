@@ -21,26 +21,32 @@
 		[key: string]: any;
 	}
 	
-	let {
-		size = 28,
-		class: className,
+	let { 
+		size = 28, 
+		class: className, 
 		triggers = { hover: true },
 		animationState = 'idle',
 		autoPlay = false,
 		loop = false,
-		duration = 1000,
+		duration = 2000,
 		onAnimationStart,
 		onAnimationEnd,
-		...restProps
+		...restProps 
 	}: Props = $props();
+	
+	export interface IconHandle {
+		startAnimation: () => void;
+		stopAnimation: () => void;
+		toggleAnimation: () => void;
+		setAnimationState: (newState: string) => void;
+		readonly isAnimating: boolean;
+	}
 	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
+	let currentAnimation: Animation | null = null;
 	let currentState = $state(animationState);
-	let currentAnimations: Animation[] = [];
-  
-	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
 			stopAnimation(); 
@@ -48,20 +54,26 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			
-			if (svgRef) {
-				const rotationAnimation = svgRef.animate([
-					{ transform: 'rotate(0deg)' },
-					{ transform: 'rotate(360deg)' }
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = '80 80';
+				path.style.strokeDashoffset = '80';
+				path.style.opacity = '0.6';
+				
+				
+				currentAnimation = path.animate([
+					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
 				], {
 					duration: duration,
 					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-					easing: 'linear'
+					easing: 'ease-in-out'
 				});
-				currentAnimations.push(rotationAnimation);
 				
 				
-				rotationAnimation.addEventListener('finish', () => {
+				currentAnimation.addEventListener('finish', () => {
 					if (!loop && !autoPlay && currentState !== 'loading') {
 						stopAnimation();
 					}
@@ -72,14 +84,21 @@
 	}
 	
 	function stopAnimation() {
-		currentAnimations.forEach(animation => {
-			animation.cancel();
-		});
-		currentAnimations = [];
+		if (currentAnimation) {
+			currentAnimation.cancel();
+			currentAnimation = null;
+		}
 		
 		if (svgRef) {
 			isAnimating = false;
-			svgRef.style.transform = 'rotate(0deg)';
+			
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = 'none';
+				path.style.strokeDashoffset = '';
+				path.style.opacity = '1';
+			}
 		}
 	}
 	
@@ -98,10 +117,10 @@
 		switch (newState) {
 			case 'active':
 			case 'loading':
-			case 'success':
 				startAnimation();
 				break;
 			case 'idle':
+			case 'success':
 			case 'error':
 			default:
 				stopAnimation();
@@ -176,38 +195,37 @@
 		setAnimationState(state);
 	}
 	
-	export function getStatus() {
+	export function getIconStatus() {
 		return {
 			isAnimating,
 			currentState
 		};
 	}
 </script>
-
 <div 
-	bind:this={containerRef}
-	class={clsx('inline-flex', className)}
-	onmouseenter={handleMouseEnter}
-	onmouseleave={handleMouseLeave}
-	onclick={handleClick}
-	onfocus={triggers.focus ? handleFocus : undefined}
-	onblur={triggers.focus ? handleBlur : undefined}
-	tabindex={triggers.focus ? 0 : undefined}
-	role={triggers.click || triggers.focus ? "button" : undefined}
-	{...restProps}
+  bind:this={containerRef}
+  class={clsx('inline-flex', className)}
+  onmouseenter={handleMouseEnter}
+  onmouseleave={handleMouseLeave}
+  onclick={handleClick}
+  onfocus={handleFocus}
+  onblur={handleBlur}
+  role={triggers.click || triggers.focus ? 'button' : 'img'}
+  aria-label="loader-circle-icon icon"
+  {...restProps}
 >
-	<svg
-		bind:this={svgRef}
-		xmlns="http://www.w3.org/2000/svg"
-		width={size}
-		height={size}
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-	>
-		<path d="M21 12a9 9 0 1 1-6.219-8.56" />
-	</svg>
+  <svg
+    bind:this={svgRef}
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+<path d="M21 12a9 9 0 1 1-6.219-8.56" />
+  </svg>
 </div>

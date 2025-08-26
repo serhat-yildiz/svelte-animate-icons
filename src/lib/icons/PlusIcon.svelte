@@ -21,30 +21,32 @@
 		[key: string]: any;
 	}
 	
-	let {
-		size = 28,
-		class: className,
+	let { 
+		size = 28, 
+		class: className, 
 		triggers = { hover: true },
 		animationState = 'idle',
 		autoPlay = false,
 		loop = false,
-		duration = 1000,
+		duration = 2000,
 		onAnimationStart,
 		onAnimationEnd,
-		...restProps
+		...restProps 
 	}: Props = $props();
+	
+	export interface IconHandle {
+		startAnimation: () => void;
+		stopAnimation: () => void;
+		toggleAnimation: () => void;
+		setAnimationState: (newState: string) => void;
+		readonly isAnimating: boolean;
+	}
 	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
+	let currentAnimation: Animation | null = null;
 	let currentState = $state(animationState);
-	let currentAnimations: Animation[] = [];
-	
-	
-	let horizontalLineEl: SVGPathElement;
-	let verticalLineEl: SVGPathElement;
-	
-	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
 			stopAnimation(); 
@@ -52,94 +54,50 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			
-			if (svgRef) {
-				const svgAnimation = svgRef.animate([
-					{ transform: 'scale(1) rotate(0deg)' },
-					{ transform: 'scale(1.2) rotate(10deg)' },
-					{ transform: 'scale(0.85) rotate(-10deg)' },
-					{ transform: 'scale(1) rotate(0deg)' }
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = '80 80';
+				path.style.strokeDashoffset = '80';
+				path.style.opacity = '0.6';
+				
+				
+				currentAnimation = path.animate([
+					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
 				], {
 					duration: duration,
 					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 					easing: 'ease-in-out'
 				});
-				currentAnimations.push(svgAnimation);
-			}
-			
-			
-			if (horizontalLineEl) {
-				const hLength = horizontalLineEl.getTotalLength();
-				horizontalLineEl.style.strokeDasharray = hLength + ' ' + hLength;
-				horizontalLineEl.style.strokeDashoffset = hLength.toString();
 				
-				const hLineAnimation = horizontalLineEl.animate([
-					{ strokeDashoffset: hLength, opacity: '1' },
-					{ strokeDashoffset: '0', opacity: '1' }
-				], {
-					duration: Math.floor(duration * 0.6),
-					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-					easing: 'ease-in-out',
-					delay: 0
+				
+				currentAnimation.addEventListener('finish', () => {
+					if (!loop && !autoPlay && currentState !== 'loading') {
+						stopAnimation();
+					}
+					onAnimationEnd?.();
 				});
-				currentAnimations.push(hLineAnimation);
-			}
-			
-			
-			if (verticalLineEl) {
-				const vLength = verticalLineEl.getTotalLength();
-				verticalLineEl.style.strokeDasharray = vLength + ' ' + vLength;
-				verticalLineEl.style.strokeDashoffset = vLength.toString();
-				
-				setTimeout(() => {
-					const vLineAnimation = verticalLineEl.animate([
-						{ strokeDashoffset: vLength, opacity: '1' },
-						{ strokeDashoffset: '0', opacity: '1' }
-					], {
-						duration: Math.floor(duration * 0.6),
-						iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-						easing: 'ease-in-out'
-					});
-					currentAnimations.push(vLineAnimation);
-					
-					
-					vLineAnimation.addEventListener('finish', () => {
-						if (!loop && !autoPlay && currentState !== 'loading') {
-							if (currentAnimations.every(anim => anim.playState === 'finished')) {
-								stopAnimation();
-							}
-						}
-						onAnimationEnd?.();
-					});
-				}, Math.floor(duration * 0.4));
 			}
 		}
 	}
 	
 	function stopAnimation() {
-		currentAnimations.forEach(animation => {
-			animation.cancel();
-		});
-		currentAnimations = [];
+		if (currentAnimation) {
+			currentAnimation.cancel();
+			currentAnimation = null;
+		}
 		
 		if (svgRef) {
 			isAnimating = false;
 			
-			
-			svgRef.style.transform = 'scale(1) rotate(0deg)';
-			
-			
-			if (horizontalLineEl) {
-				horizontalLineEl.style.strokeDasharray = 'none';
-				horizontalLineEl.style.strokeDashoffset = '';
-				horizontalLineEl.style.opacity = '1';
-			}
-			
-			
-			if (verticalLineEl) {
-				verticalLineEl.style.strokeDasharray = 'none';
-				verticalLineEl.style.strokeDashoffset = '';
-				verticalLineEl.style.opacity = '1';
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = 'none';
+				path.style.strokeDashoffset = '';
+				path.style.opacity = '1';
 			}
 		}
 	}
@@ -159,10 +117,10 @@
 		switch (newState) {
 			case 'active':
 			case 'loading':
-			case 'success':
 				startAnimation();
 				break;
 			case 'idle':
+			case 'success':
 			case 'error':
 			default:
 				stopAnimation();
@@ -237,39 +195,38 @@
 		setAnimationState(state);
 	}
 	
-	export function getStatus() {
+	export function getIconStatus() {
 		return {
 			isAnimating,
 			currentState
 		};
 	}
 </script>
-
 <div 
-	bind:this={containerRef}
-	class={clsx('inline-flex', className)}
-	onmouseenter={handleMouseEnter}
-	onmouseleave={handleMouseLeave}
-	onclick={handleClick}
-	onfocus={triggers.focus ? handleFocus : undefined}
-	onblur={triggers.focus ? handleBlur : undefined}
-	tabindex={triggers.focus ? 0 : undefined}
-	role={triggers.click || triggers.focus ? "button" : undefined}
-	{...restProps}
+  bind:this={containerRef}
+  class={clsx('inline-flex', className)}
+  onmouseenter={handleMouseEnter}
+  onmouseleave={handleMouseLeave}
+  onclick={handleClick}
+  onfocus={handleFocus}
+  onblur={handleBlur}
+  role={triggers.click || triggers.focus ? 'button' : 'img'}
+  aria-label="plus-icon icon"
+  {...restProps}
 >
-	<svg
-		bind:this={svgRef}
-		xmlns="http://www.w3.org/2000/svg"
-		width={size}
-		height={size}
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-	>
-		<path 
+  <svg
+    bind:this={svgRef}
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+<path 
 			bind:this={horizontalLineEl}
 			d="M5 12h14"
 		/>
@@ -277,5 +234,5 @@
 			bind:this={verticalLineEl}
 			d="M12 5v14"
 		/>
-	</svg>
+  </svg>
 </div>

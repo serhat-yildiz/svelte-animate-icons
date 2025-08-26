@@ -21,34 +21,32 @@
 		[key: string]: any;
 	}
 	
-	let {
-		size = 28,
-		class: className,
+	let { 
+		size = 28, 
+		class: className, 
 		triggers = { hover: true },
 		animationState = 'idle',
 		autoPlay = false,
 		loop = false,
-		duration = 1200,
+		duration = 2000,
 		onAnimationStart,
 		onAnimationEnd,
-		...restProps
+		...restProps 
 	}: Props = $props();
+	
+	export interface IconHandle {
+		startAnimation: () => void;
+		stopAnimation: () => void;
+		toggleAnimation: () => void;
+		setAnimationState: (newState: string) => void;
+		readonly isAnimating: boolean;
+	}
 	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
+	let currentAnimation: Animation | null = null;
 	let currentState = $state(animationState);
-	let currentAnimations: Animation[] = [];
-	
-	
-	let groupEl: SVGGElement;
-	let tile1El: SVGRectElement;
-	let tile2El: SVGRectElement;
-	let tile3El: SVGRectElement;
-	let tile4El: SVGRectElement;
-	let sweepEl: SVGRectElement;
-  
-	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
 			stopAnimation(); 
@@ -56,93 +54,50 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			
-			if (groupEl) {
-				const groupAnimation = groupEl.animate([
-					{ transform: 'scale(1) rotate(0deg)' },
-					{ transform: 'scale(1.03) rotate(1deg)' },
-					{ transform: 'scale(1) rotate(0deg)' }
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = '80 80';
+				path.style.strokeDashoffset = '80';
+				path.style.opacity = '0.6';
+				
+				
+				currentAnimation = path.animate([
+					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
 				], {
-					duration: Math.floor(duration * 0.5),
+					duration: duration,
 					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 					easing: 'ease-in-out'
 				});
-				currentAnimations.push(groupAnimation);
-			}
-			
-			
-			const tiles = [tile1El, tile2El, tile3El, tile4El];
-			tiles.forEach((tile, index) => {
-				if (tile) {
-					setTimeout(() => {
-						const tileAnimation = tile.animate([
-							{ opacity: '0.4', transform: 'scale(0.85)' },
-							{ opacity: '1', transform: 'scale(1.08)' },
-							{ opacity: '1', transform: 'scale(1)' }
-						], {
-							duration: Math.floor(duration * 0.46),
-							iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-							easing: 'ease-out'
-						});
-						currentAnimations.push(tileAnimation);
-					}, Math.floor(duration * 0.067) * index);
-				}
-			});
-			
-			
-			if (sweepEl) {
-				setTimeout(() => {
-					const sweepAnimation = sweepEl.animate([
-						{ transform: 'translate(-26px, -26px)', opacity: '0' },
-						{ transform: 'translate(0px, 0px)', opacity: '0.35' },
-						{ transform: 'translate(26px, 26px)', opacity: '0' }
-					], {
-						duration: Math.floor(duration * 0.67),
-						iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-						easing: 'ease-in-out'
-					});
-					currentAnimations.push(sweepAnimation);
-				}, Math.floor(duration * 0.083));
-			}
-			
-			
-			const lastAnimation = currentAnimations[currentAnimations.length - 1];
-			lastAnimation?.addEventListener('finish', () => {
-				if (!loop && !autoPlay && currentState !== 'loading') {
-					if (currentAnimations.every(anim => anim.playState === 'finished')) {
+				
+				
+				currentAnimation.addEventListener('finish', () => {
+					if (!loop && !autoPlay && currentState !== 'loading') {
 						stopAnimation();
 					}
-				}
-				onAnimationEnd?.();
-			});
+					onAnimationEnd?.();
+				});
+			}
 		}
 	}
 	
 	function stopAnimation() {
-		currentAnimations.forEach(animation => {
-			animation.cancel();
-		});
-		currentAnimations = [];
+		if (currentAnimation) {
+			currentAnimation.cancel();
+			currentAnimation = null;
+		}
 		
 		if (svgRef) {
 			isAnimating = false;
 			
-			
-			if (groupEl) {
-				groupEl.style.transform = 'scale(1) rotate(0deg)';
-			}
-			
-			const tiles = [tile1El, tile2El, tile3El, tile4El];
-			tiles.forEach(tile => {
-				if (tile) {
-					tile.style.opacity = '1';
-					tile.style.transform = 'scale(1)';
-				}
-			});
-			
-			if (sweepEl) {
-				sweepEl.style.transform = 'translate(0px, 0px)';
-				sweepEl.style.opacity = '0';
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = 'none';
+				path.style.strokeDashoffset = '';
+				path.style.opacity = '1';
 			}
 		}
 	}
@@ -162,10 +117,10 @@
 		switch (newState) {
 			case 'active':
 			case 'loading':
-			case 'success':
 				startAnimation();
 				break;
 			case 'idle':
+			case 'success':
 			case 'error':
 			default:
 				stopAnimation();
@@ -240,90 +195,40 @@
 		setAnimationState(state);
 	}
 	
-	export function getStatus() {
+	export function getIconStatus() {
 		return {
 			isAnimating,
 			currentState
 		};
 	}
 </script>
-
 <div 
-	bind:this={containerRef}
-	class={clsx('inline-flex', className)}
-	onmouseenter={handleMouseEnter}
-	onmouseleave={handleMouseLeave}
-	onclick={handleClick}
-	onfocus={triggers.focus ? handleFocus : undefined}
-	onblur={triggers.focus ? handleBlur : undefined}
-	tabindex={triggers.focus ? 0 : undefined}
-	role={triggers.click || triggers.focus ? "button" : undefined}
-	{...restProps}
+  bind:this={containerRef}
+  class={clsx('inline-flex', className)}
+  onmouseenter={handleMouseEnter}
+  onmouseleave={handleMouseLeave}
+  onclick={handleClick}
+  onfocus={handleFocus}
+  onblur={handleBlur}
+  role={triggers.click || triggers.focus ? 'button' : 'img'}
+  aria-label="layout-grid-icon icon"
+  {...restProps}
 >
-	<svg
-		bind:this={svgRef}
-		xmlns="http://www.w3.org/2000/svg"
-		width={size}
-		height={size}
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-	>
-		<defs>
-			<linearGradient id="grid-sweep" x1="0" y1="0" x2="1" y2="1">
-				<stop offset="0%" stop-color="currentColor" stop-opacity="0" />
-				<stop offset="50%" stop-color="currentColor" stop-opacity="0.35" />
-				<stop offset="100%" stop-color="currentColor" stop-opacity="0" />
-			</linearGradient>
-		</defs>
-
-		<g bind:this={groupEl}>
-			<rect
-				bind:this={tile1El}
-				width="7"
-				height="7"
-				x="3"
-				y="3"
-				rx="1"
-			/>
-			<rect
-				bind:this={tile2El}
-				width="7"
-				height="7"
-				x="14"
-				y="3"
-				rx="1"
-			/>
-			<rect
-				bind:this={tile3El}
-				width="7"
-				height="7"
-				x="14"
-				y="14"
-				rx="1"
-			/>
-			<rect
-				bind:this={tile4El}
-				width="7"
-				height="7"
-				x="3"
-				y="14"
-				rx="1"
-			/>
-
-			<rect
-				bind:this={sweepEl}
-				x="2"
-				y="2"
-				width="20"
-				height="20"
-				rx="3"
-				fill="url(#grid-sweep)"
-				style="pointer-events: none; opacity: 0;"
-			/>
-		</g>
-	</svg>
+  <svg
+    bind:this={svgRef}
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+<rect width="7" height="7" x="3" y="3" rx="1"  />
+		<rect width="7" height="7" x="14" y="3" rx="1"  />
+		<rect width="7" height="7" x="14" y="14" rx="1"  />
+		<rect width="7" height="7" x="3" y="14" rx="1"  />
+  </svg>
 </div>

@@ -1,172 +1,217 @@
 <script lang="ts">
-  import { clsx } from 'clsx';
-
-  interface AnimationTriggers {
-    hover?: boolean;
-    click?: boolean;
-    focus?: boolean;
-    custom?: boolean;
-  }
-
-  interface Props {
-    size?: number;
-    class?: string;
-    triggers?: AnimationTriggers;
-    animationState?: 'idle' | 'active' | 'loading' | 'success' | 'error';
-    autoPlay?: boolean;
-    loop?: boolean;
-    duration?: number;
-    onAnimationStart?: () => void;
-    onAnimationEnd?: () => void;
-    [key: string]: any;
-  }
-
-  let {
-    size = 28,
-    class: className,
-    triggers = { hover: true },
-    animationState = 'idle',
-    autoPlay = false,
-    loop = false,
-    duration = 2000,
-    onAnimationStart,
-    onAnimationEnd,
-    ...restProps
-  }: Props = $props();
-
-  let containerRef: HTMLDivElement;
-  let svgRef: SVGSVGElement;
-
-  
-  let bodyEl: SVGPathElement;
-  let flapGroupEl: SVGGElement;
-  let swipeEl: SVGLineElement;
-
-  let isAnimating = $state(false);
-  let currentAnimation: Animation | null = null;
-  let currentState = $state(animationState);
-
-  function startAnimation() {
-    if (isAnimating) return;
-    isAnimating = true;
-    onAnimationStart?.();
-
-    
-    if (bodyEl) {
-      bodyEl.animate(
-        [
-          { strokeDashoffset: '80', opacity: '0.4' },
-          { strokeDashoffset: '0', opacity: '1' }
-        ],
-        { duration: 800, easing: 'ease-in-out' }
-      );
-    }
-
-    
-    if (flapGroupEl) {
-      setTimeout(() => {
-        flapGroupEl.animate(
-          [
-            { transform: 'rotate(0deg)', transformOrigin: '10% 50%' },
-            { transform: 'rotate(-6deg)', transformOrigin: '10% 50%' },
-            { transform: 'rotate(0deg)', transformOrigin: '10% 50%' },
-            { transform: 'rotate(-3deg)', transformOrigin: '10% 50%' },
-            { transform: 'rotate(0deg)', transformOrigin: '10% 50%' }
-          ],
-          { duration: 900, easing: 'ease-in-out' }
-        );
-      }, 200);
-    }
-
-    
-    if (swipeEl) {
-      setTimeout(() => {
-        swipeEl.animate(
-          [
-            { transform: 'translateX(0px)', opacity: '0' },
-            { transform: 'translateX(6px)', opacity: '1' },
-            { transform: 'translateX(0px)', opacity: '0' }
-          ],
-          { duration: 800, easing: 'ease-in-out' }
-        );
-      }, 450);
-    }
-
-    setTimeout(() => {
-      isAnimating = false;
-      onAnimationEnd?.();
-    }, 1300);
-  }
-
-  function stopAnimation() {
-    if (currentAnimation) {
-      currentAnimation.cancel();
-      currentAnimation = null;
-    }
-    isAnimating = false;
-  }
-
-  function toggleAnimation() {
-    if (isAnimating) stopAnimation();
-    else startAnimation();
-  }
-
-  function setAnimationState(newState: string) {
-    currentState = newState as any;
-    switch (newState) {
-      case 'active':
-      case 'loading':
-        startAnimation();
-        break;
-      default:
-        stopAnimation();
-        break;
-    }
-  }
-
-  function handleMouseEnter() {
-    if (triggers.hover && !triggers.custom) startAnimation();
-  }
-  function handleMouseLeave() {
-    if (triggers.hover && !triggers.custom) stopAnimation();
-  }
-  function handleClick() {
-    if (triggers.click) toggleAnimation();
-  }
-  function handleFocus() {
-    if (triggers.focus) startAnimation();
-  }
-  function handleBlur() {
-    if (triggers.focus) stopAnimation();
-  }
-
-  $effect(() => {
-    if (svgRef) setAnimationState(animationState);
-  });
-
-  $effect(() => {
-    if (autoPlay && svgRef) startAnimation();
-    return () => stopAnimation();
-  });
-
-  
-  export function start() { startAnimation(); }
-  export function stop() { stopAnimation(); }
-  export function toggle() { toggleAnimation(); }
-  export function setState(state: string) { setAnimationState(state); }
-  export function getStatus() { return { isAnimating, currentState }; }
+	import { clsx } from 'clsx';
+	
+	interface AnimationTriggers {
+		hover?: boolean;
+		click?: boolean;
+		focus?: boolean;
+		custom?: boolean;
+	}
+	
+	interface Props {
+		size?: number;
+		class?: string;
+		triggers?: AnimationTriggers;
+		animationState?: 'idle' | 'active' | 'loading' | 'success' | 'error';
+		autoPlay?: boolean;
+		loop?: boolean;
+		duration?: number;
+		onAnimationStart?: () => void;
+		onAnimationEnd?: () => void;
+		[key: string]: any;
+	}
+	
+	let { 
+		size = 28, 
+		class: className, 
+		triggers = { hover: true },
+		animationState = 'idle',
+		autoPlay = false,
+		loop = false,
+		duration = 2000,
+		onAnimationStart,
+		onAnimationEnd,
+		...restProps 
+	}: Props = $props();
+	
+	export interface IconHandle {
+		startAnimation: () => void;
+		stopAnimation: () => void;
+		toggleAnimation: () => void;
+		setAnimationState: (newState: string) => void;
+		readonly isAnimating: boolean;
+	}
+	
+	let containerRef: HTMLDivElement;
+	let svgRef: SVGSVGElement;
+	let isAnimating = $state(false);
+	let currentAnimation: Animation | null = null;
+	let currentState = $state(animationState);
+	function startAnimation() {
+		if (svgRef && !isAnimating) {
+			stopAnimation(); 
+			
+			isAnimating = true;
+			onAnimationStart?.();
+			
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = '80 80';
+				path.style.strokeDashoffset = '80';
+				path.style.opacity = '0.6';
+				
+				
+				currentAnimation = path.animate([
+					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
+				], {
+					duration: duration,
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
+					easing: 'ease-in-out'
+				});
+				
+				
+				currentAnimation.addEventListener('finish', () => {
+					if (!loop && !autoPlay && currentState !== 'loading') {
+						stopAnimation();
+					}
+					onAnimationEnd?.();
+				});
+			}
+		}
+	}
+	
+	function stopAnimation() {
+		if (currentAnimation) {
+			currentAnimation.cancel();
+			currentAnimation = null;
+		}
+		
+		if (svgRef) {
+			isAnimating = false;
+			
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = 'none';
+				path.style.strokeDashoffset = '';
+				path.style.opacity = '1';
+			}
+		}
+	}
+	
+	function toggleAnimation() {
+		if (isAnimating) {
+			stopAnimation();
+		} else {
+			startAnimation();
+		}
+	}
+	
+	function setAnimationState(newState: string) {
+		currentState = newState as any;
+		
+		
+		switch (newState) {
+			case 'active':
+			case 'loading':
+				startAnimation();
+				break;
+			case 'idle':
+			case 'success':
+			case 'error':
+			default:
+				stopAnimation();
+				break;
+		}
+	}
+	
+	
+	function handleMouseEnter() {
+		if (triggers.hover && !triggers.custom) {
+			startAnimation();
+		}
+	}
+	
+	function handleMouseLeave() {
+		if (triggers.hover && !triggers.custom) {
+			stopAnimation();
+		}
+	}
+	
+	function handleClick() {
+		if (triggers.click) {
+			toggleAnimation();
+		}
+	}
+	
+	function handleFocus() {
+		if (triggers.focus) {
+			startAnimation();
+		}
+	}
+	
+	function handleBlur() {
+		if (triggers.focus) {
+			stopAnimation();
+		}
+	}
+	
+	
+	$effect(() => {
+		if (svgRef) {
+			setAnimationState(animationState);
+		}
+	});
+	
+	
+	$effect(() => {
+		if (autoPlay && svgRef) {
+			startAnimation();
+		}
+		
+		
+		return () => {
+			stopAnimation();
+		};
+	});
+	
+	
+	export function start() {
+		startAnimation();
+	}
+	
+	export function stop() {
+		stopAnimation();
+	}
+	
+	export function toggle() {
+		toggleAnimation();
+	}
+	
+	export function setState(state: string) {
+		setAnimationState(state);
+	}
+	
+	export function getIconStatus() {
+		return {
+			isAnimating,
+			currentState
+		};
+	}
 </script>
-
-<div
+<div 
   bind:this={containerRef}
-  class={clsx("inline-flex", className)}
+  class={clsx('inline-flex', className)}
   onmouseenter={handleMouseEnter}
   onmouseleave={handleMouseLeave}
   onclick={handleClick}
-  onfocus={triggers.focus ? handleFocus : undefined}
-  onblur={triggers.focus ? handleBlur : undefined}
-  tabindex={triggers.focus ? 0 : -1}
-  role={triggers.click || triggers.focus ? "button" : undefined}
+  onfocus={handleFocus}
+  onblur={handleBlur}
+  role={triggers.click || triggers.focus ? 'button' : 'img'}
+  aria-label="wallet-icon icon"
   {...restProps}
 >
   <svg
@@ -180,9 +225,8 @@
     stroke-width="2"
     stroke-linecap="round"
     stroke-linejoin="round"
-    class="lucide lucide-wallet"
   >
-    <path
+<path
       bind:this={bodyEl}
       d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"
       stroke-dasharray="80"

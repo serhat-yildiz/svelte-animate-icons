@@ -1,13 +1,11 @@
 <script lang="ts">
   import { clsx } from 'clsx';
-
   interface AnimationTriggers {
     hover?: boolean;
     click?: boolean;
     focus?: boolean;
     custom?: boolean;
   }
-
   interface Props {
     size?: number;
     class?: string;
@@ -20,7 +18,6 @@
     onAnimationEnd?: () => void;
     [key: string]: any;
   }
-
   let {
     size = 28,
     class: className,
@@ -33,15 +30,13 @@
     onAnimationEnd,
     ...restProps
   }: Props = $props();
-
-  export interface WalletMinimalIconHandle {
+  export interface IconHandle {
     startAnimation: () => void;
     stopAnimation: () => void;
     toggleAnimation: () => void;
     setAnimationState: (newState: string) => void;
     readonly isAnimating: boolean;
   }
-
   let containerRef: HTMLDivElement;
   let svgRef: SVGSVGElement;
   let wrapperEl: SVGGElement;
@@ -49,16 +44,13 @@
   let dotEl: SVGPathElement;
   let latchEl: SVGPathElement;
   let shimmerEl: SVGRectElement;
-
   let isAnimating = $state(false);
   let currentState = $state(animationState);
-
   
   function startAnimation() {
     if (!svgRef || isAnimating) return;
     isAnimating = true;
     onAnimationStart?.();
-
     
     wrapperEl?.animate(
       [
@@ -70,7 +62,6 @@
       ],
       { duration: 900, easing: 'ease-in-out' }
     );
-
     
     outlineEl?.animate(
       [
@@ -79,7 +70,6 @@
       ],
       { duration: 800, easing: 'ease-in-out' }
     );
-
     
     if (dotEl) {
       setTimeout(() => {
@@ -93,7 +83,6 @@
         );
       }, 400);
     }
-
     
     if (latchEl) {
       setTimeout(() => {
@@ -107,7 +96,6 @@
         );
       }, 500);
     }
-
     
     if (shimmerEl) {
       setTimeout(() => {
@@ -121,13 +109,11 @@
         );
       }, 250);
     }
-
     setTimeout(() => {
       if (!loop && currentState !== 'loading') stopAnimation();
       onAnimationEnd?.();
     }, duration);
   }
-
   function stopAnimation() {
     isAnimating = false;
     svgRef?.getAnimations().forEach((a) => a.cancel());
@@ -135,11 +121,9 @@
       el?.getAnimations().forEach((a) => a.cancel())
     );
   }
-
   function toggleAnimation() {
     isAnimating ? stopAnimation() : startAnimation();
   }
-
   function setAnimationState(newState: string) {
     currentState = newState as any;
     switch (newState) {
@@ -152,7 +136,6 @@
         break;
     }
   }
-
   
   function handleMouseEnter() {
     if (triggers.hover && !triggers.custom) startAnimation();
@@ -169,16 +152,13 @@
   function handleBlur() {
     if (triggers.focus) stopAnimation();
   }
-
   
   $effect(() => setAnimationState(animationState));
-
   
   $effect(() => {
     if (autoPlay) startAnimation();
     return () => stopAnimation();
   });
-
   
   export function start() {
     startAnimation();
@@ -192,20 +172,18 @@
   export function setState(state: string) {
     setAnimationState(state);
   }
-  export function getStatus() {
+  export function getIconStatus() {
     return { isAnimating, currentState };
   }
 </script>
-
 <div
   bind:this={containerRef}
   class={clsx('inline-flex items-center justify-center', className)}
-  on:mouseenter={handleMouseEnter}
-  on:mouseleave={handleMouseLeave}
-  on:click={handleClick}
-  on:focus={triggers.focus ? handleFocus : undefined}
-  on:blur={triggers.focus ? handleBlur : undefined}
-  tabindex={triggers.focus ? 0 : -1}
+  onmouseenter={handleMouseEnter}
+  onmouseleave={handleMouseLeave}
+  onclick={handleClick}
+  onfocus={triggers.focus ? handleFocus : undefined}
+  onblur={triggers.focus ? handleBlur : undefined}
   role={triggers.click || triggers.focus ? 'button' : undefined}
   {...restProps}
 >
@@ -230,17 +208,14 @@
           <stop offset="100%" stop-color="currentColor" stop-opacity="0" />
         </linearGradient>
       </defs>
-
       <path
         bind:this={outlineEl}
         d="M7 7h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14"
         stroke-dasharray="120"
         stroke-dashoffset="120"
       />
-
       <path bind:this={dotEl} d="M17 14h.01" />
       <path bind:this={latchEl} d="M17 14h.01" />
-
       <rect
         bind:this={shimmerEl}
         x="2"

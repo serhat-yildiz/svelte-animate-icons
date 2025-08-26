@@ -21,30 +21,32 @@
 		[key: string]: any;
 	}
 	
-	let {
-		size = 28,
-		class: className,
+	let { 
+		size = 28, 
+		class: className, 
 		triggers = { hover: true },
 		animationState = 'idle',
 		autoPlay = false,
 		loop = false,
-		duration = 1200,
+		duration = 2000,
 		onAnimationStart,
 		onAnimationEnd,
-		...restProps
+		...restProps 
 	}: Props = $props();
+	
+	export interface IconHandle {
+		startAnimation: () => void;
+		stopAnimation: () => void;
+		toggleAnimation: () => void;
+		setAnimationState: (newState: string) => void;
+		readonly isAnimating: boolean;
+	}
 	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
+	let currentAnimation: Animation | null = null;
 	let currentState = $state(animationState);
-	let currentAnimations: Animation[] = [];
-	
-	
-	let groupEl: SVGGElement;
-	let pathEl: SVGPathElement;
-	
-	
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
 			stopAnimation(); 
@@ -52,47 +54,28 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			
-			if (groupEl) {
-				const groupAnimation = groupEl.animate([
-					{ transform: 'rotate(0deg) scale(1)' },
-					{ transform: 'rotate(-3deg) scale(1.02)' },
-					{ transform: 'rotate(3deg) scale(1)' },
-					{ transform: 'rotate(-2deg) scale(1.015)' },
-					{ transform: 'rotate(2deg) scale(1)' },
-					{ transform: 'rotate(0deg) scale(1)' }
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = '80 80';
+				path.style.strokeDashoffset = '80';
+				path.style.opacity = '0.6';
+				
+				
+				currentAnimation = path.animate([
+					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
 				], {
 					duration: duration,
 					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 					easing: 'ease-in-out'
 				});
-				currentAnimations.push(groupAnimation);
-			}
-			
-			
-			if (pathEl) {
-				const pathLength = pathEl.getTotalLength();
-				pathEl.style.strokeDasharray = pathLength + ' ' + pathLength;
-				pathEl.style.strokeDashoffset = pathLength.toString();
-				
-				const pathAnimation = pathEl.animate([
-					{ strokeDashoffset: pathLength, opacity: '0.55' },
-					{ strokeDashoffset: '0', opacity: '1' },
-					{ strokeDashoffset: '0', opacity: '0.9' },
-					{ strokeDashoffset: '0', opacity: '1' }
-				], {
-					duration: Math.floor(duration * 0.75),
-					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-					easing: 'ease-in-out'
-				});
-				currentAnimations.push(pathAnimation);
 				
 				
-				pathAnimation.addEventListener('finish', () => {
+				currentAnimation.addEventListener('finish', () => {
 					if (!loop && !autoPlay && currentState !== 'loading') {
-						if (currentAnimations.every(anim => anim.playState === 'finished')) {
-							stopAnimation();
-						}
+						stopAnimation();
 					}
 					onAnimationEnd?.();
 				});
@@ -101,24 +84,20 @@
 	}
 	
 	function stopAnimation() {
-		currentAnimations.forEach(animation => {
-			animation.cancel();
-		});
-		currentAnimations = [];
+		if (currentAnimation) {
+			currentAnimation.cancel();
+			currentAnimation = null;
+		}
 		
 		if (svgRef) {
 			isAnimating = false;
 			
-			
-			if (groupEl) {
-				groupEl.style.transform = 'rotate(0deg) scale(1)';
-			}
-			
-			
-			if (pathEl) {
-				pathEl.style.strokeDasharray = 'none';
-				pathEl.style.strokeDashoffset = '';
-				pathEl.style.opacity = '1';
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = 'none';
+				path.style.strokeDashoffset = '';
+				path.style.opacity = '1';
 			}
 		}
 	}
@@ -138,10 +117,10 @@
 		switch (newState) {
 			case 'active':
 			case 'loading':
-			case 'success':
 				startAnimation();
 				break;
 			case 'idle':
+			case 'success':
 			case 'error':
 			default:
 				stopAnimation();
@@ -216,44 +195,42 @@
 		setAnimationState(state);
 	}
 	
-	export function getStatus() {
+	export function getIconStatus() {
 		return {
 			isAnimating,
 			currentState
 		};
 	}
 </script>
-
 <div 
-	bind:this={containerRef}
-	class={clsx('inline-flex', className)}
-	onmouseenter={handleMouseEnter}
-	onmouseleave={handleMouseLeave}
-	onclick={handleClick}
-	onfocus={triggers.focus ? handleFocus : undefined}
-	onblur={triggers.focus ? handleBlur : undefined}
-	tabindex={triggers.focus ? 0 : undefined}
-	role={triggers.click || triggers.focus ? "button" : undefined}
-	{...restProps}
+  bind:this={containerRef}
+  class={clsx('inline-flex', className)}
+  onmouseenter={handleMouseEnter}
+  onmouseleave={handleMouseLeave}
+  onclick={handleClick}
+  onfocus={handleFocus}
+  onblur={handleBlur}
+  role={triggers.click || triggers.focus ? 'button' : 'img'}
+  aria-label="phone-icon icon"
+  {...restProps}
 >
-	<svg
-		bind:this={svgRef}
-		xmlns="http://www.w3.org/2000/svg"
-		width={size}
-		height={size}
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-		class="lucide lucide-phone-icon lucide-phone"
-	>
-		<g bind:this={groupEl}>
+  <svg
+    bind:this={svgRef}
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+<g bind:this={groupEl}>
 			<path
 				bind:this={pathEl}
 				d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"
 			/>
 		</g>
-	</svg>
+  </svg>
 </div>

@@ -21,170 +21,217 @@
 		[key: string]: any;
 	}
 	
-	let {
-		size = 28,
-		class: className,
+	let { 
+		size = 28, 
+		class: className, 
 		triggers = { hover: true },
 		animationState = 'idle',
 		autoPlay = false,
 		loop = false,
-		duration = 600,
+		duration = 2000,
 		onAnimationStart,
 		onAnimationEnd,
-		...restProps
+		...restProps 
 	}: Props = $props();
 	
-	export interface BellRingIcon {
+	export interface IconHandle {
 		startAnimation: () => void;
 		stopAnimation: () => void;
+		toggleAnimation: () => void;
+		setAnimationState: (newState: string) => void;
+		readonly isAnimating: boolean;
 	}
 	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
+	let currentAnimation: Animation | null = null;
 	let currentState = $state(animationState);
-	let currentAnimations: Animation[] = [];
-	
-	
 	function startAnimation() {
-		if (svgRef) {
+		if (svgRef && !isAnimating) {
+			stopAnimation(); 
+			
 			isAnimating = true;
+			onAnimationStart?.();
 			
-			svgRef.animate([
-				{ transform: 'rotate(0deg)' },
-				{ transform: 'rotate(15deg)' },
-				{ transform: 'rotate(-10deg)' },
-				{ transform: 'rotate(5deg)' },
-				{ transform: 'rotate(0deg)' }
-			], {
-				duration: 600,
-				easing: 'ease-in-out'
-			});
-			
-			
-			const ringPaths = svgRef.querySelectorAll('path');
-			if (ringPaths.length > 1) {
-				ringPaths[1].animate([
-					{ opacity: '0.5', transform: 'scale(1)' },
-					{ opacity: '1', transform: 'scale(1.1)' },
-					{ opacity: '0.5', transform: 'scale(1)' }
+			const path = svgRef.querySelector('path');
+			if (path) {
+				
+				path.style.strokeDasharray = '80 80';
+				path.style.strokeDashoffset = '80';
+				path.style.opacity = '0.6';
+				
+				
+				currentAnimation = path.animate([
+					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
+					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
 				], {
-					duration: 400,
-					delay: 100
+					duration: duration,
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
+					easing: 'ease-in-out'
 				});
 				
-				if (ringPaths[3]) {
-					ringPaths[3].animate([
-						{ opacity: '0.5', transform: 'scale(1)' },
-						{ opacity: '1', transform: 'scale(1.1)' },
-						{ opacity: '0.5', transform: 'scale(1)' }
-					], {
-						duration: 400,
-						delay: 150
-					});
-				}
+				
+				currentAnimation.addEventListener('finish', () => {
+					if (!loop && !autoPlay && currentState !== 'loading') {
+						stopAnimation();
+					}
+					onAnimationEnd?.();
+				});
 			}
 		}
 	}
 	
 	function stopAnimation() {
+		if (currentAnimation) {
+			currentAnimation.cancel();
+			currentAnimation = null;
+		}
+		
 		if (svgRef) {
 			isAnimating = false;
 			
-			svgRef.getAnimations().forEach(animation => animation.cancel());
-			const paths = svgRef.querySelectorAll('path');
-			paths.forEach(path => {
-				path.getAnimations().forEach(animation => animation.cancel());
+			const path = svgRef.querySelector('path');
+			if (path) {
 				
-				path.style.strokeDasharray = '';
+				path.style.strokeDasharray = 'none';
 				path.style.strokeDashoffset = '';
-			});
+				path.style.opacity = '1';
+			}
 		}
 	}
 	
 	function toggleAnimation() {
-		if (isAnimating) stopAnimation();
-		else startAnimation();
+		if (isAnimating) {
+			stopAnimation();
+		} else {
+			startAnimation();
+		}
 	}
 	
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
+		
+		
 		switch (newState) {
 			case 'active':
 			case 'loading':
-			case 'success':
 				startAnimation();
 				break;
+			case 'idle':
+			case 'success':
+			case 'error':
 			default:
 				stopAnimation();
 				break;
 		}
 	}
 	
+	
 	function handleMouseEnter() {
-		if (triggers.hover && !triggers.custom) startAnimation();
+		if (triggers.hover && !triggers.custom) {
+			startAnimation();
+		}
 	}
 	
 	function handleMouseLeave() {
-		if (triggers.hover && !triggers.custom) stopAnimation();
+		if (triggers.hover && !triggers.custom) {
+			stopAnimation();
+		}
 	}
 	
 	function handleClick() {
-		if (triggers.click) toggleAnimation();
+		if (triggers.click) {
+			toggleAnimation();
+		}
 	}
 	
 	function handleFocus() {
-		if (triggers.focus) startAnimation();
+		if (triggers.focus) {
+			startAnimation();
+		}
 	}
 	
 	function handleBlur() {
-		if (triggers.focus) stopAnimation();
+		if (triggers.focus) {
+			stopAnimation();
+		}
 	}
 	
-	$effect(() => {
-		if (svgRef) setAnimationState(animationState);
-	});
 	
 	$effect(() => {
-		if (autoPlay && svgRef) startAnimation();
-		return () => stopAnimation();
+		if (svgRef) {
+			setAnimationState(animationState);
+		}
 	});
 	
 	
-	export function start() { startAnimation(); }
-	export function stop() { stopAnimation(); }
-	export function toggle() { toggleAnimation(); }
-	export function setState(state: string) { setAnimationState(state); }
-	export function getStatus() { return { isAnimating, currentState }; }
+	$effect(() => {
+		if (autoPlay && svgRef) {
+			startAnimation();
+		}
+		
+		
+		return () => {
+			stopAnimation();
+		};
+	});
+	
+	
+	export function start() {
+		startAnimation();
+	}
+	
+	export function stop() {
+		stopAnimation();
+	}
+	
+	export function toggle() {
+		toggleAnimation();
+	}
+	
+	export function setState(state: string) {
+		setAnimationState(state);
+	}
+	
+	export function getIconStatus() {
+		return {
+			isAnimating,
+			currentState
+		};
+	}
 </script>
-
 <div 
-	bind:this={containerRef}
-	class={clsx('inline-flex', className)}
-	onmouseenter={handleMouseEnter}
-	onmouseleave={handleMouseLeave}
-	onclick={handleClick}
-	onfocus={triggers.focus ? handleFocus : undefined}
-	onblur={triggers.focus ? handleBlur : undefined}
-	tabindex={triggers.focus ? 0 : -1}
-	role={triggers.click || triggers.focus ? "button" : undefined}
-	{...restProps}
+  bind:this={containerRef}
+  class={clsx('inline-flex', className)}
+  onmouseenter={handleMouseEnter}
+  onmouseleave={handleMouseLeave}
+  onclick={handleClick}
+  onfocus={handleFocus}
+  onblur={handleBlur}
+  role={triggers.click || triggers.focus ? 'button' : 'img'}
+  aria-label="bell-ring-icon icon"
+  {...restProps}
 >
-	<svg
-		bind:this={svgRef}
-		xmlns="http://www.w3.org/2000/svg"
-		width={size}
-		height={size}
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-	>
-		<path d="M10.268 21a2 2 0 0 0 3.464 0" />
-		<path d="M22 8c0-2.3-.8-4.3-2-6" />
-		<path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
-		<path d="M4 2C2.8 3.7 2 5.7 2 8" />
-	</svg>
+  <svg
+    bind:this={svgRef}
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+<path d="M4 2C2.8 3.7 2 5.7 2 8" class:animate-bell={currentState === 'running'} />
+		<path d="M22 8c0-2.3-.8-4.3-2-6" class:animate-bell={currentState === 'running'} />
+		<path
+			d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"
+			class:animate-bell={currentState === 'running'}
+		/>
+		<path d="M10.268 21a2 2 0 0 0 3.464 0" class:animate-clapper={currentState === 'running'} />
+  </svg>
 </div>

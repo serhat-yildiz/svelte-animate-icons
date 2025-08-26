@@ -1,13 +1,11 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
-
 	interface AnimationTriggers {
 		hover?: boolean;
 		click?: boolean;
 		focus?: boolean;
 		custom?: boolean;
 	}
-
 	interface Props {
 		size?: number;
 		class?: string;
@@ -20,7 +18,6 @@
 		onAnimationEnd?: () => void;
 		[key: string]: any;
 	}
-
 	let {
 		size = 28,
 		class: className,
@@ -33,27 +30,23 @@
 		onAnimationEnd,
 		...restProps
 	}: Props = $props();
-
-	export interface ContactIconHandle {
+	export interface IconHandle {
 		start: () => void;
 		stop: () => void;
 		toggle: () => void;
 		setState: (newState: string) => void;
 		getStatus: () => { isAnimating: boolean; currentState: string };
 	}
-
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
 	let currentAnimation: Animation | null = null;
 	let currentState = $state(animationState);
-
 	function startAnimation() {
 		if (svgRef && !isAnimating) {
 			stopAnimation();
 			isAnimating = true;
 			onAnimationStart?.();
-
 			
 			const rect = svgRef.querySelector('rect');
 			if (rect) {
@@ -68,7 +61,6 @@
 					{ duration: duration * 0.6, easing: 'ease-in-out', fill: 'forwards' }
 				);
 			}
-
 			
 			const circle = svgRef.querySelector('circle');
 			if (circle) {
@@ -81,7 +73,6 @@
 					{ duration: duration * 0.5, delay: duration * 0.25, easing: 'ease-out' }
 				);
 			}
-
 			
 			const lines = svgRef.querySelectorAll('path[d*="v2"]');
 			lines.forEach(line => {
@@ -93,7 +84,6 @@
 					{ duration: duration * 0.35, delay: duration * 0.4, easing: 'ease-out' }
 				);
 			});
-
 			
 			const curve = svgRef.querySelector('path[d*="M7 22"]');
 			if (curve) {
@@ -108,7 +98,6 @@
 					{ duration: duration * 0.5, delay: duration * 0.5, easing: 'ease-in-out', fill: 'forwards' }
 				);
 			}
-
 			
 			setTimeout(() => {
 				if (!loop && !autoPlay && currentState !== 'loading') {
@@ -118,7 +107,6 @@
 			}, duration);
 		}
 	}
-
 	function stopAnimation() {
 		if (svgRef) {
 			isAnimating = false;
@@ -133,12 +121,10 @@
 		}
 		currentAnimation = null;
 	}
-
 	function toggleAnimation() {
 		if (isAnimating) stopAnimation();
 		else startAnimation();
 	}
-
 	function setAnimationState(newState: string) {
 		currentState = newState as any;
 		switch (newState) {
@@ -151,7 +137,6 @@
 				break;
 		}
 	}
-
 	
 	function handleMouseEnter() {
 		if (triggers.hover && !triggers.custom) startAnimation();
@@ -168,7 +153,6 @@
 	function handleBlur() {
 		if (triggers.focus) stopAnimation();
 	}
-
 	
 	$effect(() => {
 		if (svgRef) setAnimationState(animationState);
@@ -177,26 +161,23 @@
 		if (autoPlay && svgRef) startAnimation();
 		return () => stopAnimation();
 	});
-
 	
 	export function start() { startAnimation(); }
 	export function stop() { stopAnimation(); }
 	export function toggle() { toggleAnimation(); }
 	export function setState(state: string) { setAnimationState(state); }
-	export function getStatus() {
+	export function getIconStatus() {
 		return { isAnimating, currentState };
 	}
 </script>
-
 <div
 	bind:this={containerRef}
 	class={clsx('inline-flex items-center justify-center', className)}
-	on:mouseenter={handleMouseEnter}
-	on:mouseleave={handleMouseLeave}
-	on:click={handleClick}
-	on:focus={triggers.focus ? handleFocus : undefined}
-	on:blur={triggers.focus ? handleBlur : undefined}
-	tabindex={triggers.focus ? 0 : -1}
+	onmouseenter={handleMouseEnter}
+	onmouseleave={handleMouseLeave}
+	onclick={handleClick}
+	onfocus={triggers.focus ? handleFocus : undefined}
+	onblur={triggers.focus ? handleBlur : undefined}
 	role={triggers.click || triggers.focus ? 'button' : undefined}
 	{...restProps}
 >
