@@ -7,7 +7,7 @@ Powerful animated SVG icons for Svelte 5 with flexible animation control.
 
 ## ✨ Features
 
-- 🎯 **130+ animated icons** - Beautiful SVG icons with multiple animation triggers
+- 🎯 **550+ animated icons** - Beautiful SVG icons with multiple animation triggers
 - ⚡ **Lightning fast** - Built with Web Animations API for 60fps performance
 - 🎨 **Svelte 5 ready** - Modern runes system and reactivity
 - 🎛️ **Flexible control** - Hover, click, focus, state-based, and programmatic animations
@@ -167,7 +167,7 @@ triggers: {
 
 ## 📚 Available Icons
 
-Browse all 130+ icons at: [Icon Gallery](https://serhat-yildiz.github.io/svelte-animate-icons/#gallery)
+Browse all 550+ icons at: [Icon Gallery](https://serhat-yildiz.github.io/svelte-animate-icons/#gallery)
 
 ### Popular Icons
 
