@@ -1,70 +1,124 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
-	
+
+	interface AnimationTriggers {
+		hover?: boolean;
+		click?: boolean;
+		focus?: boolean;
+		custom?: boolean;
+	}
+
 	interface Props {
 		size?: number;
 		class?: string;
+		triggers?: AnimationTriggers;
+		animationState?: 'idle' | 'active' | 'loading' | 'success' | 'error';
+		autoPlay?: boolean;
+		loop?: boolean;
+		duration?: number;
+		onAnimationStart?: () => void;
+		onAnimationEnd?: () => void;
 		[key: string]: any;
 	}
-	
-	let { size = 28, class: className, ...restProps }: Props = $props();
-	
+
+	let {
+		size = 28,
+		class: className,
+		triggers = { hover: true },
+		animationState = 'idle',
+		autoPlay = false,
+		loop = false,
+		duration = 1200,
+		onAnimationStart,
+		onAnimationEnd,
+		...restProps
+	}: Props = $props();
+
 	export interface HeadphonesOffIconHandle {
-		startAnimation: () => void;
-		stopAnimation: () => void;
+		start: () => void;
+		stop: () => void;
+		toggle: () => void;
+		setState: (newState: string) => void;
+		getStatus: () => { isAnimating: boolean; currentState: string };
 	}
-	
+
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
-	let isControlled = false;
-	
+	let currentAnimations: Animation[] = [];
+	let currentState = $state(animationState);
+
 	function startAnimation() {
-		if (svgRef) {
-			isAnimating = true;
-			
-			// SVG animation
-			svgRef.animate([
-				{ transform: 'scale(1) rotate(0deg)' },
-				{ transform: 'scale(1.1) rotate(-3deg)' },
-				{ transform: 'scale(0.95) rotate(3deg)' },
-				{ transform: 'scale(1) rotate(-2deg)' },
-				{ transform: 'scale(1) rotate(0deg)' }
-			], { duration: 1200, easing: 'ease-in-out', iterations: Infinity });
-			
-			// Headphones path animation
-			const headphonesPath = svgRef.querySelector('path[d*="M3 14h3"]');
-			if (headphonesPath) {
-				headphonesPath.animate([
-					{ transform: 'scale(1)', opacity: '1' },
-					{ transform: 'scale(1.2)', opacity: '0.7' },
-					{ transform: 'scale(0.9)', opacity: '1' },
-					{ transform: 'scale(1)', opacity: '1' }
-				], { duration: 900, easing: 'ease-in-out', iterations: Infinity });
-			}
-			
-			// Slash animation
-			const slashPath = svgRef.querySelector('path[d*="M22 2L2 22"]');
-			if (slashPath) {
-				const pathLength = slashPath.getTotalLength();
-				slashPath.style.strokeDasharray = pathLength + ' ' + pathLength;
-				
-				slashPath.animate([
-					{ strokeDashoffset: 0 },
-					{ strokeDashoffset: pathLength },
-					{ strokeDashoffset: 0 }
-				], { duration: 1200, easing: 'ease-in-out' });
-			}
+		if (!svgRef || isAnimating) return;
+		stopAnimation();
+		isAnimating = true;
+		onAnimationStart?.();
+
+		// Whole SVG wobble
+		const svgAnim = svgRef.animate([
+			{ transform: 'scale(1) rotate(0deg)' },
+			{ transform: 'scale(1.1) rotate(-3deg)' },
+			{ transform: 'scale(0.95) rotate(3deg)' },
+			{ transform: 'scale(1) rotate(-2deg)' },
+			{ transform: 'scale(1) rotate(0deg)' }
+		], {
+			duration,
+			easing: 'ease-in-out',
+			iterations: loop || autoPlay || currentState === 'loading' ? Infinity : 1
+		});
+		currentAnimations.push(svgAnim);
+
+		// Headphones pulse
+		const headphonesPath = svgRef.querySelector('path[d*="M3 14h3"]');
+		if (headphonesPath) {
+			const hpAnim = headphonesPath.animate([
+				{ transform: 'scale(1)', opacity: '1' },
+				{ transform: 'scale(1.2)', opacity: '0.7' },
+				{ transform: 'scale(0.9)', opacity: '1' },
+				{ transform: 'scale(1)', opacity: '1' }
+			], {
+				duration: duration * 0.75,
+				easing: 'ease-in-out',
+				iterations: loop || autoPlay || currentState === 'loading' ? Infinity : 1
+			});
+			currentAnimations.push(hpAnim);
+		}
+
+		// Slash drawing
+		const slashPath = svgRef.querySelector('path[d*="M22 2L2 22"]');
+		if (slashPath) {
+			const pathLength = slashPath.getTotalLength();
+			slashPath.style.strokeDasharray = pathLength + ' ' + pathLength;
+
+			const slashAnim = slashPath.animate([
+				{ strokeDashoffset: pathLength },
+				{ strokeDashoffset: 0 }
+			], {
+				duration,
+				easing: 'ease-in-out',
+				fill: 'forwards'
+			});
+			currentAnimations.push(slashAnim);
+		}
+
+		if (!(loop || autoPlay || currentState === 'loading')) {
+			setTimeout(() => {
+				stopAnimation();
+				onAnimationEnd?.();
+			}, duration + 100);
 		}
 	}
-	
+
 	function stopAnimation() {
+		isAnimating = false;
+		currentAnimations.forEach(a => a.cancel());
+		currentAnimations = [];
+
 		if (svgRef) {
-			isAnimating = false;
-			svgRef.getAnimations().forEach(animation => animation.cancel());
+			svgRef.getAnimations().forEach(a => a.cancel());
 			const paths = svgRef.querySelectorAll('path');
 			paths.forEach(path => {
-				path.getAnimations().forEach(animation => animation.cancel());
+				path.getAnimations().forEach(a => a.cancel());
 				path.style.transform = '';
 				path.style.opacity = '1';
 				path.style.strokeDasharray = '';
@@ -73,19 +127,54 @@
 			svgRef.style.transform = '';
 		}
 	}
-	
+
+	function toggleAnimation() {
+		isAnimating ? stopAnimation() : startAnimation();
+	}
+
+	function setAnimationState(newState: string) {
+		currentState = newState as any;
+		switch (newState) {
+			case 'active':
+			case 'loading':
+				startAnimation();
+				break;
+			default:
+				stopAnimation();
+				break;
+		}
+	}
+
+	// Events
 	function handleMouseEnter() {
-		if (!isControlled) startAnimation();
+		if (triggers.hover && !triggers.custom) startAnimation();
 	}
-	
 	function handleMouseLeave() {
-		if (!isControlled) stopAnimation();
+		if (triggers.hover && !triggers.custom) stopAnimation();
 	}
-	
-	export function getControls(): HeadphonesOffIconHandle {
-		isControlled = true;
-		return { startAnimation, stopAnimation };
+	function handleClick() {
+		if (triggers.click) toggleAnimation();
 	}
+	function handleFocus() {
+		if (triggers.focus) startAnimation();
+	}
+	function handleBlur() {
+		if (triggers.focus) stopAnimation();
+	}
+
+	// Sync props
+	$effect(() => setAnimationState(animationState));
+	$effect(() => {
+		if (autoPlay) startAnimation();
+		return () => stopAnimation();
+	});
+
+	// Public API
+	export function start() { startAnimation(); }
+	export function stop() { stopAnimation(); }
+	export function toggle() { toggleAnimation(); }
+	export function setState(state: string) { setAnimationState(state); }
+	export function getStatus() { return { isAnimating, currentState }; }
 </script>
 
 <div 
@@ -93,6 +182,11 @@
 	class={clsx('inline-flex', className)}
 	on:mouseenter={handleMouseEnter}
 	on:mouseleave={handleMouseLeave}
+	on:click={handleClick}
+	on:focus={triggers.focus ? handleFocus : undefined}
+	on:blur={triggers.focus ? handleBlur : undefined}
+	tabindex={triggers.focus ? 0 : -1}
+	role={triggers.click || triggers.focus ? 'button' : undefined}
 	{...restProps}
 >
 	<svg
@@ -107,8 +201,9 @@
 		stroke-linecap="round"
 		stroke-linejoin="round"
 		style="transform-origin: center;"
+		class="lucide lucide-headphones-off-icon lucide-headphones-off"
 	>
-		<path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" style="transform-origin: center;" />
+		<path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" />
 		<path d="M22 2L2 22" stroke-width="2.5" />
 	</svg>
 </div>

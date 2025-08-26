@@ -1,32 +1,55 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
 	
+	interface AnimationTriggers {
+		hover?: boolean;
+		click?: boolean;
+		focus?: boolean;
+		custom?: boolean;
+	}
+	
 	interface Props {
 		size?: number;
 		class?: string;
+		triggers?: AnimationTriggers;
+		animationState?: 'idle' | 'active' | 'loading' | 'success' | 'error';
+		autoPlay?: boolean;
+		loop?: boolean;
+		duration?: number;
+		onAnimationStart?: () => void;
+		onAnimationEnd?: () => void;
 		[key: string]: any;
 	}
 	
-	let { size = 28, class: className, ...restProps }: Props = $props();
-	
-	export interface BellMinusIconHandle {
-		startAnimation: () => void;
-		stopAnimation: () => void;
-	}
+	let { 
+		size = 28, 
+		class: className, 
+		triggers = { hover: true },
+		animationState = 'idle',
+		autoPlay = false,
+		loop = false,
+		duration = 2000,
+		onAnimationStart,
+		onAnimationEnd,
+		...restProps 
+	}: Props = $props();
 	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
-	let isControlled = false;
+	let currentAnimations: Animation[] = [];
+	let currentState = $state(animationState);
 	
 	// Animation controls
 	function startAnimation() {
-		if (svgRef) {
+		if (svgRef && !isAnimating) {
+			stopAnimation(); // Clear any existing animation
+			
 			isAnimating = true;
+			onAnimationStart?.();
 			
 			// Bell swing animation
-			// React: rotate: [0, -12, 10, -6, 3, 0]
-			svgRef.animate([
+			const svgAnimation = svgRef.animate([
 				{ transform: 'rotate(0deg)' },
 				{ transform: 'rotate(-12deg)' },
 				{ transform: 'rotate(10deg)' },
@@ -34,16 +57,16 @@
 				{ transform: 'rotate(3deg)' },
 				{ transform: 'rotate(0deg)' }
 			], {
-				duration: 1400,
-				iterations: Infinity,
+				duration: Math.floor(duration * 0.7),
+				iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 				easing: 'ease-in-out'
 			});
+			currentAnimations.push(svgAnimation);
 			
 			// Clapper movement animation
-			// React: x: [0, -3, 3, -2, 1, 0]
 			const clapper = svgRef.querySelector('path[d*="21a2"]'); // clapper path
 			if (clapper) {
-				clapper.animate([
+				const clapperAnimation = clapper.animate([
 					{ transform: 'translateX(0px)' },
 					{ transform: 'translateX(-3px)' },
 					{ transform: 'translateX(3px)' },
@@ -51,79 +74,177 @@
 					{ transform: 'translateX(1px)' },
 					{ transform: 'translateX(0px)' }
 				], {
-					duration: 1400,
-					iterations: Infinity,
+					duration: Math.floor(duration * 0.7),
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 					easing: 'ease-in-out'
 				});
+				currentAnimations.push(clapperAnimation);
 			}
 			
 			// Minus line animation
-			// React: scaleX: [1, 0.6, 1.2, 1], rotate: [0, -10, 10, 0], opacity: [1, 0.6, 1]
 			const minus = svgRef.querySelector('path[d*="15 8h6"]'); // minus path
 			if (minus) {
-				minus.animate([
+				const minusAnimation = minus.animate([
 					{ transform: 'scaleX(1) rotate(0deg)', opacity: '1' },
 					{ transform: 'scaleX(0.6) rotate(-10deg)', opacity: '0.6' },
 					{ transform: 'scaleX(1.2) rotate(10deg)', opacity: '1' },
 					{ transform: 'scaleX(1) rotate(0deg)', opacity: '1' }
 				], {
-					duration: 1200,
-					iterations: Infinity,
+					duration: Math.floor(duration * 0.6),
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 					easing: 'ease-in-out'
 				});
+				currentAnimations.push(minusAnimation);
 			}
+			
+			// Handle animation completion
+			const lastAnimation = currentAnimations[currentAnimations.length - 1];
+			lastAnimation?.addEventListener('finish', () => {
+				if (!loop && !autoPlay && currentState !== 'loading') {
+					if (currentAnimations.every(anim => anim.playState === 'finished')) {
+						stopAnimation();
+					}
+				}
+				onAnimationEnd?.();
+			});
 		}
 	}
 	
 	function stopAnimation() {
+		currentAnimations.forEach(animation => {
+			animation.cancel();
+		});
+		currentAnimations = [];
+		
 		if (svgRef) {
 			isAnimating = false;
-			// Cancel all animations
-			svgRef.getAnimations().forEach(animation => animation.cancel());
+			
+			// Reset to normal state
+			svgRef.style.transform = 'rotate(0deg)';
 			const clapper = svgRef.querySelector('path[d*="21a2"]');
 			const minus = svgRef.querySelector('path[d*="15 8h6"]');
 			
 			if (clapper) {
-				clapper.getAnimations().forEach(animation => animation.cancel());
 				clapper.style.transform = 'translateX(0px)';
 			}
 			if (minus) {
-				minus.getAnimations().forEach(animation => animation.cancel());
 				minus.style.transform = 'scaleX(1) rotate(0deg)';
 				minus.style.opacity = '1';
 			}
-			// Reset SVG transform
-			svgRef.style.transform = 'rotate(0deg)';
 		}
 	}
 	
+	function toggleAnimation() {
+		if (isAnimating) {
+			stopAnimation();
+		} else {
+			startAnimation();
+		}
+	}
+	
+	function setAnimationState(newState: string) {
+		currentState = newState as any;
+		
+		// State-based animation logic
+		switch (newState) {
+			case 'active':
+			case 'loading':
+				startAnimation();
+				break;
+			case 'idle':
+			case 'success':
+			case 'error':
+			default:
+				stopAnimation();
+				break;
+		}
+	}
+	
+	// Event handlers
 	function handleMouseEnter() {
-		if (!isControlled) {
+		if (triggers.hover && !triggers.custom) {
 			startAnimation();
 		}
 	}
 	
 	function handleMouseLeave() {
-		if (!isControlled) {
+		if (triggers.hover && !triggers.custom) {
 			stopAnimation();
 		}
 	}
 	
-	// Public API
-	export function getControls(): BellMinusIconHandle {
-		isControlled = true;
+	function handleClick() {
+		if (triggers.click) {
+			toggleAnimation();
+		}
+	}
+	
+	function handleFocus() {
+		if (triggers.focus) {
+			startAnimation();
+		}
+	}
+	
+	function handleBlur() {
+		if (triggers.focus) {
+			stopAnimation();
+		}
+	}
+	
+	// Reactive state changes - update animation when state prop changes
+	$effect(() => {
+		if (svgRef) {
+			setAnimationState(animationState);
+		}
+	});
+	
+	// Auto-play on mount
+	$effect(() => {
+		if (autoPlay && svgRef) {
+			startAnimation();
+		}
+		
+		// Cleanup on destroy
+		return () => {
+			stopAnimation();
+		};
+	});
+	
+	// Public API for external control
+	export function start() {
+		startAnimation();
+	}
+	
+	export function stop() {
+		stopAnimation();
+	}
+	
+	export function toggle() {
+		toggleAnimation();
+	}
+	
+	export function setState(state: string) {
+		setAnimationState(state);
+	}
+	
+	export function getStatus() {
 		return {
-			startAnimation,
-			stopAnimation
+			isAnimating,
+			currentState
 		};
 	}
 </script>
 
 <div 
 	bind:this={containerRef}
-	class={clsx('relative inline-flex', className)}
-	on:mouseenter={handleMouseEnter}
-	on:mouseleave={handleMouseLeave}
+	class={clsx('inline-flex', className)}
+	onmouseenter={handleMouseEnter}
+	onmouseleave={handleMouseLeave}
+	onclick={handleClick}
+	onfocus={triggers.focus ? handleFocus : undefined}
+	onblur={triggers.focus ? handleBlur : undefined}
+	tabindex={triggers.focus ? 0 : -1}
+	role={triggers.click || triggers.focus ? "button" : undefined}
 	{...restProps}
 >
 	<svg

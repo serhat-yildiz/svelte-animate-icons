@@ -1,162 +1,200 @@
 <script lang="ts">
-  import { clsx } from 'clsx';
-  
-  interface Props {
-    size?: number;
-    class?: string;
-  }
-  
-  let { size = 28, class: className, ...restProps }: Props = $props();
-  
-  // Animation control
-  let isAnimating = $state(false);
-  
-  // Refs for animation elements
-  let svgEl: SVGSVGElement;
-  let swayGroupEl: SVGGElement;
-  let dotEl: SVGPathElement;
-  let bar1El: SVGPathElement;
-  let bar2El: SVGPathElement;
-  let bar3El: SVGPathElement;
-  let bar4El: SVGPathElement;
-  let bar1BreatheEl: SVGPathElement;
-  let bar2BreatheEl: SVGPathElement;
-  let bar3BreatheEl: SVGPathElement;
-  let bar4BreatheEl: SVGPathElement;
-  
-  export function startAnimation() {
-    if (isAnimating) return;
-    isAnimating = true;
-    
-    // SVG animation
-    if (svgEl) {
-      svgEl.animate([
-        { transform: 'scale(1) rotate(0deg) translateY(0px)' },
-        { transform: 'scale(1.06) rotate(-2deg) translateY(-1px)' },
-        { transform: 'scale(1) rotate(2deg) translateY(0px)' },
-        { transform: 'scale(1) rotate(0deg) translateY(0px)' }
-      ], {
-        duration: 900,
-        easing: 'ease-in-out'
-      });
-    }
-    
-    // Sway group animation
-    if (swayGroupEl) {
-      swayGroupEl.animate([
-        { transform: 'rotate(0deg) translate(0px, 0px) scale(1)' },
-        { transform: 'rotate(-2deg) translate(-0.4px, -0.3px) scale(1.018)' },
-        { transform: 'rotate(1deg) translate(0.2px, 0.1px) scale(1)' },
-        { transform: 'rotate(0deg) translate(0px, 0px) scale(1)' }
-      ], {
-        duration: 700,
-        easing: 'ease-in-out'
-      });
-    }
-    
-    // Dot kick animation (delayed)
-    if (dotEl) {
-      setTimeout(() => {
-        dotEl.animate([
-          { transform: 'scale(1)', opacity: '1' },
-          { transform: 'scale(1.18)', opacity: '1' },
-          { transform: 'scale(1)', opacity: '1' }
-        ], {
-          duration: 300,
-          easing: 'ease-out'
-        });
-      }, 60);
-    }
-    
-    // Bar bounce animations (staggered)
-    const bars = [bar1El, bar2El, bar3El, bar4El];
-    bars.forEach((bar, index) => {
-      if (bar) {
-        setTimeout(() => {
-          bar.animate([
-            { transform: 'translateY(0px) scaleY(1)', transformOrigin: 'center bottom', opacity: '1' },
-            { transform: 'translateY(-0.8px) scaleY(1.1)', transformOrigin: 'center bottom', opacity: '1' },
-            { transform: 'translateY(0px) scaleY(1)', transformOrigin: 'center bottom', opacity: '1' }
-          ], {
-            duration: 420,
-            easing: 'ease-out'
-          });
-        }, 60 + (index * 60));
-      }
-    });
-    
-    // Bar breathe animations (delayed)
-    const breatheBars = [bar1BreatheEl, bar2BreatheEl, bar3BreatheEl, bar4BreatheEl];
-    breatheBars.forEach((bar, index) => {
-      if (bar) {
-        setTimeout(() => {
-          bar.animate([
-            { transform: 'scaleY(1)', transformOrigin: 'center bottom' },
-            { transform: 'scaleY(1.04)', transformOrigin: 'center bottom' },
-            { transform: 'scaleY(1)', transformOrigin: 'center bottom' }
-          ], {
-            duration: 500,
-            easing: 'ease-in-out'
-          });
-        }, 320 + (index * 40));
-      }
-    });
-    
-    // Reset animation state
-    setTimeout(() => {
-      isAnimating = false;
-    }, 1200);
-  }
-  
-  export function stopAnimation() {
-    isAnimating = false;
-  }
-  
-  function handleMouseEnter() {
-    startAnimation();
-  }
-  
-  function handleMouseLeave() {
-    stopAnimation();
-  }
+	import { clsx } from 'clsx';
+	
+	interface AnimationTriggers {
+		hover?: boolean;
+		click?: boolean;
+		focus?: boolean;
+		custom?: boolean;
+	}
+	
+	interface Props {
+		size?: number;
+		class?: string;
+		triggers?: AnimationTriggers;
+		animationState?: 'idle' | 'active' | 'loading' | 'success' | 'error';
+		autoPlay?: boolean;
+		loop?: boolean;
+		duration?: number;
+		onAnimationStart?: () => void;
+		onAnimationEnd?: () => void;
+		[key: string]: any;
+	}
+	
+	let {
+		size = 28,
+		class: className,
+		triggers = { hover: true },
+		animationState = 'idle',
+		autoPlay = false,
+		loop = false,
+		duration = 2000,
+		onAnimationStart,
+		onAnimationEnd,
+		...restProps
+	}: Props = $props();
+	
+	let containerRef: HTMLDivElement;
+	let svgRef: SVGSVGElement;
+	let isAnimating = $state(false);
+	let currentState = $state(animationState);
+	let currentAnimations: Animation[] = [];
+	
+	// Refs for animation elements
+	let swayGroupEl: SVGGElement;
+	let dotEl: SVGPathElement;
+	let bar1El: SVGPathElement;
+	let bar2El: SVGPathElement;
+	let bar3El: SVGPathElement;
+	let bar4El: SVGPathElement;
+	
+	function startAnimation() {
+		if (svgRef && !isAnimating) {
+			stopAnimation();
+			
+			isAnimating = true;
+			onAnimationStart?.();
+			
+			// Complex signal bar animations with staggered timing
+			const bars = [bar1El, bar2El, bar3El, bar4El];
+			const delays = [0, 0.1, 0.2, 0.3];
+			
+			bars.forEach((bar, index) => {
+				if (bar) {
+					setTimeout(() => {
+						const barAnimation = bar.animate([
+							{ opacity: '0.3', transform: 'scaleY(0.5)' },
+							{ opacity: '1', transform: 'scaleY(1)' },
+							{ opacity: '0.6', transform: 'scaleY(0.8)' },
+							{ opacity: '1', transform: 'scaleY(1)' }
+						], {
+							duration: Math.floor(duration * 0.6),
+							iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
+							easing: 'ease-in-out'
+						});
+						currentAnimations.push(barAnimation);
+						
+						if (index === bars.length - 1) {
+							barAnimation.addEventListener('finish', () => {
+								if (!loop && !autoPlay && currentState !== 'loading') {
+									if (currentAnimations.every(anim => anim.playState === 'finished')) {
+										stopAnimation();
+									}
+								}
+								onAnimationEnd?.();
+							});
+						}
+					}, Math.floor(duration * delays[index]));
+				}
+			});
+			
+			// Dot pulse animation
+			if (dotEl) {
+				const dotAnimation = dotEl.animate([
+					{ opacity: '0.4', transform: 'scale(1)' },
+					{ opacity: '1', transform: 'scale(1.2)' },
+					{ opacity: '0.7', transform: 'scale(1)' }
+				], {
+					duration: Math.floor(duration * 0.8),
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
+					easing: 'ease-in-out'
+				});
+				currentAnimations.push(dotAnimation);
+			}
+		}
+	}
+	
+	function stopAnimation() {
+		currentAnimations.forEach(animation => animation.cancel());
+		currentAnimations = [];
+		
+		if (svgRef) {
+			isAnimating = false;
+			
+			[bar1El, bar2El, bar3El, bar4El, dotEl].forEach(el => {
+				if (el) {
+					el.style.opacity = '1';
+					el.style.transform = 'scaleY(1) scale(1)';
+				}
+			});
+		}
+	}
+	
+	function toggleAnimation() {
+		if (isAnimating) stopAnimation();
+		else startAnimation();
+	}
+	
+	function setAnimationState(newState: string) {
+		currentState = newState as any;
+		switch (newState) {
+			case 'active': case 'loading': case 'success':
+				startAnimation(); break;
+			default: stopAnimation(); break;
+		}
+	}
+	
+	function handleMouseEnter() {
+		if (triggers.hover && !triggers.custom) startAnimation();
+	}
+	
+	function handleMouseLeave() {
+		if (triggers.hover && !triggers.custom) stopAnimation();
+	}
+	
+	function handleClick() {
+		if (triggers.click) toggleAnimation();
+	}
+	
+	function handleFocus() {
+		if (triggers.focus) startAnimation();
+	}
+	
+	function handleBlur() {
+		if (triggers.focus) stopAnimation();
+	}
+	
+	$effect(() => { if (svgRef) setAnimationState(animationState); });
+	$effect(() => { if (autoPlay && svgRef) startAnimation(); return () => stopAnimation(); });
+	
+	export function start() { startAnimation(); }
+	export function stop() { stopAnimation(); }
+	export function toggle() { toggleAnimation(); }
+	export function setState(state: string) { setAnimationState(state); }
+	export function getStatus() { return { isAnimating, currentState }; }
 </script>
 
 <div 
-  class={clsx("inline-flex items-center justify-center", className)} 
-  onmouseenter={handleMouseEnter}
-  onmouseleave={handleMouseLeave}
-  {...restProps}
+	bind:this={containerRef}
+	class={clsx('inline-flex', className)}
+	onmouseenter={handleMouseEnter}
+	onmouseleave={handleMouseLeave}
+	onclick={handleClick}
+	onfocus={triggers.focus ? handleFocus : undefined}
+	onblur={triggers.focus ? handleBlur : undefined}
+	tabindex={triggers.focus ? 0 : undefined}
+	role={triggers.click || triggers.focus ? "button" : undefined}
+	{...restProps}
 >
-  <svg
-    bind:this={svgEl}
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    class="lucide lucide-signal-icon lucide-signal"
-  >
-    <g bind:this={swayGroupEl}>
-      <path
-        bind:this={dotEl}
-        d="M2 20h.01"
-      />
-      <g>
-        <path bind:this={bar1El} d="M7 20v-4" />
-        <path bind:this={bar2El} d="M12 20v-8" />
-        <path bind:this={bar3El} d="M17 20V8" />
-        <path bind:this={bar4El} d="M22 4v16" />
-      </g>
-      <g>
-        <path bind:this={bar1BreatheEl} d="M7 20v-4" />
-        <path bind:this={bar2BreatheEl} d="M12 20v-8" />
-        <path bind:this={bar3BreatheEl} d="M17 20V8" />
-        <path bind:this={bar4BreatheEl} d="M22 4v16" />
-      </g>
-    </g>
-  </svg>
+	<svg
+		bind:this={svgRef}
+		xmlns="http://www.w3.org/2000/svg"
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		class="lucide lucide-signal-icon lucide-signal"
+	>
+		<g bind:this={swayGroupEl}>
+			<path bind:this={dotEl} d="M12 12h.01" />
+			<path bind:this={bar1El} d="M10 14v-4" />
+			<path bind:this={bar2El} d="M14 14v-4" />
+			<path bind:this={bar3El} d="M6 16v-8" />
+			<path bind:this={bar4El} d="M18 16v-8" />
+		</g>
+	</svg>
 </div>

@@ -1,103 +1,182 @@
 <script lang="ts">
   import { clsx } from 'clsx';
-  
+
+  type AnimationState = 'idle' | 'active' | 'loading' | 'success' | 'error';
+
   interface Props {
     size?: number;
     class?: string;
+    triggers?: { hover?: boolean; click?: boolean; focus?: boolean; custom?: boolean };
+    animationState?: AnimationState;
+    autoPlay?: boolean;
+    loop?: boolean;
+    duration?: number;
+    onAnimationStart?: () => void;
+    onAnimationEnd?: () => void;
+    [key: string]: any;
   }
-  
-  let { size = 28, class: className, ...restProps }: Props = $props();
-  
-  // Animation control
-  let isAnimating = $state(false);
-  
-  // Refs for animation elements
-  let svgEl: SVGSVGElement;
+
+  let {
+    size = 28,
+    class: className,
+    triggers = { hover: true },
+    animationState = 'idle',
+    autoPlay = false,
+    loop = false,
+    duration = 600,
+    onAnimationStart,
+    onAnimationEnd,
+    ...restProps
+  }: Props = $props();
+
+  let svgRef: SVGSVGElement;
   let shaftEl: SVGPathElement;
   let headEl: SVGPathElement;
   let trayEl: SVGPathElement;
-  
-  export function startAnimation() {
-    if (isAnimating) return;
+
+  let isAnimating = $state(false);
+  let currentState: AnimationState = animationState;
+
+  // --- Core animation ---
+  function runAnimation() {
+    if (!svgRef) return;
     isAnimating = true;
-    
-    // Group pulse animation
-    if (svgEl) {
-      svgEl.animate([
+    onAnimationStart?.();
+
+    // Group pulse
+    svgRef.animate(
+      [
         { transform: 'scale(1)' },
         { transform: 'scale(1.02)' },
         { transform: 'scale(1)' }
-      ], {
-        duration: 600,
-        easing: 'ease-in-out'
-      });
-    }
-    
-    // Shaft drawing animation
+      ],
+      { duration, easing: 'ease-in-out', iterations: loop ? Infinity : 1 }
+    );
+
+    // Shaft
     if (shaftEl) {
-      shaftEl.animate([
-        { strokeDashoffset: '30', opacity: '0.4' },
-        { strokeDashoffset: '0', opacity: '1' }
-      ], {
-        duration: 600,
-        easing: 'ease-in-out'
-      });
+      shaftEl.animate(
+        [
+          { strokeDashoffset: '30', opacity: '0.4' },
+          { strokeDashoffset: '0', opacity: '1' }
+        ],
+        { duration, easing: 'ease-in-out', iterations: loop ? Infinity : 1 }
+      );
     }
-    
-    // Head movement animation (delayed)
+
+    // Head
     if (headEl) {
-      setTimeout(() => {
-        headEl.animate([
+      headEl.animate(
+        [
           { transform: 'translateY(2px) scale(1)', opacity: '0.6' },
           { transform: 'translateY(-2px) scale(1.05)', opacity: '1' },
           { transform: 'translateY(0px) scale(1)', opacity: '1' }
-        ], {
-          duration: 600,
-          easing: 'ease-in-out'
-        });
-      }, 50);
+        ],
+        {
+          duration,
+          delay: 50,
+          easing: 'ease-in-out',
+          iterations: loop ? Infinity : 1
+        }
+      );
     }
-    
-    // Tray drawing animation (delayed)
+
+    // Tray
     if (trayEl) {
-      setTimeout(() => {
-        trayEl.animate([
+      trayEl.animate(
+        [
           { strokeDashoffset: '60', opacity: '0.3' },
           { strokeDashoffset: '0', opacity: '1' }
-        ], {
-          duration: 600,
-          easing: 'ease-in-out'
-        });
-      }, 100);
+        ],
+        {
+          duration,
+          delay: 100,
+          easing: 'ease-in-out',
+          iterations: loop ? Infinity : 1
+        }
+      );
     }
-    
-    // Reset animation state
+
     setTimeout(() => {
       isAnimating = false;
-    }, 700);
+      onAnimationEnd?.();
+      if (!loop) currentState = 'idle';
+    }, duration + 200);
   }
-  
-  export function stopAnimation() {
+
+  function resetAnimation() {
+    if (!svgRef) return;
+    svgRef.getAnimations().forEach((a) => a.cancel());
+    svgRef.querySelectorAll('*').forEach((el) => {
+      el.getAnimations().forEach((a) => a.cancel());
+      (el as HTMLElement).style.transform = '';
+      (el as HTMLElement).style.opacity = '1';
+      (el as HTMLElement).style.strokeDashoffset = '';
+    });
+  }
+
+  // --- Public API ---
+  export function start() {
+    if (!isAnimating) {
+      currentState = 'active';
+      runAnimation();
+    }
+  }
+  export function stop() {
+    resetAnimation();
     isAnimating = false;
+    currentState = 'idle';
   }
-  
+  export function toggle() {
+    isAnimating ? stop() : start();
+  }
+  export function setState(state: AnimationState) {
+    currentState = state;
+    if (state === 'active' || state === 'loading') start();
+    else stop();
+  }
+  export function getStatus() {
+    return { state: currentState, isAnimating };
+  }
+
+  // --- Events ---
   function handleMouseEnter() {
-    startAnimation();
+    if (triggers.hover && !triggers.custom) start();
   }
-  
   function handleMouseLeave() {
-    stopAnimation();
+    if (triggers.hover && !triggers.custom) stop();
   }
+  function handleClick() {
+    if (triggers.click) toggle();
+  }
+  function handleFocus() {
+    if (triggers.focus) start();
+  }
+  function handleBlur() {
+    if (triggers.focus) stop();
+  }
+
+  // --- Reactivity ---
+  $effect(() => setState(animationState));
+  $effect(() => {
+    if (autoPlay) start();
+    return () => stop();
+  });
 </script>
 
-<div 
-  class={clsx("inline-flex items-center justify-center", className)} 
-  onmouseenter={handleMouseEnter}
-  onmouseleave={handleMouseLeave}
+<div
+  class={clsx("inline-flex items-center justify-center", className)}
+  on:mouseenter={handleMouseEnter}
+  on:mouseleave={handleMouseLeave}
+  on:click={handleClick}
+  on:focus={handleFocus}
+  on:blur={handleBlur}
+  tabindex={triggers.focus ? 0 : -1}
+  role={triggers.click || triggers.focus ? "button" : undefined}
   {...restProps}
 >
   <svg
-    bind:this={svgEl}
+    bind:this={svgRef}
     xmlns="http://www.w3.org/2000/svg"
     width={size}
     height={size}
@@ -107,7 +186,7 @@
     stroke-width="2"
     stroke-linecap="round"
     stroke-linejoin="round"
-    class="lucide lucide-upload-icon lucide-upload"
+    style="transform-origin: center;"
   >
     <path
       bind:this={shaftEl}

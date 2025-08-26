@@ -1,81 +1,158 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
 	
+	interface AnimationTriggers {
+		hover?: boolean;
+		click?: boolean;
+		focus?: boolean;
+		custom?: boolean;
+	}
+	
 	interface Props {
 		size?: number;
 		class?: string;
+		triggers?: AnimationTriggers;
+		animationState?: 'idle' | 'active' | 'loading' | 'success' | 'error';
+		autoPlay?: boolean;
+		loop?: boolean;
+		duration?: number;
+		onAnimationStart?: () => void;
+		onAnimationEnd?: () => void;
 		[key: string]: any;
 	}
 	
-	let { size = 28, class: className, ...restProps }: Props = $props();
-	
-	export interface CirclePlusIconHandle {
-		startAnimation: () => void;
-		stopAnimation: () => void;
-	}
+	let { 
+		size = 28, 
+		class: className, 
+		triggers = { hover: true },
+		animationState = 'idle',
+		autoPlay = false,
+		loop = false,
+		duration = 2000,
+		onAnimationStart,
+		onAnimationEnd,
+		...restProps 
+	}: Props = $props();
 	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
-	let isControlled = false;
+	let currentAnimation: Animation[] = [];
+	let currentState = $state(animationState);
 	
 	function startAnimation() {
-		if (svgRef) {
+		if (svgRef && !isAnimating) {
+			stopAnimation();
 			isAnimating = true;
+			onAnimationStart?.();
 			
-			// Circle scale and rotation
 			const circle = svgRef.querySelector('circle');
 			if (circle) {
-				circle.animate([
+				currentAnimation.push(circle.animate([
 					{ transform: 'scale(1) rotate(0deg)' },
 					{ transform: 'scale(1.1) rotate(180deg)' },
 					{ transform: 'scale(1) rotate(360deg)' }
-				], { duration: 2000, iterations: Infinity, easing: 'linear' });
+				], { duration, iterations: loop || autoPlay || currentState === 'loading' ? Infinity : 1, easing: 'linear' }));
 			}
 			
-			// Plus lines opacity pulse
 			const plusLines = svgRef.querySelectorAll('path');
 			plusLines.forEach(line => {
-				line.animate([
+				currentAnimation.push(line.animate([
 					{ opacity: '1' },
 					{ opacity: '0.4' },
 					{ opacity: '1' }
-				], { duration: 1000, iterations: Infinity });
+				], { duration: 1000, iterations: loop || autoPlay || currentState === 'loading' ? Infinity : 1 }));
+			});
+			
+			currentAnimation.forEach(anim => {
+				anim.addEventListener('finish', () => {
+					if (!loop && !autoPlay && currentState !== 'loading') stopAnimation();
+					onAnimationEnd?.();
+				});
 			});
 		}
 	}
 	
 	function stopAnimation() {
+		currentAnimation.forEach(anim => anim.cancel());
+		currentAnimation = [];
 		if (svgRef) {
 			isAnimating = false;
-			const allElements = svgRef.querySelectorAll('*');
-			allElements.forEach(element => {
-				element.getAnimations().forEach(animation => animation.cancel());
-				element.style.transform = '';
-				element.style.opacity = '1';
+			svgRef.querySelectorAll('*').forEach(el => {
+				el.getAnimations().forEach(a => a.cancel());
+				el.style.transform = '';
+				el.style.opacity = '1';
 			});
 		}
 	}
 	
+	function toggleAnimation() {
+		isAnimating ? stopAnimation() : startAnimation();
+	}
+	
+	function setAnimationState(newState: string) {
+		currentState = newState as any;
+		switch (newState) {
+			case 'active':
+			case 'loading':
+				startAnimation();
+				break;
+			case 'idle':
+			case 'success':
+			case 'error':
+			default:
+				stopAnimation();
+				break;
+		}
+	}
+	
 	function handleMouseEnter() {
-		if (!isControlled) startAnimation();
+		if (triggers.hover && !triggers.custom) startAnimation();
 	}
 	
 	function handleMouseLeave() {
-		if (!isControlled) stopAnimation();
+		if (triggers.hover && !triggers.custom) stopAnimation();
 	}
 	
-	export function getControls(): CirclePlusIconHandle {
-		isControlled = true;
-		return { startAnimation, stopAnimation };
+	function handleClick() {
+		if (triggers.click) toggleAnimation();
 	}
+	
+	function handleFocus() {
+		if (triggers.focus) startAnimation();
+	}
+	
+	function handleBlur() {
+		if (triggers.focus) stopAnimation();
+	}
+	
+	$effect(() => {
+		if (svgRef) setAnimationState(animationState);
+	});
+	
+	$effect(() => {
+		if (autoPlay && svgRef) startAnimation();
+		return () => stopAnimation();
+	});
+	
+	// Public API
+	export function start() { startAnimation(); }
+	export function stop() { stopAnimation(); }
+	export function toggle() { toggleAnimation(); }
+	export function setState(state: string) { setAnimationState(state); }
+	export function getStatus() { return { isAnimating, currentState }; }
 </script>
 
 <div 
 	bind:this={containerRef}
 	class={clsx('inline-flex', className)}
-	on:mouseenter={handleMouseEnter}
-	on:mouseleave={handleMouseLeave}
+	onmouseenter={handleMouseEnter}
+	onmouseleave={handleMouseLeave}
+	onclick={handleClick}
+	onfocus={triggers.focus ? handleFocus : undefined}
+	onblur={triggers.focus ? handleBlur : undefined}
+	tabindex={triggers.focus ? 0 : -1}
+	role={triggers.click || triggers.focus ? "button" : undefined}
 	{...restProps}
 >
 	<svg
@@ -90,8 +167,8 @@
 		stroke-linecap="round"
 		stroke-linejoin="round"
 	>
-		<circle cx="12" cy="12" r="10" stroke="currentColor" style="transform-origin: center;" />
-		<path d="M8 12h8" stroke="currentColor" />
-		<path d="M12 8v8" stroke="currentColor" />
+		<circle cx="12" cy="12" r="10" style="transform-origin: center;" />
+		<path d="M8 12h8" />
+		<path d="M12 8v8" />
 	</svg>
 </div>

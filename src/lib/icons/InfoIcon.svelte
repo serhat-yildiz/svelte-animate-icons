@@ -1,112 +1,183 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
-	
+  
+	type AnimationState = 'idle' | 'active' | 'loading' | 'success' | 'error';
+  
 	interface Props {
-		size?: number;
-		class?: string;
-		[key: string]: any;
+	  size?: number;
+	  class?: string;
+	  triggers?: { hover?: boolean; click?: boolean; focus?: boolean; custom?: boolean };
+	  animationState?: AnimationState;
+	  autoPlay?: boolean;
+	  loop?: boolean;
+	  duration?: number;
+	  onAnimationStart?: () => void;
+	  onAnimationEnd?: () => void;
+	  [key: string]: any;
 	}
-	
-	let { size = 28, class: className, ...restProps }: Props = $props();
-	
-	export interface InfoIconHandle {
-		startAnimation: () => void;
-		stopAnimation: () => void;
-	}
-	
-	let containerRef: HTMLDivElement;
+  
+	let {
+	  size = 28,
+	  class: className,
+	  triggers = { hover: true },
+	  animationState = 'idle',
+	  autoPlay = false,
+	  loop = false,
+	  duration = 1400,
+	  onAnimationStart,
+	  onAnimationEnd,
+	  ...restProps
+	}: Props = $props();
+  
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
-	let isControlled = false;
-	
-	function startAnimation() {
-		if (svgRef) {
-			isAnimating = true;
-			
-			// SVG rotation and scale
-			svgRef.animate([
-				{ transform: 'rotate(0deg) scale(1)' },
-				{ transform: 'rotate(-2deg) scale(1.08)' },
-				{ transform: 'rotate(2deg) scale(0.95)' },
-				{ transform: 'rotate(0deg) scale(1)' }
-			], { duration: 1400, easing: 'ease-in-out', iterations: Infinity });
-			
-			// Circle drawing
-			const circle = svgRef.querySelector('circle');
-			if (circle) {
-				const pathLength = circle.getTotalLength();
-				circle.style.strokeDasharray = pathLength + ' ' + pathLength;
-				
-				circle.animate([
-					{ strokeDashoffset: pathLength, opacity: '0.6' },
-					{ strokeDashoffset: 0, opacity: '1' }
-				], { duration: 1500, easing: 'ease-in-out', iterations: Infinity });
-			}
-			
-			// Info "i" parts pulse
-			const infoPaths = svgRef.querySelectorAll('path');
-			infoPaths.forEach(path => {
-				path.animate([
-					{ transform: 'scale(1)', opacity: '1' },
-					{ transform: 'scale(1.3)', opacity: '0.5' },
-					{ transform: 'scale(0.8)', opacity: '1' },
-					{ transform: 'scale(1)', opacity: '1' }
-				], { duration: 1000, easing: 'ease-in-out', iterations: Infinity });
-			});
-		}
+	let currentState: AnimationState = animationState;
+  
+	// --- Core Animation ---
+	function runAnimation() {
+	  if (!svgRef) return;
+	  isAnimating = true;
+	  onAnimationStart?.();
+  
+	  // Circle draw
+	  const circle = svgRef.querySelector('circle');
+	  if (circle) {
+		const pathLength = circle.getTotalLength();
+		circle.style.strokeDasharray = `${pathLength} ${pathLength}`;
+		circle.style.strokeDashoffset = `${pathLength}`;
+		circle.animate(
+		  [
+			{ strokeDashoffset: pathLength, opacity: '0.6' },
+			{ strokeDashoffset: 0, opacity: '1' }
+		  ],
+		  { duration: 1500, easing: 'ease-in-out', iterations: loop ? Infinity : 1, fill: 'forwards' }
+		);
+	  }
+  
+	  // Info symbol pulse
+	  const infoPaths = svgRef.querySelectorAll('path');
+	  infoPaths.forEach(path => {
+		path.animate(
+		  [
+			{ transform: 'scale(1)', opacity: '1' },
+			{ transform: 'scale(1.3)', opacity: '0.5' },
+			{ transform: 'scale(0.8)', opacity: '1' },
+			{ transform: 'scale(1)', opacity: '1' }
+		  ],
+		  { duration: 1000, easing: 'ease-in-out', iterations: loop ? Infinity : 1 }
+		);
+	  });
+  
+	  // Wiggle effect on svg
+	  svgRef.animate(
+		[
+		  { transform: 'rotate(0deg) scale(1)' },
+		  { transform: 'rotate(-2deg) scale(1.08)' },
+		  { transform: 'rotate(2deg) scale(0.95)' },
+		  { transform: 'rotate(0deg) scale(1)' }
+		],
+		{ duration, easing: 'ease-in-out', iterations: loop ? Infinity : 1 }
+	  );
+  
+	  setTimeout(() => {
+		isAnimating = false;
+		onAnimationEnd?.();
+		if (!loop) currentState = 'idle';
+	  }, duration + 200);
 	}
-	
-	function stopAnimation() {
-		if (svgRef) {
-			isAnimating = false;
-			svgRef.getAnimations().forEach(animation => animation.cancel());
-			const allElements = svgRef.querySelectorAll('*');
-			allElements.forEach(element => {
-				element.getAnimations().forEach(animation => animation.cancel());
-				element.style.transform = '';
-				element.style.strokeDasharray = '';
-				element.style.strokeDashoffset = '';
-				element.style.opacity = '1';
-			});
-		}
+  
+	function resetAnimation() {
+	  if (!svgRef) return;
+	  svgRef.getAnimations().forEach(a => a.cancel());
+	  svgRef.querySelectorAll('*').forEach(el => {
+		el.getAnimations().forEach(a => a.cancel());
+		(el as HTMLElement).style.transform = '';
+		(el as HTMLElement).style.strokeDasharray = '';
+		(el as HTMLElement).style.strokeDashoffset = '';
+		(el as HTMLElement).style.opacity = '1';
+	  });
 	}
-	
+  
+	// --- Public API ---
+	export function start() {
+	  if (!isAnimating) {
+		currentState = 'active';
+		runAnimation();
+	  }
+	}
+	export function stop() {
+	  resetAnimation();
+	  currentState = 'idle';
+	  isAnimating = false;
+	}
+	export function toggle() {
+	  isAnimating ? stop() : start();
+	}
+	export function setState(state: AnimationState) {
+	  currentState = state;
+	  if (state === 'active' || state === 'loading') start();
+	  else stop();
+	}
+	export function getStatus() {
+	  return { state: currentState, isAnimating };
+	}
+  
+	// --- Event handlers ---
 	function handleMouseEnter() {
-		if (!isControlled) startAnimation();
+	  if (triggers.hover && !triggers.custom) start();
 	}
-	
 	function handleMouseLeave() {
-		if (!isControlled) stopAnimation();
+	  if (triggers.hover && !triggers.custom) stop();
 	}
-	
-	export function getControls(): InfoIconHandle {
-		isControlled = true;
-		return { startAnimation, stopAnimation };
+	function handleClick() {
+	  if (triggers.click) toggle();
 	}
-</script>
-
-<div 
-	bind:this={containerRef}
+	function handleFocus() {
+	  if (triggers.focus) start();
+	}
+	function handleBlur() {
+	  if (triggers.focus) stop();
+	}
+  
+	// --- Reactivity ---
+	$effect(() => {
+	  setState(animationState);
+	});
+  
+	$effect(() => {
+	  if (autoPlay) start();
+	  return () => stop();
+	});
+  </script>
+  
+  <div
 	class={clsx('inline-flex', className)}
 	on:mouseenter={handleMouseEnter}
 	on:mouseleave={handleMouseLeave}
+	on:click={handleClick}
+	on:focus={handleFocus}
+	on:blur={handleBlur}
+	tabindex={triggers.focus ? 0 : -1}
+	role={triggers.click || triggers.focus ? 'button' : undefined}
 	{...restProps}
->
+  >
 	<svg
-		bind:this={svgRef}
-		xmlns="http://www.w3.org/2000/svg"
-		width={size}
-		height={size}
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-		style="transform-origin: center;"
+	  bind:this={svgRef}
+	  xmlns="http://www.w3.org/2000/svg"
+	  width={size}
+	  height={size}
+	  viewBox="0 0 24 24"
+	  fill="none"
+	  stroke="currentColor"
+	  stroke-width="2"
+	  stroke-linecap="round"
+	  stroke-linejoin="round"
+	  style="transform-origin: center;"
+	  class="lucide lucide-info-icon lucide-info"
 	>
-		<circle cx="12" cy="12" r="10" />
-		<path d="M12 16v-4" style="transform-origin: center;" />
-		<path d="M12 8h.01" style="transform-origin: center;" />
+	  <circle cx="12" cy="12" r="10" />
+	  <path d="M12 16v-4" style="transform-origin: center;" />
+	  <path d="M12 8h.01" style="transform-origin: center;" />
 	</svg>
-</div>
+  </div>
+  

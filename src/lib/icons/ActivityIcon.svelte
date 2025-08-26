@@ -1,30 +1,63 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
 	
+	interface AnimationTriggers {
+		hover?: boolean;
+		click?: boolean;
+		focus?: boolean;
+		custom?: boolean;
+	}
+	
 	interface Props {
 		size?: number;
 		class?: string;
+		triggers?: AnimationTriggers;
+		animationState?: 'idle' | 'active' | 'loading' | 'success' | 'error';
+		autoPlay?: boolean;
+		loop?: boolean;
+		duration?: number;
+		onAnimationStart?: () => void;
+		onAnimationEnd?: () => void;
 		[key: string]: any;
 	}
 	
-	let { size = 28, class: className, ...restProps }: Props = $props();
+	let { 
+		size = 28, 
+		class: className, 
+		triggers = { hover: true },
+		animationState = 'idle',
+		autoPlay = false,
+		loop = false,
+		duration = 2000,
+		onAnimationStart,
+		onAnimationEnd,
+		...restProps 
+	}: Props = $props();
 	
 	export interface ActivityIconHandle {
 		startAnimation: () => void;
 		stopAnimation: () => void;
+		toggleAnimation: () => void;
+		setAnimationState: (newState: string) => void;
+		readonly isAnimating: boolean;
 	}
 	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
-	let isControlled = false;
+	let currentAnimation: Animation | null = null;
+	let currentState = $state(animationState);
+	
+	// Watch for prop changes - removed automatic sync
 	
 	// Animation controls
 	function startAnimation() {
-		if (svgRef) {
-			isAnimating = true;
+		if (svgRef && !isAnimating) {
+			stopAnimation(); // Clear any existing animation
 			
-			// Activity pulse animation - exact match with React version
+			isAnimating = true;
+			onAnimationStart?.();
+			
 			const path = svgRef.querySelector('path');
 			if (path) {
 				// Set initial state
@@ -32,28 +65,39 @@
 				path.style.strokeDashoffset = '80';
 				path.style.opacity = '0.6';
 				
-				// Animate: strokeDashoffset: [80, 0, -80], opacity: [0.6, 1, 0.6]
-				path.animate([
+				// Create animation
+				currentAnimation = path.animate([
 					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
 					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
 					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
 				], {
-					duration: 2000, // React: 2 seconds
-					iterations: Infinity, // React: repeat: Infinity
-					easing: 'ease-in-out' // React: ease: "easeInOut"
+					duration: duration,
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
+					easing: 'ease-in-out'
+				});
+				
+				// Handle animation completion
+				currentAnimation.addEventListener('finish', () => {
+					if (!loop && !autoPlay && currentState !== 'loading') {
+						stopAnimation();
+					}
+					onAnimationEnd?.();
 				});
 			}
 		}
 	}
 	
 	function stopAnimation() {
+		if (currentAnimation) {
+			currentAnimation.cancel();
+			currentAnimation = null;
+		}
+		
 		if (svgRef) {
 			isAnimating = false;
-			// Cancel all animations
-			svgRef.getAnimations().forEach(animation => animation.cancel());
+			
 			const path = svgRef.querySelector('path');
 			if (path) {
-				path.getAnimations().forEach(animation => animation.cancel());
 				// Reset to normal state
 				path.style.strokeDasharray = 'none';
 				path.style.strokeDashoffset = '';
@@ -62,24 +106,103 @@
 		}
 	}
 	
+	function toggleAnimation() {
+		if (isAnimating) {
+			stopAnimation();
+		} else {
+			startAnimation();
+		}
+	}
+	
+	function setAnimationState(newState: string) {
+		currentState = newState as any;
+		
+		// State-based animation logic
+		switch (newState) {
+			case 'active':
+			case 'loading':
+				startAnimation();
+				break;
+			case 'idle':
+			case 'success':
+			case 'error':
+			default:
+				stopAnimation();
+				break;
+		}
+	}
+	
+	// Event handlers
 	function handleMouseEnter() {
-		if (!isControlled) {
+		if (triggers.hover && !triggers.custom) {
 			startAnimation();
 		}
 	}
 	
 	function handleMouseLeave() {
-		if (!isControlled) {
+		if (triggers.hover && !triggers.custom) {
 			stopAnimation();
 		}
 	}
 	
-	// Public API
-	export function getControls(): ActivityIconHandle {
-		isControlled = true;
+	function handleClick() {
+		if (triggers.click) {
+			toggleAnimation();
+		}
+	}
+	
+	function handleFocus() {
+		if (triggers.focus) {
+			startAnimation();
+		}
+	}
+	
+	function handleBlur() {
+		if (triggers.focus) {
+			stopAnimation();
+		}
+	}
+	
+	// Reactive state changes - update animation when state prop changes
+	$effect(() => {
+		if (svgRef) {
+			setAnimationState(animationState);
+		}
+	});
+	
+	// Auto-play on mount
+	$effect(() => {
+		if (autoPlay && svgRef) {
+			startAnimation();
+		}
+		
+		// Cleanup on destroy
+		return () => {
+			stopAnimation();
+		};
+	});
+	
+	// Public API for external control
+	export function start() {
+		startAnimation();
+	}
+	
+	export function stop() {
+		stopAnimation();
+	}
+	
+	export function toggle() {
+		toggleAnimation();
+	}
+	
+	export function setState(state: string) {
+		setAnimationState(state);
+	}
+	
+	export function getStatus() {
 		return {
-			startAnimation,
-			stopAnimation
+			isAnimating,
+			currentState
 		};
 	}
 </script>
@@ -87,8 +210,13 @@
 <div 
 	bind:this={containerRef}
 	class={clsx('inline-flex', className)}
-	on:mouseenter={handleMouseEnter}
-	on:mouseleave={handleMouseLeave}
+	onmouseenter={handleMouseEnter}
+	onmouseleave={handleMouseLeave}
+	onclick={handleClick}
+	onfocus={triggers.focus ? handleFocus : undefined}
+	onblur={triggers.focus ? handleBlur : undefined}
+	tabindex={triggers.focus ? 0 : -1}
+	role={triggers.click || triggers.focus ? "button" : undefined}
 	{...restProps}
 >
 	<svg

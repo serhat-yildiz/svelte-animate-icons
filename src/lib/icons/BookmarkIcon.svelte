@@ -1,94 +1,211 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
 	
+	interface AnimationTriggers {
+		hover?: boolean;
+		click?: boolean;
+		focus?: boolean;
+		custom?: boolean;
+	}
+	
 	interface Props {
 		size?: number;
 		class?: string;
+		triggers?: AnimationTriggers;
+		animationState?: 'idle' | 'active' | 'loading' | 'success' | 'error';
+		autoPlay?: boolean;
+		loop?: boolean;
+		duration?: number;
+		onAnimationStart?: () => void;
+		onAnimationEnd?: () => void;
 		[key: string]: any;
 	}
 	
-	let { size = 28, class: className, ...restProps }: Props = $props();
-	
-	export interface BookmarkIconHandle {
-		startAnimation: () => void;
-		stopAnimation: () => void;
-	}
+	let { 
+		size = 28, 
+		class: className, 
+		triggers = { hover: true },
+		animationState = 'idle',
+		autoPlay = false,
+		loop = false,
+		duration = 2000,
+		onAnimationStart,
+		onAnimationEnd,
+		...restProps 
+	}: Props = $props();
 	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let sparkRef: HTMLDivElement;
 	let isAnimating = $state(false);
-	let isControlled = false;
+	let currentAnimations: Animation[] = [];
+	let currentState = $state(animationState);
 	
 	// Animation controls
 	function startAnimation() {
-		if (svgRef && sparkRef) {
+		if (svgRef && sparkRef && !isAnimating) {
+			stopAnimation(); // Clear any existing animation
+			
 			isAnimating = true;
+			onAnimationStart?.();
 			
 			// Bookmark scaling animation
-			// React: scale: [1, 1.15, 0.9, 1]
-			svgRef.animate([
+			const svgAnimation = svgRef.animate([
 				{ transform: 'scale(1)' },
 				{ transform: 'scale(1.15)' },
 				{ transform: 'scale(0.9)' },
 				{ transform: 'scale(1)' }
 			], {
-				duration: 1200,
-				iterations: Infinity,
+				duration: duration,
+				iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 				easing: 'ease-in-out'
 			});
+			currentAnimations.push(svgAnimation);
 			
 			// Spark effect animation
-			// React: opacity: [0.8, 0, 0], scale: [1, 1.5, 0]
 			const sparkSvg = sparkRef.querySelector('svg');
 			if (sparkSvg) {
-				sparkSvg.animate([
+				const sparkAnimation = sparkSvg.animate([
 					{ opacity: '0.8', transform: 'scale(1)' },
 					{ opacity: '0', transform: 'scale(1.5)' },
 					{ opacity: '0', transform: 'scale(0)' }
 				], {
-					duration: 1200,
-					iterations: Infinity,
+					duration: duration,
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 					easing: 'ease-out'
 				});
+				currentAnimations.push(sparkAnimation);
 			}
+			
+			// Handle animation completion
+			const lastAnimation = currentAnimations[currentAnimations.length - 1];
+			lastAnimation?.addEventListener('finish', () => {
+				if (!loop && !autoPlay && currentState !== 'loading') {
+					if (currentAnimations.every(anim => anim.playState === 'finished')) {
+						stopAnimation();
+					}
+				}
+				onAnimationEnd?.();
+			});
 		}
 	}
 	
 	function stopAnimation() {
+		currentAnimations.forEach(animation => {
+			animation.cancel();
+		});
+		currentAnimations = [];
+		
 		if (svgRef && sparkRef) {
 			isAnimating = false;
-			// Cancel all animations
-			svgRef.getAnimations().forEach(animation => animation.cancel());
+			
+			// Reset to normal state
+			svgRef.style.transform = 'scale(1)';
 			const sparkSvg = sparkRef.querySelector('svg');
 			if (sparkSvg) {
-				sparkSvg.getAnimations().forEach(animation => animation.cancel());
 				sparkSvg.style.transform = 'scale(0)';
 				sparkSvg.style.opacity = '0';
 			}
-			// Reset SVG transform
-			svgRef.style.transform = 'scale(1)';
 		}
 	}
 	
+	function toggleAnimation() {
+		if (isAnimating) {
+			stopAnimation();
+		} else {
+			startAnimation();
+		}
+	}
+	
+	function setAnimationState(newState: string) {
+		currentState = newState as any;
+		
+		// State-based animation logic
+		switch (newState) {
+			case 'active':
+			case 'loading':
+				startAnimation();
+				break;
+			case 'idle':
+			case 'success':
+			case 'error':
+			default:
+				stopAnimation();
+				break;
+		}
+	}
+	
+	// Event handlers
 	function handleMouseEnter() {
-		if (!isControlled) {
+		if (triggers.hover && !triggers.custom) {
 			startAnimation();
 		}
 	}
 	
 	function handleMouseLeave() {
-		if (!isControlled) {
+		if (triggers.hover && !triggers.custom) {
 			stopAnimation();
 		}
 	}
 	
-	// Public API
-	export function getControls(): BookmarkIconHandle {
-		isControlled = true;
+	function handleClick() {
+		if (triggers.click) {
+			toggleAnimation();
+		}
+	}
+	
+	function handleFocus() {
+		if (triggers.focus) {
+			startAnimation();
+		}
+	}
+	
+	function handleBlur() {
+		if (triggers.focus) {
+			stopAnimation();
+		}
+	}
+	
+	// Reactive state changes - update animation when state prop changes
+	$effect(() => {
+		if (svgRef) {
+			setAnimationState(animationState);
+		}
+	});
+	
+	// Auto-play on mount
+	$effect(() => {
+		if (autoPlay && svgRef) {
+			startAnimation();
+		}
+		
+		// Cleanup on destroy
+		return () => {
+			stopAnimation();
+		};
+	});
+	
+	// Public API for external control
+	export function start() {
+		startAnimation();
+	}
+	
+	export function stop() {
+		stopAnimation();
+	}
+	
+	export function toggle() {
+		toggleAnimation();
+	}
+	
+	export function setState(state: string) {
+		setAnimationState(state);
+	}
+	
+	export function getStatus() {
 		return {
-			startAnimation,
-			stopAnimation
+			isAnimating,
+			currentState
 		};
 	}
 </script>
@@ -96,8 +213,13 @@
 <div 
 	bind:this={containerRef}
 	class={clsx('relative inline-flex', className)}
-	on:mouseenter={handleMouseEnter}
-	on:mouseleave={handleMouseLeave}
+	onmouseenter={handleMouseEnter}
+	onmouseleave={handleMouseLeave}
+	onclick={handleClick}
+	onfocus={triggers.focus ? handleFocus : undefined}
+	onblur={triggers.focus ? handleBlur : undefined}
+	tabindex={triggers.focus ? 0 : -1}
+	role={triggers.click || triggers.focus ? "button" : undefined}
 	{...restProps}
 >
 	<svg

@@ -1,101 +1,199 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
-	
+  
+	interface AnimationTriggers {
+	  hover?: boolean;
+	  click?: boolean;
+	  focus?: boolean;
+	  custom?: boolean;
+	}
+  
 	interface Props {
-		size?: number;
-		class?: string;
-		[key: string]: any;
+	  size?: number;
+	  class?: string;
+	  triggers?: AnimationTriggers;
+	  animationState?: 'idle' | 'active' | 'loading' | 'success' | 'error';
+	  autoPlay?: boolean;
+	  loop?: boolean;
+	  duration?: number;
+	  onAnimationStart?: () => void;
+	  onAnimationEnd?: () => void;
+	  [key: string]: any;
 	}
-	
-	let { size = 28, class: className, ...restProps }: Props = $props();
-	
+  
+	let {
+	  size = 28,
+	  class: className,
+	  triggers = { hover: true },
+	  animationState = 'idle',
+	  autoPlay = false,
+	  loop = false,
+	  duration = 700,
+	  onAnimationStart,
+	  onAnimationEnd,
+	  ...restProps
+	}: Props = $props();
+  
 	export interface CopyIconHandle {
-		startAnimation: () => void;
-		stopAnimation: () => void;
+	  startAnimation: () => void;
+	  stopAnimation: () => void;
+	  toggleAnimation: () => void;
+	  setAnimationState: (newState: string) => void;
+	  readonly isAnimating: boolean;
 	}
-	
+  
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
+	let rectEl: SVGRectElement;
+	let pathEl: SVGPathElement;
+  
 	let isAnimating = $state(false);
-	let isControlled = false;
-	
+	let currentState = $state(animationState);
+  
+	// --- Animation controls ---
 	function startAnimation() {
-		if (svgRef) {
-			isAnimating = true;
-			
-			// Box animation (translate + rotate)
-			const rect = svgRef.querySelector('rect');
-			if (rect) {
-				rect.animate([
-					{ transform: 'translateY(0px) translateX(0px) rotate(0deg)' },
-					{ transform: 'translateY(-3px) translateX(-3px) rotate(360deg)' }
-				], { 
-					duration: 700, 
-					easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
-					fill: 'forwards'
-				});
-			}
-			
-			// Path animation
-			const path = svgRef.querySelector('path');
-			if (path) {
-				path.animate([
-					{ transform: 'translateX(0px) translateY(0px)' },
-					{ transform: 'translateX(3px) translateY(3px)' }
-				], { 
-					duration: 700, 
-					easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
-					fill: 'forwards'
-				});
-			}
+	  if (!svgRef || isAnimating) return;
+	  isAnimating = true;
+	  onAnimationStart?.();
+  
+	  // Box animation
+	  rectEl?.animate(
+		[
+		  { transform: 'translateY(0px) translateX(0px) rotate(0deg)' },
+		  { transform: 'translateY(-3px) translateX(-3px) rotate(360deg)' }
+		],
+		{
+		  duration,
+		  easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
+		  fill: 'forwards'
 		}
+	  );
+  
+	  // Path animation
+	  pathEl?.animate(
+		[
+		  { transform: 'translateX(0px) translateY(0px)' },
+		  { transform: 'translateX(3px) translateY(3px)' }
+		],
+		{
+		  duration,
+		  easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
+		  fill: 'forwards'
+		}
+	  );
+  
+	  setTimeout(() => {
+		if (!loop && currentState !== 'loading') stopAnimation();
+		onAnimationEnd?.();
+	  }, duration);
 	}
-	
+  
 	function stopAnimation() {
-		if (svgRef) {
-			isAnimating = false;
-			const elements = svgRef.querySelectorAll('rect, path');
-			elements.forEach(element => {
-				element.getAnimations().forEach(animation => animation.cancel());
-				element.style.transform = '';
-			});
-		}
+	  isAnimating = false;
+	  svgRef?.getAnimations().forEach((a) => a.cancel());
+	  [rectEl, pathEl].forEach((el) =>
+		el?.getAnimations().forEach((a) => a.cancel())
+	  );
 	}
-	
+  
+	function toggleAnimation() {
+	  isAnimating ? stopAnimation() : startAnimation();
+	}
+  
+	function setAnimationState(newState: string) {
+	  currentState = newState as any;
+	  switch (newState) {
+		case 'active':
+		case 'loading':
+		  startAnimation();
+		  break;
+		default:
+		  stopAnimation();
+		  break;
+	  }
+	}
+  
+	// --- Event handlers ---
 	function handleMouseEnter() {
-		if (!isControlled) startAnimation();
+	  if (triggers.hover && !triggers.custom) startAnimation();
 	}
-	
 	function handleMouseLeave() {
-		if (!isControlled) stopAnimation();
+	  if (triggers.hover && !triggers.custom) stopAnimation();
 	}
-	
-	export function getControls(): CopyIconHandle {
-		isControlled = true;
-		return { startAnimation, stopAnimation };
+	function handleClick() {
+	  if (triggers.click) toggleAnimation();
 	}
-</script>
-
-<div 
+	function handleFocus() {
+	  if (triggers.focus) startAnimation();
+	}
+	function handleBlur() {
+	  if (triggers.focus) stopAnimation();
+	}
+  
+	// Reactive props
+	$effect(() => setAnimationState(animationState));
+  
+	// AutoPlay
+	$effect(() => {
+	  if (autoPlay) startAnimation();
+	  return () => stopAnimation();
+	});
+  
+	// Public API
+	export function start() {
+	  startAnimation();
+	}
+	export function stop() {
+	  stopAnimation();
+	}
+	export function toggle() {
+	  toggleAnimation();
+	}
+	export function setState(state: string) {
+	  setAnimationState(state);
+	}
+	export function getStatus() {
+	  return { isAnimating, currentState };
+	}
+  </script>
+  
+  <div
 	bind:this={containerRef}
 	class={clsx(className)}
 	on:mouseenter={handleMouseEnter}
 	on:mouseleave={handleMouseLeave}
+	on:click={handleClick}
+	on:focus={triggers.focus ? handleFocus : undefined}
+	on:blur={triggers.focus ? handleBlur : undefined}
+	tabindex={triggers.focus ? 0 : -1}
+	role={triggers.click || triggers.focus ? 'button' : undefined}
 	{...restProps}
->
+  >
 	<svg
-		bind:this={svgRef}
-		xmlns="http://www.w3.org/2000/svg"
-		width={size}
-		height={size}
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
+	  bind:this={svgRef}
+	  xmlns="http://www.w3.org/2000/svg"
+	  width={size}
+	  height={size}
+	  viewBox="0 0 24 24"
+	  fill="none"
+	  stroke="currentColor"
+	  stroke-width="2"
+	  stroke-linecap="round"
+	  stroke-linejoin="round"
 	>
-		<rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
-		<path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+	  <rect
+		bind:this={rectEl}
+		width="14"
+		height="14"
+		x="8"
+		y="8"
+		rx="2"
+		ry="2"
+	  />
+	  <path
+		bind:this={pathEl}
+		d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
+	  />
 	</svg>
-</div>
+  </div>
+  

@@ -1,77 +1,147 @@
 <script lang="ts">
   import { clsx } from 'clsx';
-  
+
+  interface AnimationTriggers {
+    hover?: boolean;
+    click?: boolean;
+    focus?: boolean;
+    custom?: boolean;
+  }
+
+  type AnimationState = 'idle' | 'active' | 'loading' | 'success' | 'error';
+
   interface Props {
     size?: number;
     class?: string;
+    triggers?: AnimationTriggers;
+    animationState?: AnimationState;
+    autoPlay?: boolean;
+    loop?: boolean;
+    duration?: number;
+    onAnimationStart?: () => void;
+    onAnimationEnd?: () => void;
+    [key: string]: any;
   }
-  
-  let { size = 28, class: className, ...restProps }: Props = $props();
-  
-  // Animation control
-  let isAnimating = $state(false);
-  
-  // Refs for animation elements
+
+  let {
+    size = 28,
+    class: className,
+    triggers = { hover: true },
+    animationState = 'idle',
+    autoPlay = false,
+    loop = false,
+    duration = 600,
+    onAnimationStart,
+    onAnimationEnd,
+    ...restProps
+  }: Props = $props();
+
   let lineEl: SVGPathElement;
   let chevronEl: SVGPathElement;
-  
-  export function startAnimation() {
+  let isAnimating = $state(false);
+  let currentState: AnimationState = animationState;
+
+  function startAnimation() {
     if (isAnimating) return;
     isAnimating = true;
-    
-    // Line scale animation
+    onAnimationStart?.();
+
+    // Line squash
     if (lineEl) {
-      lineEl.animate([
-        { transform: 'scaleX(1)', transformOrigin: 'left' },
-        { transform: 'scaleX(0.3)', transformOrigin: 'left' },
-        { transform: 'scaleX(1)', transformOrigin: 'left' }
-      ], {
-        duration: 600,
-        easing: 'ease-in-out'
-      });
+      lineEl.animate(
+        [
+          { transform: 'scaleX(1)', transformOrigin: 'left' },
+          { transform: 'scaleX(0.3)', transformOrigin: 'left' },
+          { transform: 'scaleX(1)', transformOrigin: 'left' }
+        ],
+        { duration, easing: 'ease-in-out' }
+      );
     }
-    
-    // Chevron movement animation (continuous)
+
+    // Chevron nudge (loop if enabled or loading)
     if (chevronEl) {
-      chevronEl.animate([
-        { transform: 'translateX(0px)', opacity: '1' },
-        { transform: 'translateX(-2px)', opacity: '0.6' },
-        { transform: 'translateX(0px)', opacity: '1' }
-      ], {
-        duration: 500,
-        iterations: Infinity,
-        iterationStart: 0,
-        delay: 500
-      });
+      chevronEl.animate(
+        [
+          { transform: 'translateX(0px)', opacity: '1' },
+          { transform: 'translateX(-2px)', opacity: '0.6' },
+          { transform: 'translateX(0px)', opacity: '1' }
+        ],
+        {
+          duration: 500,
+          delay: 200,
+          easing: 'ease-in-out',
+          iterations: loop || currentState === 'loading' ? Infinity : 1
+        }
+      );
     }
-    
-    // Reset animation state (but keep chevron going)
+
     setTimeout(() => {
-      isAnimating = false;
-    }, 600);
+      if (!loop && currentState !== 'loading') stopAnimation();
+      onAnimationEnd?.();
+    }, duration + 500);
   }
-  
-  export function stopAnimation() {
+
+  function stopAnimation() {
     isAnimating = false;
-    // Stop chevron animation
-    if (chevronEl) {
-      chevronEl.getAnimations().forEach(animation => animation.finish());
-    }
+    [lineEl, chevronEl].forEach(el => {
+      if (el) el.getAnimations().forEach(a => a.cancel());
+    });
   }
-  
+
+  function toggleAnimation() {
+    isAnimating ? stopAnimation() : startAnimation();
+  }
+
+  function setAnimationState(newState: AnimationState) {
+    currentState = newState;
+    if (newState === 'active' || newState === 'loading') startAnimation();
+    else stopAnimation();
+  }
+
+  // Event handlers
   function handleMouseEnter() {
-    startAnimation();
+    if (triggers.hover && !triggers.custom) startAnimation();
   }
-  
   function handleMouseLeave() {
-    stopAnimation();
+    if (triggers.hover && !triggers.custom) stopAnimation();
   }
+  function handleClick() {
+    if (triggers.click) toggleAnimation();
+  }
+  function handleFocus() {
+    if (triggers.focus) startAnimation();
+  }
+  function handleBlur() {
+    if (triggers.focus) stopAnimation();
+  }
+
+  // Reactivity
+  $effect(() => {
+    setAnimationState(animationState);
+  });
+
+  $effect(() => {
+    if (autoPlay) startAnimation();
+    return () => stopAnimation();
+  });
+
+  // Public API
+  export function start() { startAnimation(); }
+  export function stop() { stopAnimation(); }
+  export function toggle() { toggleAnimation(); }
+  export function setState(state: AnimationState) { setAnimationState(state); }
+  export function getStatus() { return { isAnimating, currentState }; }
 </script>
 
 <div 
-  class={clsx(className)} 
+  class={clsx("inline-flex", className)} 
   onmouseenter={handleMouseEnter}
   onmouseleave={handleMouseLeave}
+  onclick={handleClick}
+  onfocus={triggers.focus ? handleFocus : undefined}
+  onblur={triggers.focus ? handleBlur : undefined}
+  tabindex={triggers.focus ? 0 : -1}
+  role={triggers.click || triggers.focus ? "button" : undefined}
   {...restProps}
 >
   <svg
@@ -85,14 +155,7 @@
     stroke-linecap="round"
     stroke-linejoin="round"
   >
-    <path
-      bind:this={lineEl}
-      d="M12 19h8"
-    />
-    
-    <path
-      bind:this={chevronEl}
-      d="m4 17 6-6-6-6"
-    />
+    <path bind:this={lineEl} d="M12 19h8" />
+    <path bind:this={chevronEl} d="m4 17 6-6-6-6" />
   </svg>
 </div>

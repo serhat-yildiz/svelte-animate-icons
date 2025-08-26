@@ -1,80 +1,198 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
 	
+	interface AnimationTriggers {
+		hover?: boolean;
+		click?: boolean;
+		focus?: boolean;
+		custom?: boolean;
+	}
+	
 	interface Props {
 		size?: number;
 		class?: string;
+		triggers?: AnimationTriggers;
+		animationState?: 'idle' | 'active' | 'loading' | 'success' | 'error';
+		autoPlay?: boolean;
+		loop?: boolean;
+		duration?: number;
+		onAnimationStart?: () => void;
+		onAnimationEnd?: () => void;
 		[key: string]: any;
 	}
 	
-	let { size = 28, class: className, ...restProps }: Props = $props();
-	
-	export interface AtomIconHandle {
-		startAnimation: () => void;
-		stopAnimation: () => void;
-	}
+	let { 
+		size = 28, 
+		class: className, 
+		triggers = { hover: true },
+		animationState = 'idle',
+		autoPlay = false,
+		loop = false,
+		duration = 2000,
+		onAnimationStart,
+		onAnimationEnd,
+		...restProps 
+	}: Props = $props();
 	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
-	let isControlled = false;
+	let currentAnimation: Animation | null = null;
+	let currentState = $state(animationState);
 	
 	// Animation controls
 	function startAnimation() {
-		if (svgRef) {
+		if (svgRef && !isAnimating) {
+			stopAnimation(); // Clear any existing animation
+			
 			isAnimating = true;
+			onAnimationStart?.();
 			
 			// Atom rotation and scale animation
-			// React: rotate: 360, scale: [1, 1.1, 1], duration: 2, repeat: Infinity
-			svgRef.animate([
+			currentAnimation = svgRef.animate([
 				{ transform: 'rotate(0deg) scale(1)' },
 				{ transform: 'rotate(180deg) scale(1.1)' },
 				{ transform: 'rotate(360deg) scale(1)' }
 			], {
-				duration: 2000,
-				iterations: Infinity,
+				duration: duration,
+				iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 				easing: 'linear'
+			});
+			
+			// Handle animation completion
+			currentAnimation.addEventListener('finish', () => {
+				if (!loop && !autoPlay && currentState !== 'loading') {
+					stopAnimation();
+				}
+				onAnimationEnd?.();
 			});
 		}
 	}
 	
 	function stopAnimation() {
+		if (currentAnimation) {
+			currentAnimation.cancel();
+			currentAnimation = null;
+		}
+		
 		if (svgRef) {
 			isAnimating = false;
-			// Cancel all animations
-			svgRef.getAnimations().forEach(animation => animation.cancel());
 			// Reset to normal state
 			svgRef.style.transform = 'rotate(0deg) scale(1)';
 		}
 	}
 	
+	function toggleAnimation() {
+		if (isAnimating) {
+			stopAnimation();
+		} else {
+			startAnimation();
+		}
+	}
+	
+	function setAnimationState(newState: string) {
+		currentState = newState as any;
+		
+		// State-based animation logic
+		switch (newState) {
+			case 'active':
+			case 'loading':
+				startAnimation();
+				break;
+			case 'idle':
+			case 'success':
+			case 'error':
+			default:
+				stopAnimation();
+				break;
+		}
+	}
+	
+	// Event handlers
 	function handleMouseEnter() {
-		if (!isControlled) {
+		if (triggers.hover && !triggers.custom) {
 			startAnimation();
 		}
 	}
 	
 	function handleMouseLeave() {
-		if (!isControlled) {
+		if (triggers.hover && !triggers.custom) {
 			stopAnimation();
 		}
 	}
 	
-	// Public API
-	export function getControls(): AtomIconHandle {
-		isControlled = true;
+	function handleClick() {
+		if (triggers.click) {
+			toggleAnimation();
+		}
+	}
+	
+	function handleFocus() {
+		if (triggers.focus) {
+			startAnimation();
+		}
+	}
+	
+	function handleBlur() {
+		if (triggers.focus) {
+			stopAnimation();
+		}
+	}
+	
+	// Reactive state changes - update animation when state prop changes
+	$effect(() => {
+		if (svgRef) {
+			setAnimationState(animationState);
+		}
+	});
+	
+	// Auto-play on mount
+	$effect(() => {
+		if (autoPlay && svgRef) {
+			startAnimation();
+		}
+		
+		// Cleanup on destroy
+		return () => {
+			stopAnimation();
+		};
+	});
+	
+	// Public API for external control
+	export function start() {
+		startAnimation();
+	}
+	
+	export function stop() {
+		stopAnimation();
+	}
+	
+	export function toggle() {
+		toggleAnimation();
+	}
+	
+	export function setState(state: string) {
+		setAnimationState(state);
+	}
+	
+	export function getStatus() {
 		return {
-			startAnimation,
-			stopAnimation
+			isAnimating,
+			currentState
 		};
 	}
 </script>
 
 <div 
 	bind:this={containerRef}
-	class={clsx(className)}
-	on:mouseenter={handleMouseEnter}
-	on:mouseleave={handleMouseLeave}
+	class={clsx('inline-flex', className)}
+	onmouseenter={handleMouseEnter}
+	onmouseleave={handleMouseLeave}
+	onclick={handleClick}
+	onfocus={triggers.focus ? handleFocus : undefined}
+	onblur={triggers.focus ? handleBlur : undefined}
+	tabindex={triggers.focus ? 0 : -1}
+	role={triggers.click || triggers.focus ? "button" : undefined}
 	{...restProps}
 >
 	<svg

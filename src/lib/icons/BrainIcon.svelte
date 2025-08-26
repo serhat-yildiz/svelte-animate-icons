@@ -1,152 +1,196 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
 	
+	interface AnimationTriggers {
+		hover?: boolean;
+		click?: boolean;
+		focus?: boolean;
+		custom?: boolean;
+	}
+	
 	interface Props {
 		size?: number;
 		class?: string;
+		triggers?: AnimationTriggers;
+		animationState?: 'idle' | 'active' | 'loading' | 'success' | 'error';
+		autoPlay?: boolean;
+		loop?: boolean;
+		duration?: number;
+		onAnimationStart?: () => void;
+		onAnimationEnd?: () => void;
 		[key: string]: any;
 	}
 	
-	let { size = 28, class: className, ...restProps }: Props = $props();
-	
-	export interface BrainIconHandle {
-		startAnimation: () => void;
-		stopAnimation: () => void;
-	}
+	let { 
+		size = 28, 
+		class: className, 
+		triggers = { hover: true },
+		animationState = 'idle',
+		autoPlay = false,
+		loop = false,
+		duration = 2000,
+		onAnimationStart,
+		onAnimationEnd,
+		...restProps 
+	}: Props = $props();
 	
 	let containerRef: HTMLDivElement;
 	let svgRef: SVGSVGElement;
 	let isAnimating = $state(false);
-	let isControlled = false;
+	let currentAnimations: Animation[] = [];
+	let currentState = $state(animationState);
 	
 	// Animation controls
 	function startAnimation() {
-		if (svgRef) {
+		if (svgRef && !isAnimating) {
+			stopAnimation(); // Clear any existing animation
+			
 			isAnimating = true;
+			onAnimationStart?.();
 			
 			// Group micro tilt
-			// React: rotate: [0, -2.2, 1.2, 0], scale: [1, 1.015, 1]
 			const group = svgRef.querySelector('g');
 			if (group) {
-				group.animate([
+				const groupAnimation = group.animate([
 					{ transform: 'rotate(0deg) scale(1)' },
 					{ transform: 'rotate(-2.2deg) scale(1.015)' },
 					{ transform: 'rotate(1.2deg) scale(1)' },
 					{ transform: 'rotate(0deg) scale(1)' }
 				], {
-					duration: 700,
+					duration: Math.floor(duration * 0.35),
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 					easing: 'ease-in-out'
 				});
+				currentAnimations.push(groupAnimation);
 			}
 			
-			// Spine pulse animation (delay: 0.06)
-			// React: pathLength: [0, 1], opacity: [0.55, 1]
+			// Spine pulse animation
 			const spine = svgRef.querySelector('path[d="M12 18V5"]');
 			if (spine) {
 				const pathLength = spine.getTotalLength();
 				spine.style.strokeDasharray = pathLength + ' ' + pathLength;
 				spine.style.strokeDashoffset = pathLength;
 				
-				spine.animate([
+				const spineAnimation = spine.animate([
 					{ strokeDashoffset: pathLength, opacity: '0.55' },
 					{ strokeDashoffset: 0, opacity: '1' }
 				], {
-					duration: 500,
-					delay: 60,
+					duration: Math.floor(duration * 0.25),
+					delay: Math.floor(duration * 0.03),
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 					easing: 'ease-in-out',
 					fill: 'forwards'
 				});
+				currentAnimations.push(spineAnimation);
 			}
 			
-			// Lobe breathe A paths (delay: 0.12)
-			// React: pathLength: [0, 1], opacity: [0.6, 1], scale: [0.98, 1.02, 1]
+			// Lobe breathe A paths
 			const lobePathsA = svgRef.querySelectorAll('path[d*="M15 13a4.17"], path[d*="M17.997 5.125"], path[d*="M19.967 17.483"], path[d*="M6.003 5.125"]');
 			lobePathsA.forEach(path => {
 				const pathLength = path.getTotalLength();
 				path.style.strokeDasharray = pathLength + ' ' + pathLength;
 				path.style.strokeDashoffset = pathLength;
 				
-				path.animate([
+				const lobeAAnimation = path.animate([
 					{ strokeDashoffset: pathLength, opacity: '0.6', transform: 'scale(0.98)' },
 					{ strokeDashoffset: pathLength * 0.5, opacity: '0.8', transform: 'scale(1.02)' },
 					{ strokeDashoffset: 0, opacity: '1', transform: 'scale(1)' }
 				], {
-					duration: 600,
-					delay: 120,
+					duration: Math.floor(duration * 0.3),
+					delay: Math.floor(duration * 0.06),
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 					easing: 'ease-in-out',
 					fill: 'forwards'
 				});
+				currentAnimations.push(lobeAAnimation);
 			});
 			
-			// Lobe breathe B paths (delay: 0.18)
-			// React: pathLength: [0, 1], opacity: [0.6, 1], scale: [1.02, 0.98, 1]
+			// Lobe breathe B paths
 			const lobePathsB = svgRef.querySelectorAll('path[d*="M17.598 6.5"], path[d*="M18 18a4"], path[d*="M6 18a4"]');
 			lobePathsB.forEach(path => {
 				const pathLength = path.getTotalLength();
 				path.style.strokeDasharray = pathLength + ' ' + pathLength;
 				path.style.strokeDashoffset = pathLength;
 				
-				path.animate([
+				const lobeBAnimation = path.animate([
 					{ strokeDashoffset: pathLength, opacity: '0.6', transform: 'scale(1.02)' },
 					{ strokeDashoffset: pathLength * 0.5, opacity: '0.8', transform: 'scale(0.98)' },
 					{ strokeDashoffset: 0, opacity: '1', transform: 'scale(1)' }
 				], {
-					duration: 620,
-					delay: 180,
+					duration: Math.floor(duration * 0.31),
+					delay: Math.floor(duration * 0.09),
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 					easing: 'ease-in-out',
 					fill: 'forwards'
 				});
+				currentAnimations.push(lobeBAnimation);
 			});
 			
-			// Synapse spark L (delay: 0.26)
-			// React: pathLength: [0, 1], opacity: [0, 1, 0]
+			// Synapse spark L
 			const sparkL = svgRef.querySelector('path[d*="M8.5 11.6"]');
 			if (sparkL) {
 				const pathLength = sparkL.getTotalLength();
 				sparkL.style.strokeDasharray = pathLength + ' ' + pathLength;
 				sparkL.style.strokeDashoffset = pathLength;
 				
-				sparkL.animate([
+				const sparkLAnimation = sparkL.animate([
 					{ strokeDashoffset: pathLength, opacity: '0' },
 					{ strokeDashoffset: 0, opacity: '1' },
 					{ strokeDashoffset: -pathLength * 0.5, opacity: '0' }
 				], {
-					duration: 550,
-					delay: 260,
+					duration: Math.floor(duration * 0.275),
+					delay: Math.floor(duration * 0.13),
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 					easing: 'ease-in-out'
 				});
+				currentAnimations.push(sparkLAnimation);
 			}
 			
-			// Synapse spark R (delay: 0.34)
-			// React: pathLength: [0, 1], opacity: [0, 1, 0]
+			// Synapse spark R
 			const sparkR = svgRef.querySelector('path[d*="M13.8 9.4"]');
 			if (sparkR) {
 				const pathLength = sparkR.getTotalLength();
 				sparkR.style.strokeDasharray = pathLength + ' ' + pathLength;
 				sparkR.style.strokeDashoffset = pathLength;
 				
-				sparkR.animate([
+				const sparkRAnimation = sparkR.animate([
 					{ strokeDashoffset: pathLength, opacity: '0' },
 					{ strokeDashoffset: 0, opacity: '1' },
 					{ strokeDashoffset: -pathLength * 0.5, opacity: '0' }
 				], {
-					duration: 550,
-					delay: 340,
+					duration: Math.floor(duration * 0.275),
+					delay: Math.floor(duration * 0.17),
+					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
 					easing: 'ease-in-out'
 				});
+				currentAnimations.push(sparkRAnimation);
 			}
+			
+			// Handle animation completion
+			const lastAnimation = currentAnimations[currentAnimations.length - 1];
+			lastAnimation?.addEventListener('finish', () => {
+				if (!loop && !autoPlay && currentState !== 'loading') {
+					if (currentAnimations.every(anim => anim.playState === 'finished')) {
+						stopAnimation();
+					}
+				}
+				onAnimationEnd?.();
+			});
 		}
 	}
 	
 	function stopAnimation() {
+		currentAnimations.forEach(animation => {
+			animation.cancel();
+		});
+		currentAnimations = [];
+		
 		if (svgRef) {
 			isAnimating = false;
-			// Cancel all animations
-			svgRef.getAnimations().forEach(animation => animation.cancel());
+			
+			// Reset all elements to normal state
 			const allElements = svgRef.querySelectorAll('*');
 			allElements.forEach(element => {
-				element.getAnimations().forEach(animation => animation.cancel());
-				// Reset styles
 				element.style.transform = '';
 				element.style.strokeDasharray = '';
 				element.style.strokeDashoffset = '';
@@ -155,33 +199,117 @@
 		}
 	}
 	
+	function toggleAnimation() {
+		if (isAnimating) {
+			stopAnimation();
+		} else {
+			startAnimation();
+		}
+	}
+	
+	function setAnimationState(newState: string) {
+		currentState = newState as any;
+		
+		// State-based animation logic
+		switch (newState) {
+			case 'active':
+			case 'loading':
+				startAnimation();
+				break;
+			case 'idle':
+			case 'success':
+			case 'error':
+			default:
+				stopAnimation();
+				break;
+		}
+	}
+	
+	// Event handlers
 	function handleMouseEnter() {
-		if (!isControlled) {
+		if (triggers.hover && !triggers.custom) {
 			startAnimation();
 		}
 	}
 	
 	function handleMouseLeave() {
-		if (!isControlled) {
+		if (triggers.hover && !triggers.custom) {
 			stopAnimation();
 		}
 	}
 	
-	// Public API
-	export function getControls(): BrainIconHandle {
-		isControlled = true;
+	function handleClick() {
+		if (triggers.click) {
+			toggleAnimation();
+		}
+	}
+	
+	function handleFocus() {
+		if (triggers.focus) {
+			startAnimation();
+		}
+	}
+	
+	function handleBlur() {
+		if (triggers.focus) {
+			stopAnimation();
+		}
+	}
+	
+	// Reactive state changes - update animation when state prop changes
+	$effect(() => {
+		if (svgRef) {
+			setAnimationState(animationState);
+		}
+	});
+	
+	// Auto-play on mount
+	$effect(() => {
+		if (autoPlay && svgRef) {
+			startAnimation();
+		}
+		
+		// Cleanup on destroy
+		return () => {
+			stopAnimation();
+		};
+	});
+	
+	// Public API for external control
+	export function start() {
+		startAnimation();
+	}
+	
+	export function stop() {
+		stopAnimation();
+	}
+	
+	export function toggle() {
+		toggleAnimation();
+	}
+	
+	export function setState(state: string) {
+		setAnimationState(state);
+	}
+	
+	export function getStatus() {
 		return {
-			startAnimation,
-			stopAnimation
+			isAnimating,
+			currentState
 		};
 	}
 </script>
 
 <div 
 	bind:this={containerRef}
-	class={clsx('inline-flex items-center justify-center', className)}
-	on:mouseenter={handleMouseEnter}
-	on:mouseleave={handleMouseLeave}
+	class={clsx('inline-flex', className)}
+	onmouseenter={handleMouseEnter}
+	onmouseleave={handleMouseLeave}
+	onclick={handleClick}
+	onfocus={triggers.focus ? handleFocus : undefined}
+	onblur={triggers.focus ? handleBlur : undefined}
+	tabindex={triggers.focus ? 0 : -1}
+	role={triggers.click || triggers.focus ? "button" : undefined}
 	{...restProps}
 >
 	<svg
