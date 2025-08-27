@@ -1,8 +1,8 @@
 # Contributing to Svelte Animate Icons
 
-Thank you for your interest in contributing! 🎉
+Thank you for your interest in contributing!
 
-## 🚀 Quick Start
+## Quick Start
 
 1. **Fork & Clone**
    ```bash
@@ -22,16 +22,16 @@ Thank you for your interest in contributing! 🎉
    npm run package
    ```
 
-## 📝 How to Contribute
+## How to Contribute
 
-### 🎨 Adding New Icons
+### Adding New Icons
 
 1. Add your SVG icon to `src/lib/icons/`
 2. Follow the naming convention: `MyIconName.svelte`
 3. Update `src/lib/index.ts` to export the new icon
 4. Update `src/lib/registry/iconRegistry.ts` to register the icon
 
-### 🐛 Bug Reports
+### Bug Reports
 
 Please use our [GitHub Issues](https://github.com/serhat-yildiz/svelte-animate-icons/issues) with:
 - Clear description
@@ -39,14 +39,14 @@ Please use our [GitHub Issues](https://github.com/serhat-yildiz/svelte-animate-i
 - Expected vs actual behavior
 - Environment details
 
-### 💡 Feature Requests
+### Feature Requests
 
 We welcome feature requests! Please:
 - Check existing issues first
 - Describe the use case
 - Explain why it would be valuable
 
-## 🎯 Development Guidelines
+## Development Guidelines
 
 ### Code Style
 - Use TypeScript
@@ -66,16 +66,16 @@ We welcome feature requests! Please:
 - Verify animations work smoothly
 - Check bundle size impact
 
-## 📖 Resources
+## Resources
 
 - [Documentation](https://serhat-yildiz.github.io/svelte-animate-icons/docs)
 - [Live Demo](https://serhat-yildiz.github.io/svelte-animate-icons/)
 - [Svelte 5 Guide](https://svelte.dev/)
 
-## 📄 License
+## License
 
 By contributing, you agree that your contributions will be licensed under the MIT License.
 
 ---
 
-❤️ Thank you for making Svelte Animate Icons better!
+Thank you for making Svelte Animate Icons better!

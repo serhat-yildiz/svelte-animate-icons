@@ -1,21 +1,21 @@
-# 🎯 Svelte Animate Icons
+# Svelte Animate Icons
 
 Powerful animated SVG icons for Svelte 5 with flexible animation control.
 
 [![npm version](https://badge.fury.io/js/svelte-animate-icons.svg)](https://badge.fury.io/js/svelte-animate-icons)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## ✨ Features
+## Features
 
-- 🎯 **550+ animated icons** - Beautiful SVG icons with multiple animation triggers
-- ⚡ **Lightning fast** - Built with Web Animations API for 60fps performance
-- 🎨 **Svelte 5 ready** - Modern runes system and reactivity
-- 🎛️ **Flexible control** - Hover, click, focus, state-based, and programmatic animations
-- 📦 **Tiny bundle** - Tree-shakeable, import only what you need
-- 🔧 **TypeScript** - Full type safety included
-- 📱 **Production ready** - Used in real-world applications
+- **550+ animated icons** - Beautiful SVG icons with multiple animation triggers
+- **Lightning fast** - Built with Web Animations API for 60fps performance
+- **Svelte 5 ready** - Modern runes system and reactivity
+- **Flexible control** - Hover, click, focus, state-based, and programmatic animations
+- **Tiny bundle** - Tree-shakeable, import only what you need
+- **TypeScript** - Full type safety included
+- **Production ready** - Used in real-world applications
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Installation
 
@@ -58,7 +58,7 @@ npm install svelte-animate-icons
 <button onclick={() => loadingState = 'loading'}>Start Loading</button>
 ```
 
-## 📋 API Reference
+## API Reference
 
 ### Props
 
@@ -98,7 +98,7 @@ triggers: {
 | `stop()` | Stop animation |
 | `toggle()` | Toggle animation state |
 
-## 🎨 Real-World Examples
+## Real-World Examples
 
 ### Loading Button
 
@@ -157,7 +157,7 @@ triggers: {
 </div>
 ```
 
-## 🎯 Animation System
+## Animation System
 
 - **Multiple triggers**: Hover, click, focus, or programmatic control
 - **State-driven**: Perfect for loading states and user feedback
@@ -165,7 +165,7 @@ triggers: {
 - **Accessible**: Respects `prefers-reduced-motion`
 - **Flexible**: Use cases from simple hovers to complex state management
 
-## 📚 Available Icons
+## Available Icons
 
 Browse all 550+ icons at: [Icon Gallery](https://serhat-yildiz.github.io/svelte-animate-icons/#gallery)
 
@@ -203,7 +203,7 @@ Browse all 550+ icons at: [Icon Gallery](https://serhat-yildiz.github.io/svelte-
 <FacebookIcon />
 ```
 
-## 🛠️ Framework Integration
+## Framework Integration
 
 ### SvelteKit
 
@@ -234,14 +234,14 @@ Browse all 550+ icons at: [Icon Gallery](https://serhat-yildiz.github.io/svelte-
 />
 ```
 
-## 📦 Bundle Size
+## Bundle Size
 
 - **Individual icon**: ~2KB gzipped
 - **Core runtime**: ~5KB gzipped  
 - **Animation system**: ~3KB gzipped
 - **Tree-shakeable**: Only import what you use
 
-## 🎭 Performance
+## Performance
 
 - **60fps** smooth animations
 - **Web Animations API** for optimal performance
@@ -249,22 +249,22 @@ Browse all 550+ icons at: [Icon Gallery](https://serhat-yildiz.github.io/svelte-
 - **Memory efficient**: Animations clean up automatically
 - **Production tested**: Used in high-traffic applications
 
-## 🌐 Browser Support
+## Browser Support
 
 Modern browsers that support:
 - Svelte 5
 - Web Animations API
 - ES2020+
 
-## 📄 License
+## License
 
 MIT © [Serhat YILDIZ](https://github.com/serhat-yildiz)
 
-## 🤝 Contributing
+## Contributing
 
 Contributions welcome! Please read our [contributing guide](CONTRIBUTING.md) first.
 
-## 🔗 Links
+## Links
 
 - [Documentation](https://serhat-yildiz.github.io/svelte-animate-icons/docs)
 - [Icon Gallery](https://serhat-yildiz.github.io/svelte-animate-icons/#gallery) 
@@ -273,4 +273,4 @@ Contributions welcome! Please read our [contributing guide](CONTRIBUTING.md) fir
 
 ---
 
-Built with ❤️ for the Svelte community.
+Built with love for the Svelte community.
