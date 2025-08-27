@@ -54,32 +54,155 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			const path = svgRef.querySelector('path');
-			if (path) {
+			// Get all paths for complex animation
+			const zapPaths = svgRef.querySelectorAll('path:not([d*="m2 2 20 20"])'); // Lightning paths
+			const crossPath = svgRef.querySelector('path[d*="m2 2 20 20"]'); // Cross-out line
+			
+			// Phase 1: Lightning appears with energy
+			zapPaths.forEach((path, index) => {
+				const pathElement = path as SVGPathElement;
+				const pathLength = pathElement.getTotalLength();
 				
-				path.style.strokeDasharray = '80 80';
-				path.style.strokeDashoffset = '80';
-				path.style.opacity = '0.6';
+				// Initial state - hidden
+				pathElement.style.strokeDasharray = `${pathLength}`;
+				pathElement.style.strokeDashoffset = `${pathLength}`;
+				pathElement.style.opacity = '0';
+				pathElement.style.filter = 'drop-shadow(0 0 4px currentColor)';
 				
-				
-				currentAnimation = path.animate([
-					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
-					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
-					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
-				], {
-					duration: duration,
-					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-					easing: 'ease-in-out'
-				});
-				
-				
-				currentAnimation.addEventListener('finish', () => {
-					if (!loop && !autoPlay && currentState !== 'loading') {
-						stopAnimation();
+				// Animate lightning drawing in
+				const lightningAnimation = pathElement.animate([
+					{ 
+						strokeDashoffset: `${pathLength}`, 
+						opacity: '0',
+						transform: 'scale(0.8)',
+						filter: 'drop-shadow(0 0 2px currentColor)'
+					},
+					{ 
+						strokeDashoffset: '0', 
+						opacity: '1',
+						transform: 'scale(1.1)',
+						filter: 'drop-shadow(0 0 8px currentColor)'
+					},
+					{ 
+						strokeDashoffset: '0', 
+						opacity: '1',
+						transform: 'scale(1)',
+						filter: 'drop-shadow(0 0 4px currentColor)'
 					}
-					onAnimationEnd?.();
+				], {
+					duration: duration * 0.4,
+					delay: index * 100,
+					easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+					fill: 'forwards'
 				});
+			});
+			
+			// Phase 2: Lightning flickers with power
+			setTimeout(() => {
+				zapPaths.forEach((path) => {
+					const pathElement = path as SVGPathElement;
+					pathElement.animate([
+						{ opacity: '1', filter: 'drop-shadow(0 0 4px currentColor)' },
+						{ opacity: '0.7', filter: 'drop-shadow(0 0 2px currentColor)' },
+						{ opacity: '1', filter: 'drop-shadow(0 0 6px currentColor)' },
+						{ opacity: '0.8', filter: 'drop-shadow(0 0 3px currentColor)' },
+						{ opacity: '1', filter: 'drop-shadow(0 0 4px currentColor)' }
+					], {
+						duration: duration * 0.3,
+						easing: 'ease-in-out'
+					});
+				});
+			}, duration * 0.4);
+			
+			// Phase 3: Cross line appears to "turn off" the lightning
+			if (crossPath) {
+				const crossElement = crossPath as SVGPathElement;
+				const crossLength = crossElement.getTotalLength();
+				
+				setTimeout(() => {
+					crossElement.style.strokeDasharray = `${crossLength}`;
+					crossElement.style.strokeDashoffset = `${crossLength}`;
+					crossElement.style.opacity = '0';
+					crossElement.style.strokeWidth = '3';
+					crossElement.style.filter = 'drop-shadow(0 0 2px #ff4444)';
+					
+					const crossAnimation = crossElement.animate([
+						{ 
+							strokeDashoffset: `${crossLength}`, 
+							opacity: '0',
+							filter: 'drop-shadow(0 0 2px #ff4444)'
+						},
+						{ 
+							strokeDashoffset: '0', 
+							opacity: '1',
+							filter: 'drop-shadow(0 0 6px #ff4444)'
+						}
+					], {
+						duration: duration * 0.2,
+						easing: 'cubic-bezier(0.55, 0.05, 0.68, 0.19)',
+						fill: 'forwards'
+					});
+				}, duration * 0.7);
 			}
+			
+			// Phase 4: Lightning fades out as it's "turned off"
+			setTimeout(() => {
+				zapPaths.forEach((path, index) => {
+					const pathElement = path as SVGPathElement;
+					pathElement.animate([
+						{ 
+							opacity: '1', 
+							transform: 'scale(1)',
+							filter: 'drop-shadow(0 0 4px currentColor)'
+						},
+						{ 
+							opacity: '0.3', 
+							transform: 'scale(0.95)',
+							filter: 'drop-shadow(0 0 1px currentColor)'
+						},
+						{ 
+							opacity: '0.1', 
+							transform: 'scale(0.9)',
+							filter: 'none'
+						}
+					], {
+						duration: duration * 0.25,
+						delay: index * 50,
+						easing: 'ease-out',
+						fill: 'forwards'
+					});
+				});
+			}, duration * 0.75);
+			
+			// Set up the main animation reference for cleanup
+			currentAnimation = {
+				cancel: () => {
+					zapPaths.forEach(path => {
+						(path as SVGPathElement).getAnimations().forEach(anim => anim.cancel());
+					});
+					if (crossPath) {
+						(crossPath as SVGPathElement).getAnimations().forEach(anim => anim.cancel());
+					}
+				},
+				addEventListener: (event: string, callback: () => void) => {
+					if (event === 'finish') {
+						setTimeout(() => {
+							if (!loop && !autoPlay && currentState !== 'loading') {
+								stopAnimation();
+							}
+							onAnimationEnd?.();
+						}, duration);
+					}
+				}
+			} as Animation;
+			
+			// Auto-finish handling
+			setTimeout(() => {
+				if (!loop && !autoPlay && currentState !== 'loading') {
+					stopAnimation();
+				}
+				onAnimationEnd?.();
+			}, duration);
 		}
 	}
 	
@@ -92,13 +215,20 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			const path = svgRef.querySelector('path');
-			if (path) {
+			// Reset all paths to their default state
+			const allPaths = svgRef.querySelectorAll('path');
+			allPaths.forEach(path => {
+				const pathElement = path as SVGPathElement;
+				pathElement.style.strokeDasharray = 'none';
+				pathElement.style.strokeDashoffset = '';
+				pathElement.style.opacity = '1';
+				pathElement.style.transform = '';
+				pathElement.style.filter = '';
+				pathElement.style.strokeWidth = '';
 				
-				path.style.strokeDasharray = 'none';
-				path.style.strokeDashoffset = '';
-				path.style.opacity = '1';
-			}
+				// Cancel any running animations
+				pathElement.getAnimations().forEach(anim => anim.cancel());
+			});
 		}
 	}
 	

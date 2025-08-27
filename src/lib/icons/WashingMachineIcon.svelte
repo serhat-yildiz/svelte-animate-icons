@@ -54,24 +54,17 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			const path = svgRef.querySelector('path');
-			if (path) {
-				
-				path.style.strokeDasharray = '80 80';
-				path.style.strokeDashoffset = '80';
-				path.style.opacity = '0.6';
-				
-				
-				currentAnimation = path.animate([
-					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
-					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
-					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
+			const drum = svgRef.querySelector('.drum');
+			if (drum) {
+				// Simple drum rotation
+				currentAnimation = drum.animate([
+					{ transform: 'rotate(0deg)' },
+					{ transform: 'rotate(360deg)' }
 				], {
 					duration: duration,
 					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-					easing: 'ease-in-out'
+					easing: 'linear',
 				});
-				
 				
 				currentAnimation.addEventListener('finish', () => {
 					if (!loop && !autoPlay && currentState !== 'loading') {
@@ -92,12 +85,9 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			const path = svgRef.querySelector('path');
-			if (path) {
-				
-				path.style.strokeDasharray = 'none';
-				path.style.strokeDashoffset = '';
-				path.style.opacity = '1';
+			const drum = svgRef.querySelector('.drum');
+			if (drum) {
+				(drum as SVGElement).style.transform = '';
 			}
 		}
 	}
@@ -226,5 +216,18 @@
     stroke-linecap="round"
     stroke-linejoin="round"
   >
+    <!-- Machine box -->
+    <rect x="3" y="2" width="18" height="20" rx="2" />
+    
+    <!-- Door -->
+    <circle cx="12" cy="13" r="7" />
+    
+    <!-- Inner drum -->
+    <circle cx="12" cy="13" r="4" class="drum" />
+    
+    <!-- Control buttons -->
+    <circle cx="7" cy="5" r="0.5" />
+    <circle cx="9" cy="5" r="0.5" />
   </svg>
+  
 </div>

@@ -54,32 +54,98 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			const path = svgRef.querySelector('path');
-			if (path) {
+			const circle = svgRef.querySelector('circle');
+			const rect = svgRef.querySelector('rect');
+			
+			if (circle && rect) {
+				// Phase 1: Highlight the toggle track
+				setTimeout(() => {
+					animateTrackHighlight(rect);
+				}, 100);
 				
-				path.style.strokeDasharray = '80 80';
-				path.style.strokeDashoffset = '80';
-				path.style.opacity = '0.6';
+				// Phase 2: Slide circle from right to left (ON to OFF)
+				setTimeout(() => {
+					animateCircleSlide(circle);
+				}, duration * 0.3);
 				
+				// Set up animation management
+				currentAnimation = {
+					cancel: () => {
+						stopToggleAnimations();
+					},
+					addEventListener: (event: string, callback: () => void) => {
+						if (event === 'finish') {
+							setTimeout(() => {
+								if (!loop && !autoPlay && currentState !== 'loading') {
+									stopAnimation();
+								}
+								onAnimationEnd?.();
+							}, duration);
+						}
+					}
+				} as Animation;
 				
-				currentAnimation = path.animate([
-					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
-					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
-					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
-				], {
-					duration: duration,
-					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-					easing: 'ease-in-out'
-				});
-				
-				
-				currentAnimation.addEventListener('finish', () => {
+				// Auto-finish handling
+				setTimeout(() => {
 					if (!loop && !autoPlay && currentState !== 'loading') {
 						stopAnimation();
 					}
 					onAnimationEnd?.();
-				});
+				}, duration);
 			}
+		}
+	}
+	
+	function animateTrackHighlight(rect: Element) {
+		// Track dims to indicate deactivation
+		(rect as SVGElement).animate([
+			{ 
+				opacity: '1',
+				filter: 'drop-shadow(0 0 2px currentColor)'
+			},
+			{ 
+				opacity: '0.7',
+				filter: 'drop-shadow(0 0 1px currentColor)'
+			},
+			{ 
+				opacity: '1',
+				filter: 'drop-shadow(0 0 0px currentColor)'
+			}
+		], {
+			duration: duration * 0.4,
+			easing: 'ease-in-out',
+			fill: 'forwards'
+		});
+	}
+	
+	function animateCircleSlide(circle: Element) {
+		// Circle slides from right (cx=15) to left (cx=9)
+		(circle as SVGElement).animate([
+			{ 
+				transform: 'translateX(0px)',
+				filter: 'drop-shadow(0 0 2px currentColor)'
+			},
+			{ 
+				transform: 'translateX(-3px)',
+				filter: 'drop-shadow(0 0 4px currentColor)'
+			},
+			{ 
+				transform: 'translateX(-6px)',
+				filter: 'drop-shadow(0 0 1px currentColor)'
+			}
+		], {
+			duration: duration * 0.5,
+			easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+			fill: 'forwards'
+		});
+	}
+	
+	function stopToggleAnimations() {
+		if (svgRef) {
+			const allElements = svgRef.querySelectorAll('*');
+			allElements.forEach(element => {
+				(element as SVGElement).getAnimations().forEach(anim => anim.cancel());
+			});
 		}
 	}
 	
@@ -92,12 +158,21 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			const path = svgRef.querySelector('path');
-			if (path) {
-				
-				path.style.strokeDasharray = 'none';
-				path.style.strokeDashoffset = '';
-				path.style.opacity = '1';
+			// Stop all toggle animations
+			stopToggleAnimations();
+			
+			// Reset elements to default state
+			const circle = svgRef.querySelector('circle');
+			const rect = svgRef.querySelector('rect');
+			
+			if (circle) {
+				(circle as SVGElement).style.transform = '';
+				(circle as SVGElement).style.filter = '';
+			}
+			
+			if (rect) {
+				(rect as SVGElement).style.filter = '';
+				(rect as SVGElement).style.opacity = '1';
 			}
 		}
 	}

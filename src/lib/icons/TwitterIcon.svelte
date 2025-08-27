@@ -54,31 +54,131 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			const path = svgRef.querySelector('path');
-			if (path) {
+			const bird = svgRef.querySelector('.twitter-bird');
+			if (bird) {
+				// Phase 1: Bird appears and prepares to fly
+				setTimeout(() => {
+					animateBirdAppear();
+				}, 100);
 				
-				path.style.strokeDasharray = '80 80';
-				path.style.strokeDashoffset = '80';
-				path.style.opacity = '0.6';
+				// Phase 2: Flying motion
+				setTimeout(() => {
+					animateBirdFly();
+				}, duration * 0.3);
 				
+				// Phase 3: Gentle floating
+				setTimeout(() => {
+					animateBirdFloat();
+				}, duration * 0.7);
 				
-				currentAnimation = path.animate([
-					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
-					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
-					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
-				], {
-					duration: duration,
-					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-					easing: 'ease-in-out'
-				});
+				// Set up animation management
+				currentAnimation = {
+					cancel: () => {
+						stopBirdAnimations();
+					},
+					addEventListener: (event: string, callback: () => void) => {
+						if (event === 'finish') {
+							setTimeout(() => {
+								if (!loop && !autoPlay && currentState !== 'loading') {
+									stopAnimation();
+								}
+								onAnimationEnd?.();
+							}, duration);
+						}
+					}
+				} as Animation;
 				
-				
-				currentAnimation.addEventListener('finish', () => {
+				// Auto-finish handling
+				setTimeout(() => {
 					if (!loop && !autoPlay && currentState !== 'loading') {
 						stopAnimation();
 					}
 					onAnimationEnd?.();
-				});
+				}, duration);
+			}
+		}
+	}
+	
+	function animateBirdAppear() {
+		const bird = svgRef?.querySelector('.twitter-bird');
+		if (!bird) return;
+		
+		// Bird appears with a gentle scale-in
+		(bird as SVGElement).animate([
+			{ 
+				opacity: '0',
+				transform: 'scale(0.8) translateY(5px)'
+			},
+			{ 
+				opacity: '1',
+				transform: 'scale(1) translateY(0px)'
+			}
+		], {
+			duration: duration * 0.3,
+			easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+			fill: 'forwards'
+		});
+	}
+	
+	function animateBirdFly() {
+		const bird = svgRef?.querySelector('.twitter-bird');
+		if (!bird) return;
+		
+		// Flying motion with wing-like movement
+		(bird as SVGElement).animate([
+			{ 
+				transform: 'scale(1) translateY(0px) rotate(0deg)'
+			},
+			{ 
+				transform: 'scale(1.05) translateY(-2px) rotate(-2deg)'
+			},
+			{ 
+				transform: 'scale(0.98) translateY(1px) rotate(1deg)'
+			},
+			{ 
+				transform: 'scale(1.02) translateY(-1px) rotate(-1deg)'
+			},
+			{ 
+				transform: 'scale(1) translateY(0px) rotate(0deg)'
+			}
+		], {
+			duration: duration * 0.4,
+			easing: 'ease-in-out'
+		});
+	}
+	
+	function animateBirdFloat() {
+		const bird = svgRef?.querySelector('.twitter-bird');
+		if (!bird) return;
+		
+		// Gentle floating motion
+		(bird as SVGElement).animate([
+			{ 
+				transform: 'scale(1) translateY(0px)'
+			},
+			{ 
+				transform: 'scale(1.01) translateY(-1px)'
+			},
+			{ 
+				transform: 'scale(1) translateY(0px)'
+			},
+			{ 
+				transform: 'scale(0.99) translateY(0.5px)'
+			},
+			{ 
+				transform: 'scale(1) translateY(0px)'
+			}
+		], {
+			duration: duration * 0.3,
+			easing: 'ease-in-out'
+		});
+	}
+	
+	function stopBirdAnimations() {
+		if (svgRef) {
+			const bird = svgRef.querySelector('.twitter-bird');
+			if (bird) {
+				(bird as SVGElement).getAnimations().forEach(anim => anim.cancel());
 			}
 		}
 	}
@@ -92,12 +192,14 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			const path = svgRef.querySelector('path');
-			if (path) {
-				
-				path.style.strokeDasharray = 'none';
-				path.style.strokeDashoffset = '';
-				path.style.opacity = '1';
+			// Stop bird animations
+			stopBirdAnimations();
+			
+			// Reset bird to default state
+			const bird = svgRef.querySelector('.twitter-bird');
+			if (bird) {
+				(bird as SVGElement).style.transform = '';
+				(bird as SVGElement).style.opacity = '1';
 			}
 		}
 	}
@@ -201,8 +303,6 @@
 			currentState
 		};
 	}
-	// Element references for animation
-	let pathRef = $state<SVGPathElement>();
 </script>
 <div 
   bind:this={containerRef}
@@ -222,17 +322,13 @@
     width={size}
     height={size}
     viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
+    fill="currentColor"
+    stroke="none"
   >
-<path
-      bind:this={pathRef}
-      d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 
-         106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 
-         389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"
+    <!-- Twitter bird path adapted for 24x24 viewBox -->
+    <path 
+      d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"
+      class="twitter-bird"
     />
   </svg>
 </div>

@@ -54,32 +54,106 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			const path = svgRef.querySelector('path');
-			if (path) {
+			const door = svgRef.querySelector('.vault-door');
+			const handle = svgRef.querySelector('.handle');
+			const lockOuter = svgRef.querySelector('.lock-outer');
+			const lockInner = svgRef.querySelector('.lock-inner');
+			
+			if (door && handle && lockOuter && lockInner) {
+				// Phase 1: Lock spinning
+				setTimeout(() => {
+					animateLockSpinning(lockOuter, lockInner);
+				}, 100);
 				
-				path.style.strokeDasharray = '80 80';
-				path.style.strokeDashoffset = '80';
-				path.style.opacity = '0.6';
+				// Phase 2: Door opening
+				setTimeout(() => {
+					animateDoorOpening(door, handle);
+				}, duration * 0.4);
 				
+				// Set up animation management
+				currentAnimation = {
+					cancel: () => {
+						stopVaultAnimations();
+					},
+					addEventListener: (event: string, callback: () => void) => {
+						if (event === 'finish') {
+							setTimeout(() => {
+								if (!loop && !autoPlay && currentState !== 'loading') {
+									stopAnimation();
+								}
+								onAnimationEnd?.();
+							}, duration);
+						}
+					}
+				} as Animation;
 				
-				currentAnimation = path.animate([
-					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
-					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
-					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
-				], {
-					duration: duration,
-					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
-					easing: 'ease-in-out'
-				});
-				
-				
-				currentAnimation.addEventListener('finish', () => {
+				// Auto-finish handling
+				setTimeout(() => {
 					if (!loop && !autoPlay && currentState !== 'loading') {
 						stopAnimation();
 					}
 					onAnimationEnd?.();
-				});
+				}, duration);
 			}
+		}
+	}
+	
+	function animateLockSpinning(lockOuter: Element, lockInner: Element) {
+		// Outer lock rotates
+		(lockOuter as SVGElement).style.transformOrigin = '12px 12px';
+		(lockOuter as SVGElement).animate([
+			{ transform: 'rotate(0deg)' },
+			{ transform: 'rotate(180deg)' },
+			{ transform: 'rotate(360deg)' }
+		], {
+			duration: duration * 0.3,
+			easing: 'ease-in-out'
+		});
+		
+		// Inner lock counter-rotates
+		(lockInner as SVGElement).style.transformOrigin = '12px 12px';
+		(lockInner as SVGElement).animate([
+			{ transform: 'rotate(0deg)' },
+			{ transform: 'rotate(-90deg)' },
+			{ transform: 'rotate(-180deg)' }
+		], {
+			duration: duration * 0.3,
+			easing: 'ease-in-out'
+		});
+	}
+	
+	function animateDoorOpening(door: Element, handle: Element) {
+		// Set pivot point at the left edge (hinges)
+		(door as SVGElement).style.transformOrigin = '5px 12px';
+		(handle as SVGElement).style.transformOrigin = '5px 12px';
+		
+		// Door opens
+		(door as SVGElement).animate([
+			{ transform: 'rotateY(0deg)' },
+			{ transform: 'rotateY(-120deg)' }
+		], {
+			duration: duration * 0.5,
+			easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+			fill: 'forwards'
+		});
+		
+		// Handle follows door
+		(handle as SVGElement).animate([
+			{ transform: 'rotateY(0deg)' },
+			{ transform: 'rotateY(-120deg)' }
+		], {
+			duration: duration * 0.5,
+			easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+			fill: 'forwards'
+		});
+	}
+	
+	function stopVaultAnimations() {
+		if (svgRef) {
+			const allElements = svgRef.querySelectorAll('*');
+			allElements.forEach(element => {
+				(element as SVGElement).getAnimations().forEach(anim => anim.cancel());
+			});
 		}
 	}
 	
@@ -92,13 +166,16 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			const path = svgRef.querySelector('path');
-			if (path) {
-				
-				path.style.strokeDasharray = 'none';
-				path.style.strokeDashoffset = '';
-				path.style.opacity = '1';
-			}
+			// Stop all animations
+			stopVaultAnimations();
+			
+			// Reset all elements to default state
+			const allElements = svgRef.querySelectorAll('*');
+			allElements.forEach(element => {
+				const el = element as SVGElement;
+				el.style.transform = '';
+				el.style.transformOrigin = '';
+			});
 		}
 	}
 	
@@ -226,5 +303,21 @@
     stroke-linecap="round"
     stroke-linejoin="round"
   >
+    <!-- Vault body -->
+    <rect x="3" y="4" width="18" height="16" rx="2" class="vault-body" />
+    
+    <!-- Vault door -->
+    <rect x="5" y="6" width="14" height="12" rx="1" class="vault-door" />
+    
+    <!-- Door handle -->
+    <circle cx="16" cy="12" r="1.5" class="handle" />
+    
+    <!-- Lock mechanism -->
+    <circle cx="12" cy="12" r="3" class="lock-outer" />
+    <circle cx="12" cy="12" r="1" class="lock-inner" />
+    
+    <!-- Hinges -->
+    <rect x="4.5" y="8" width="0.5" height="2" class="hinge" />
+    <rect x="4.5" y="14" width="0.5" height="2" class="hinge" />
   </svg>
 </div>

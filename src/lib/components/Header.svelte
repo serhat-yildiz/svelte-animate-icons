@@ -9,22 +9,19 @@
 	let logoIconRef: any;
 	let githubIconRef: any;
 	let heartIconRef: any;
+	let starButtonRef: HTMLElement;
+	let isStarHovered = $state(false);
 	
-	// GitHub API'den gerçek yıldız sayısını al
 	async function fetchStarCount() {
 		try {
 			const response = await fetch('https://api.github.com/repos/serhat-yildiz/svelte-animate-icons');
 			const data = await response.json();
 			starCount = data.stargazers_count || 0;
-			console.log('GitHub stars:', starCount); // Debug için
 		} catch (error) {
-			console.log('Star count fetch failed:', error);
-			// Geçici olarak test değeri atalım
 			starCount = 1;
 		}
 	}
 	
-	// Component mount olduğunda yıldız sayısını al
 	$effect(() => {
 		fetchStarCount();
 	});
@@ -39,6 +36,39 @@
 			element.scrollIntoView({ behavior: 'smooth' });
 		}
 		mobileMenuOpen = false;
+	}
+
+	function handleStarHover() {
+		isStarHovered = true;
+		githubIconRef?.start();
+		heartIconRef?.start();
+		
+		if (starButtonRef) {
+			starButtonRef.style.transform = 'scale(1.05)';
+		}
+	}
+
+	function handleStarLeave() {
+		isStarHovered = false;
+		githubIconRef?.stop();
+		heartIconRef?.stop();
+		
+		if (starButtonRef) {
+			starButtonRef.style.transform = 'scale(1)';
+		}
+	}
+
+	function handleStarClick() {
+		if (starButtonRef) {
+			starButtonRef.style.transform = 'scale(0.95)';
+			setTimeout(() => {
+				if (starButtonRef) {
+					starButtonRef.style.transform = isStarHovered ? 'scale(1.05)' : 'scale(1)';
+				}
+			}, 150);
+		}
+		
+		heartIconRef?.start();
 	}
 </script>
 
@@ -80,24 +110,21 @@
 			<!-- Action Buttons -->
 			<div class="actions">
 				<a 
+					bind:this={starButtonRef}
 					href="https://github.com/serhat-yildiz/svelte-animate-icons" 
 					target="_blank" 
 					rel="noopener noreferrer"
 					class="github-link btn-secondary"
-					onmouseenter={() => {
-						githubIconRef?.start();
-						heartIconRef?.start();
-					}}
-					onmouseleave={() => {
-						githubIconRef?.stop();
-						heartIconRef?.stop();
-					}}
+					class:hovered={isStarHovered}
+					onmouseenter={handleStarHover}
+					onmouseleave={handleStarLeave}
+					onclick={handleStarClick}
 				>
 					<GithubIcon bind:this={githubIconRef} size={20} triggers={{ custom: true }} />
 					<span class="hide-mobile">GitHub</span>
-					<div class="star-count hide-mobile">
+					<div class="star-count hide-mobile" class:animated={isStarHovered}>
 						<HeartIcon bind:this={heartIconRef} size={14} triggers={{ custom: true }} />
-						<span>{starCount}</span>
+						<span class="star-number">{starCount}</span>
 					</div>
 				</a>
 				
@@ -229,12 +256,44 @@
 		align-items: center;
 		gap: 4px;
 		margin-left: var(--space-sm);
-		padding: 2px 6px;
+		padding: 3px 8px;
 		background: rgba(255, 255, 255, 0.1);
-		border-radius: 12px;
+		border-radius: 14px;
 		font-size: 0.75rem;
 		font-weight: 600;
 		color: var(--text-primary);
+		transition: all var(--transition-normal);
+		backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		position: relative;
+		overflow: hidden;
+	}
+
+	.star-count.animated {
+		background: linear-gradient(135deg, rgba(255, 62, 0, 0.2), rgba(255, 136, 77, 0.2));
+		border-color: rgba(255, 136, 77, 0.3);
+		box-shadow: 0 0 20px rgba(255, 136, 77, 0.3);
+	}
+
+	.star-count::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: -100%;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+		transition: left 0.6s ease;
+	}
+
+	.star-count.animated::before {
+		left: 100%;
+	}
+
+	.star-number {
+		position: relative;
+		z-index: 1;
+		transition: all var(--transition-normal);
 	}
 	
 
@@ -244,6 +303,22 @@
 		align-items: center;
 		gap: var(--space-sm);
 		text-decoration: none;
+		transition: all var(--transition-normal);
+		transform-origin: center;
+		position: relative;
+	}
+
+	.github-link:hover {
+		transform: translateY(-1px);
+	}
+
+	.github-link.hovered {
+		animation: gentle-pulse 2s ease-in-out infinite;
+	}
+
+	@keyframes gentle-pulse {
+		0%, 100% { transform: translateY(-1px) scale(1); }
+		50% { transform: translateY(-1px) scale(1.02); }
 	}
 	
 	.mobile-menu-btn {

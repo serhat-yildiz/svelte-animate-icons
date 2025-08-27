@@ -54,31 +54,205 @@
 			isAnimating = true;
 			onAnimationStart?.();
 			
-			const path = svgRef.querySelector('path');
-			if (path) {
+			// Create dynamic WiFi signal arcs that will disappear
+			createWifiSignals();
+			
+			const dot = svgRef.querySelector('path');
+			if (dot) {
+				// Phase 1: WiFi signals appear and fluctuate
+				setTimeout(() => {
+					animateWifiSignalLoss();
+				}, 200);
 				
-				path.style.strokeDasharray = '80 80';
-				path.style.strokeDashoffset = '80';
-				path.style.opacity = '0.6';
-				
-				
-				currentAnimation = path.animate([
-					{ strokeDasharray: '80 80', strokeDashoffset: '80', opacity: '0.6' },
-					{ strokeDasharray: '80 80', strokeDashoffset: '0', opacity: '1' },
-					{ strokeDasharray: '80 80', strokeDashoffset: '-80', opacity: '0.6' }
+				// Phase 2: Dot pulses as signals disappear
+				setTimeout(() => {
+					animateDotPulse();
+				}, duration * 0.6);
+			}
+			
+			// Set up cleanup
+			currentAnimation = {
+				cancel: () => {
+					clearDynamicElements();
+				},
+				addEventListener: (event: string, callback: () => void) => {
+					if (event === 'finish') {
+						setTimeout(() => {
+							if (!loop && !autoPlay && currentState !== 'loading') {
+								stopAnimation();
+							}
+							onAnimationEnd?.();
+						}, duration);
+					}
+				}
+			} as Animation;
+			
+			// Auto-finish handling
+			setTimeout(() => {
+				if (!loop && !autoPlay && currentState !== 'loading') {
+					stopAnimation();
+				}
+				onAnimationEnd?.();
+			}, duration);
+		}
+	}
+	
+	function createWifiSignals() {
+		if (!svgRef) return;
+		
+		// Create 3 concentric WiFi arcs
+		const signals = [
+			{ radius: 6, opacity: 0.8, delay: 0 },
+			{ radius: 9, opacity: 0.6, delay: 100 },
+			{ radius: 12, opacity: 0.4, delay: 200 }
+		];
+		
+		signals.forEach((signal, index) => {
+			const arc = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+			arc.setAttribute('d', `M ${12 - signal.radius} ${20 - signal.radius} Q 12 ${20 - signal.radius * 1.5} ${12 + signal.radius} ${20 - signal.radius}`);
+			arc.setAttribute('stroke', 'currentColor');
+			arc.setAttribute('stroke-width', '2');
+			arc.setAttribute('stroke-linecap', 'round');
+			arc.setAttribute('fill', 'none');
+			arc.setAttribute('opacity', '0');
+			arc.classList.add('wifi-signal', `signal-${index}`);
+			
+			// Set initial dash properties
+			const pathLength = arc.getTotalLength();
+			arc.style.strokeDasharray = `${pathLength}`;
+			arc.style.strokeDashoffset = `${pathLength}`;
+			arc.style.filter = 'drop-shadow(0 0 2px currentColor)';
+			
+			svgRef.appendChild(arc);
+		});
+	}
+	
+	function animateWifiSignalLoss() {
+		if (!svgRef) return;
+		
+		const signals = svgRef.querySelectorAll('.wifi-signal');
+		
+		// Phase 1: Signals appear
+		signals.forEach((signal, index) => {
+			const arc = signal as SVGPathElement;
+			const pathLength = arc.getTotalLength();
+			
+			setTimeout(() => {
+				// Draw in the signal
+				arc.animate([
+					{ 
+						strokeDashoffset: `${pathLength}`, 
+						opacity: '0',
+						transform: 'scale(0.8)',
+						filter: 'drop-shadow(0 0 2px currentColor)'
+					},
+					{ 
+						strokeDashoffset: '0', 
+						opacity: index === 0 ? '0.8' : index === 1 ? '0.6' : '0.4',
+						transform: 'scale(1)',
+						filter: 'drop-shadow(0 0 4px currentColor)'
+					}
 				], {
-					duration: duration,
-					iterations: loop || autoPlay || (currentState === 'loading') ? Infinity : 1,
+					duration: duration * 0.3,
+					easing: 'ease-out',
+					fill: 'forwards'
+				});
+			}, index * 150);
+		});
+		
+		// Phase 2: Signals flicker and weaken
+		setTimeout(() => {
+			signals.forEach((signal, index) => {
+				const arc = signal as SVGPathElement;
+				
+				arc.animate([
+					{ opacity: index === 0 ? '0.8' : index === 1 ? '0.6' : '0.4' },
+					{ opacity: '0.2' },
+					{ opacity: index === 0 ? '0.6' : index === 1 ? '0.4' : '0.2' },
+					{ opacity: '0.1' },
+					{ opacity: index === 0 ? '0.4' : index === 1 ? '0.2' : '0.1' }
+				], {
+					duration: duration * 0.3,
 					easing: 'ease-in-out'
 				});
+			});
+		}, duration * 0.3);
+		
+		// Phase 3: Signals disappear one by one (furthest first)
+		setTimeout(() => {
+			[...signals].reverse().forEach((signal, index) => {
+				const arc = signal as SVGPathElement;
 				
-				
-				currentAnimation.addEventListener('finish', () => {
-					if (!loop && !autoPlay && currentState !== 'loading') {
-						stopAnimation();
-					}
-					onAnimationEnd?.();
-				});
+				setTimeout(() => {
+					arc.animate([
+						{ 
+							opacity: arc.style.opacity || '0.4',
+							transform: 'scale(1)',
+							filter: 'drop-shadow(0 0 4px currentColor)'
+						},
+						{ 
+							opacity: '0',
+							transform: 'scale(0.7)',
+							filter: 'none'
+						}
+					], {
+						duration: duration * 0.2,
+						easing: 'ease-in',
+						fill: 'forwards'
+					});
+				}, index * 200);
+			});
+		}, duration * 0.5);
+	}
+	
+	function animateDotPulse() {
+		const dot = svgRef?.querySelector('path[d*="M12 20h.01"]');
+		if (!dot) return;
+		
+		// Dot becomes more prominent as signals disappear
+		(dot as SVGPathElement).animate([
+			{ 
+				opacity: '1',
+				transform: 'scale(1)',
+				filter: 'none'
+			},
+			{ 
+				opacity: '0.5',
+				transform: 'scale(1.5)',
+				filter: 'drop-shadow(0 0 3px currentColor)'
+			},
+			{ 
+				opacity: '1',
+				transform: 'scale(1)',
+				filter: 'drop-shadow(0 0 1px currentColor)'
+			},
+			{ 
+				opacity: '0.7',
+				transform: 'scale(1.2)',
+				filter: 'drop-shadow(0 0 2px currentColor)'
+			},
+			{ 
+				opacity: '1',
+				transform: 'scale(1)',
+				filter: 'none'
+			}
+		], {
+			duration: duration * 0.4,
+			easing: 'ease-in-out'
+		});
+	}
+	
+	function clearDynamicElements() {
+		if (svgRef) {
+			const signals = svgRef.querySelectorAll('.wifi-signal');
+			signals.forEach(signal => {
+				signal.getAnimations().forEach(anim => anim.cancel());
+				signal.remove();
+			});
+			
+			const dot = svgRef.querySelector('path[d*="M12 20h.01"]');
+			if (dot) {
+				(dot as SVGPathElement).getAnimations().forEach(anim => anim.cancel());
 			}
 		}
 	}
@@ -92,12 +266,17 @@
 		if (svgRef) {
 			isAnimating = false;
 			
-			const path = svgRef.querySelector('path');
-			if (path) {
-				
-				path.style.strokeDasharray = 'none';
-				path.style.strokeDashoffset = '';
-				path.style.opacity = '1';
+			// Clear dynamic WiFi signals
+			clearDynamicElements();
+			
+			// Reset the original dot
+			const dot = svgRef.querySelector('path[d*="M12 20h.01"]');
+			if (dot) {
+				const dotElement = dot as SVGPathElement;
+				dotElement.style.opacity = '1';
+				dotElement.style.transform = '';
+				dotElement.style.filter = '';
+				dotElement.getAnimations().forEach(anim => anim.cancel());
 			}
 		}
 	}
