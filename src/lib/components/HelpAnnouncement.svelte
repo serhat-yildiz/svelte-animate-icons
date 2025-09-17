@@ -1,8 +1,13 @@
 <script lang="ts">
+  import { CircleAlertIcon, TriangleAlertIcon } from '$lib';
   import { onMount } from 'svelte';
 
-  let isVisible = true;
-  let isDismissed = false;
+  let isVisible = $state(true);
+  let isDismissed = $state(false);
+
+  // Icon refs for programmatic control
+  let triangleIconRef: any;
+  let circleIconRef: any;
 
   onMount(() => {
     // Check if user has already dismissed the announcement
@@ -24,14 +29,37 @@
     isDismissed = false;
     localStorage.removeItem('help-announcement-dismissed');
   }
+
+  // Hover functions
+  function handleBannerMouseEnter() {
+    triangleIconRef?.start?.();
+  }
+
+  function handleBannerMouseLeave() {
+    triangleIconRef?.stop?.();
+  }
+
+  function handleButtonMouseEnter() {
+    circleIconRef?.start?.();
+  }
+
+  function handleButtonMouseLeave() {
+    circleIconRef?.stop?.();
+  }
 </script>
 
 {#if isVisible && !isDismissed}
-  <div class="announcement">
+  <div
+    class="announcement"
+    onmouseenter={handleBannerMouseEnter}
+    onmouseleave={handleBannerMouseLeave}
+  >
     <div class="announcement-content">
-      <div class="announcement-icon">🚨</div>
+      <div class="announcement-icon">
+        <TriangleAlertIcon bind:this={triangleIconRef} size={32} />
+      </div>
       <div class="announcement-text">
-        <h3>Help Wanted! 🎯</h3>
+        <h3>Help Wanted!</h3>
         <p>
           We need your help to fix <strong>689 TypeScript errors</strong> and get
           this library production-ready! Join our community effort to make Svelte
@@ -50,6 +78,7 @@
         </div>
       </div>
       <button
+        type="button"
         class="dismiss-btn"
         onclick={dismissAnnouncement}
         aria-label="Dismiss announcement"
@@ -72,22 +101,14 @@
 
 {#if isDismissed}
   <button
+    type="button"
     class="show-announcement-btn"
     onclick={showAnnouncement}
     title="Show help announcement"
+    onmouseenter={handleButtonMouseEnter}
+    onmouseleave={handleButtonMouseLeave}
   >
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-    >
-      <circle cx="12" cy="12" r="10"></circle>
-      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-      <line x1="12" y1="17" x2="12.01" y2="17"></line>
-    </svg>
+    <CircleAlertIcon bind:this={circleIconRef} size={20} />
     Help Wanted
   </button>
 {/if}
@@ -126,8 +147,8 @@
   }
 
   .announcement-icon {
-    font-size: 2rem;
     animation: pulse 2s infinite;
+    color: white;
   }
 
   @keyframes pulse {
@@ -216,7 +237,7 @@
 
   .show-announcement-btn {
     position: fixed;
-    top: 1rem;
+    top: 7rem;
     right: 1rem;
     background: #ff3e00;
     color: white;
@@ -251,7 +272,7 @@
     }
 
     .show-announcement-btn {
-      top: 0.5rem;
+      top: 6rem;
       right: 0.5rem;
       padding: 0.5rem 0.75rem;
       font-size: 0.875rem;

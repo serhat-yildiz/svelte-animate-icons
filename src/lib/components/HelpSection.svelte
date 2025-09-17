@@ -1,7 +1,25 @@
 <script lang="ts">
+  import {
+    BookIcon,
+    CircleAlertIcon,
+    CopyIcon,
+    GithubIcon,
+    StarIcon,
+    TriangleAlertIcon,
+    UsersIcon,
+  } from '$lib';
   import { onMount } from 'svelte';
 
   let helpSection: HTMLElement;
+
+  // Icon refs for programmatic control
+  let triangleIconRef: any;
+  let circleIconRef: any;
+  let starIconRef: any;
+  let bookIconRef: any;
+  let usersIconRef: any;
+  let githubIconRef: any;
+  let copyIconRef: any;
 
   onMount(() => {
     // Smooth scroll to help section when announcement is clicked
@@ -18,12 +36,33 @@
       window.removeEventListener('hashchange', handleHashChange);
     };
   });
+
+  // Hover functions for cards
+  function handleCardMouseEnter(iconRef: any) {
+    iconRef?.start?.();
+  }
+
+  function handleCardMouseLeave(iconRef: any) {
+    iconRef?.stop?.();
+  }
+
+  // Hover functions for buttons
+  function handleButtonMouseEnter(iconRef: any) {
+    iconRef?.start?.();
+  }
+
+  function handleButtonMouseLeave(iconRef: any) {
+    iconRef?.stop?.();
+  }
 </script>
 
 <section id="help-section" bind:this={helpSection} class="help-section">
   <div class="container">
     <div class="help-header">
-      <h2>🤝 Help Wanted!</h2>
+      <div class="help-title-icon">
+        <UsersIcon bind:this={usersIconRef} size={48} />
+      </div>
+      <h2 class="help-title">Help Wanted!</h2>
       <p class="help-subtitle">
         We need your help to fix <strong>689 TypeScript errors</strong> and get this
         library production-ready!
@@ -31,8 +70,14 @@
     </div>
 
     <div class="help-grid">
-      <div class="help-card">
-        <div class="help-icon">🚨</div>
+      <div
+        class="help-card"
+        onmouseenter={() => handleCardMouseEnter(triangleIconRef)}
+        onmouseleave={() => handleCardMouseLeave(triangleIconRef)}
+      >
+        <div class="help-icon">
+          <TriangleAlertIcon bind:this={triangleIconRef} size={40} />
+        </div>
         <h3>Current Issues</h3>
         <ul>
           <li>Interface export issues (689 errors)</li>
@@ -42,8 +87,14 @@
         </ul>
       </div>
 
-      <div class="help-card">
-        <div class="help-icon">🎯</div>
+      <div
+        class="help-card"
+        onmouseenter={() => handleCardMouseEnter(circleIconRef)}
+        onmouseleave={() => handleCardMouseLeave(circleIconRef)}
+      >
+        <div class="help-icon">
+          <CircleAlertIcon bind:this={circleIconRef} size={40} />
+        </div>
         <h3>How to Help</h3>
         <ol>
           <li>Fork the repository</li>
@@ -56,8 +107,14 @@
         </ol>
       </div>
 
-      <div class="help-card">
-        <div class="help-icon">🎁</div>
+      <div
+        class="help-card"
+        onmouseenter={() => handleCardMouseEnter(starIconRef)}
+        onmouseleave={() => handleCardMouseLeave(starIconRef)}
+      >
+        <div class="help-icon">
+          <StarIcon bind:this={starIconRef} size={40} />
+        </div>
         <h3>What You Get</h3>
         <ul>
           <li>✅ Contributor credit</li>
@@ -68,8 +125,14 @@
         </ul>
       </div>
 
-      <div class="help-card">
-        <div class="help-icon">📚</div>
+      <div
+        class="help-card"
+        onmouseenter={() => handleCardMouseEnter(bookIconRef)}
+        onmouseleave={() => handleCardMouseLeave(bookIconRef)}
+      >
+        <div class="help-icon">
+          <BookIcon bind:this={bookIconRef} size={40} />
+        </div>
         <h3>Resources</h3>
         <ul>
           <li>
@@ -110,19 +173,10 @@
         class="btn-primary"
         target="_blank"
         rel="noopener"
+        onmouseenter={() => handleButtonMouseEnter(githubIconRef)}
+        onmouseleave={() => handleButtonMouseLeave(githubIconRef)}
       >
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <path
-            d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"
-          ></path>
-        </svg>
+        <GithubIcon bind:this={githubIconRef} size={20} />
         View on GitHub
       </a>
       <a
@@ -130,26 +184,10 @@
         class="btn-secondary"
         target="_blank"
         rel="noopener"
+        onmouseenter={() => handleButtonMouseEnter(copyIconRef)}
+        onmouseleave={() => handleButtonMouseLeave(copyIconRef)}
       >
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
-          <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
-          <path d="M4 22h16"></path>
-          <path
-            d="M10 14.66V17c0 .55-.47.98-.97 1.21l-1.25.5c-.5.2-1.28.2-1.78 0l-1.25-.5c-.5-.23-.97-.66-.97-1.21v-2.34"
-          ></path>
-          <path
-            d="M14 14.66V17c0 .55.47.98.97 1.21l1.25.5c.5.2 1.28.2 1.78 0l1.25-.5c.5-.23.97-.66.97-1.21v-2.34"
-          ></path>
-          <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
-        </svg>
+        <CopyIcon bind:this={copyIconRef} size={20} />
         Fork Repository
       </a>
     </div>
@@ -165,9 +203,18 @@
 
 <style>
   .help-section {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: radial-gradient(
+        circle at 20% 20%,
+        rgba(255, 62, 0, 0.05) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 80% 80%,
+        rgba(255, 107, 53, 0.05) 0%,
+        transparent 50%
+      );
     padding: 4rem 0;
-    border-top: 1px solid #dee2e6;
+    border-top: 1px solid #e5e7eb;
   }
 
   .container {
@@ -181,18 +228,25 @@
     margin-bottom: 3rem;
   }
 
-  .help-header h2 {
+  .help-title-icon {
+    margin-bottom: 1rem;
+    color: #ff3e00;
+  }
+
+  .help-header .help-title {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #212529;
+    color: #e5e7eb;
     margin: 0 0 1rem 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
   .help-subtitle {
     font-size: 1.25rem;
-    color: #6c757d;
+    color: #e5e7eb;
     margin: 0;
     line-height: 1.6;
+    font-weight: 500;
   }
 
   .help-grid {
@@ -203,11 +257,11 @@
   }
 
   .help-card {
-    background: white;
+    background: #f8fafc;
     padding: 2rem;
-    border-radius: 1rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    border: 1px solid #e9ecef;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
     transition: all 0.3s ease;
   }
 
@@ -217,25 +271,27 @@
   }
 
   .help-icon {
-    font-size: 3rem;
     margin-bottom: 1rem;
     text-align: center;
+    color: #ff3e00;
   }
 
   .help-card h3 {
     font-size: 1.5rem;
     font-weight: 600;
-    color: #212529;
+    color: #1a1a1a;
     margin: 0 0 1rem 0;
     text-align: center;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 
   .help-card ul,
   .help-card ol {
     margin: 0;
     padding-left: 1.5rem;
-    color: #495057;
+    color: #4a5568;
     line-height: 1.6;
+    font-weight: 500;
   }
 
   .help-card li {
@@ -243,21 +299,24 @@
   }
 
   .help-card code {
-    background: #f8f9fa;
+    background: rgba(255, 62, 0, 0.1);
     padding: 0.25rem 0.5rem;
     border-radius: 0.25rem;
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     font-size: 0.875rem;
-    color: #e83e8c;
+    color: #ff3e00;
+    font-weight: 600;
   }
 
   .help-card a {
-    color: #007bff;
+    color: #ff3e00;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
+    transition: color 0.2s ease;
   }
 
   .help-card a:hover {
+    color: #e63500;
     text-decoration: underline;
   }
 
@@ -312,15 +371,17 @@
   .help-footer {
     text-align: center;
     padding: 2rem;
-    background: white;
-    border-radius: 1rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
   }
 
   .help-footer p {
     margin: 0;
-    color: #495057;
+    color: #4a5568;
     font-size: 1.1rem;
+    font-weight: 500;
   }
 
   @media (max-width: 768px) {
@@ -334,6 +395,7 @@
 
     .help-header h2 {
       font-size: 2rem;
+      color: #e5e7eb;
     }
 
     .help-subtitle {

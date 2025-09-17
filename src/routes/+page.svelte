@@ -122,8 +122,8 @@
   <main>
     <Hero />
     <InstallSection />
-    <IconGallery />
     <HelpSection />
+    <IconGallery />
   </main>
   <Footer />
 </div>
