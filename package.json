@@ -1,6 +1,6 @@
 {
   "name": "svelte-animate-icons",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "type": "module",
   "description": "551 animated SVG icons for Svelte 5 with Web Animations API - hover, click, state-based animations, TypeScript ready",
   "author": {
