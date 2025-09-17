@@ -4,10 +4,16 @@ Powerful animated SVG icons for Svelte 5 with flexible animation control.
 
 [![npm version](https://badge.fury.io/js/svelte-animate-icons.svg)](https://badge.fury.io/js/svelte-animate-icons)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Downloads](https://img.shields.io/npm/dm/svelte-animate-icons.svg)](https://www.npmjs.com/package/svelte-animate-icons)
+[![Bundle Size](https://img.shields.io/bundlephobia/minzip/svelte-animate-icons)](https://bundlephobia.com/package/svelte-animate-icons)
+[![Svelte 5](https://img.shields.io/badge/Svelte-5-orange)](https://svelte.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue)](https://www.typescriptlang.org/)
+[![Help Wanted](https://img.shields.io/badge/Help-Wanted-red)](https://github.com/serhat-yildiz/svelte-animate-icons/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
+[![Good First Issue](https://img.shields.io/badge/Good%20First-Issue-green)](https://github.com/serhat-yildiz/svelte-animate-icons/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
 
 ## Features
 
-- **550+ animated icons** - Beautiful SVG icons with multiple animation triggers
+- **551 animated icons** - Beautiful SVG icons with multiple animation triggers
 - **Lightning fast** - Built with Web Animations API for 60fps performance
 - **Svelte 5 ready** - Modern runes system and reactivity
 - **Flexible control** - Hover, click, focus, state-based, and programmatic animations
@@ -89,6 +95,7 @@ triggers: {
 - `'success'` - Brief animation then stop
 - `'error'` - Brief animation then stop
 - `'active'` - Continuous animation
+- `'running'` - Alternative continuous animation state
 
 ### Methods (when using bind:this)
 
@@ -167,7 +174,7 @@ triggers: {
 
 ## Available Icons
 
-Browse all 550+ icons at: [Icon Gallery](https://serhat-yildiz.github.io/svelte-animate-icons/#gallery)
+Browse all 551 icons at: [Icon Gallery](https://serhat-yildiz.github.io/svelte-animate-icons/#gallery)
 
 ### Popular Icons
 
@@ -220,15 +227,23 @@ Browse all 550+ icons at: [Icon Gallery](https://serhat-yildiz.github.io/svelte-
 </div>
 ```
 
-### With Tailwind CSS
+### With CSS Frameworks
 
 ```svelte
 <script>
   import { ActivityIcon } from 'svelte-animate-icons';
 </script>
 
+<!-- With Tailwind CSS -->
 <ActivityIcon 
   class="text-blue-500 hover:text-blue-600" 
+  triggers={{ hover: true, click: true }}
+  size={24} 
+/>
+
+<!-- With custom CSS -->
+<ActivityIcon 
+  class="my-custom-icon" 
   triggers={{ hover: true, click: true }}
   size={24} 
 />
@@ -236,8 +251,8 @@ Browse all 550+ icons at: [Icon Gallery](https://serhat-yildiz.github.io/svelte-
 
 ## Bundle Size
 
-- **Individual icon**: ~2KB gzipped
-- **Core runtime**: ~5KB gzipped  
+- **Individual icon**: ~1.5KB gzipped
+- **Core runtime**: ~4.2KB gzipped  
 - **Animation system**: ~3KB gzipped
 - **Tree-shakeable**: Only import what you use
 
@@ -255,14 +270,31 @@ Modern browsers that support:
 - Svelte 5
 - Web Animations API
 - ES2020+
+- Node.js 18+
 
 ## License
 
 MIT © [Serhat YILDIZ](https://github.com/serhat-yildiz)
 
-## Contributing
+## 🤝 Contributing
 
-Contributions welcome! Please read our [contributing guide](CONTRIBUTING.md) first.
+We need your help to get this library production-ready! 
+
+**Current Priority:** Fix 689 TypeScript errors
+
+**How to help:**
+1. Visit our [live demo](https://serhat-yildiz.github.io/svelte-animate-icons/) and scroll to "Help Wanted" section
+2. Fork the repository
+3. Pick an icon file to fix
+4. Submit a PR and get contributor credit!
+
+**What you get:**
+- ✅ Contributor credit
+- ✅ Experience with Svelte 5
+- ✅ Access to 551 animated icons
+- ✅ Help build the Svelte ecosystem!
+
+Read our [contributing guide](CONTRIBUTING.md) for details.
 
 ## Links
 

@@ -1,16 +1,14 @@
 // Export types
-export type { 
-	AnimationDefinition, 
-	AnimationVariants, 
-	IconHandle, 
-	IconProps, 
-	IconMetadata 
+export type {
+  AnimationDefinition,
+  AnimationVariants,
+  IconHandle, IconMetadata, IconProps
 } from './types/index.js';
 
 // Export registry
 export * from './registry/iconRegistry.js';
 
-// Export all icons (552 total)
+// Export all icons (551 total)
 export { default as ActivityIcon } from './icons/ActivityIcon.svelte';
 export { default as AlarmClockCheckIcon } from './icons/AlarmClockCheckIcon.svelte';
 export { default as AlarmClockIcon } from './icons/AlarmClockIcon.svelte';
@@ -88,7 +86,12 @@ export { default as BookIcon } from './icons/BookIcon.svelte';
 export { default as BookImageIcon } from './icons/BookImageIcon.svelte';
 export { default as BookKeyIcon } from './icons/BookKeyIcon.svelte';
 export { default as BookLockIcon } from './icons/BookLockIcon.svelte';
+export { default as BookmarkCheckIcon } from './icons/BookmarkCheckIcon.svelte';
 export { default as BookMarkedIcon } from './icons/BookMarkedIcon.svelte';
+export { default as BookmarkIcon } from './icons/BookmarkIcon.svelte';
+export { default as BookmarkMinusIcon } from './icons/BookmarkMinusIcon.svelte';
+export { default as BookmarkPlusIcon } from './icons/BookmarkPlusIcon.svelte';
+export { default as BookmarkXIcon } from './icons/BookmarkXIcon.svelte';
 export { default as BookMinusIcon } from './icons/BookMinusIcon.svelte';
 export { default as BookOpenCheckIcon } from './icons/BookOpenCheckIcon.svelte';
 export { default as BookPlusIcon } from './icons/BookPlusIcon.svelte';
@@ -98,11 +101,6 @@ export { default as BookUp2Icon } from './icons/BookUp2Icon.svelte';
 export { default as BookUpIcon } from './icons/BookUpIcon.svelte';
 export { default as BookUserIcon } from './icons/BookUserIcon.svelte';
 export { default as BookXIcon } from './icons/BookXIcon.svelte';
-export { default as BookmarkCheckIcon } from './icons/BookmarkCheckIcon.svelte';
-export { default as BookmarkIcon } from './icons/BookmarkIcon.svelte';
-export { default as BookmarkMinusIcon } from './icons/BookmarkMinusIcon.svelte';
-export { default as BookmarkPlusIcon } from './icons/BookmarkPlusIcon.svelte';
-export { default as BookmarkXIcon } from './icons/BookmarkXIcon.svelte';
 export { default as BotOffIcon } from './icons/BotOffIcon.svelte';
 export { default as BoxesIcon } from './icons/BoxesIcon.svelte';
 export { default as BrainCogIcon } from './icons/BrainCogIcon.svelte';
@@ -148,7 +146,6 @@ export { default as CherryIcon } from './icons/CherryIcon.svelte';
 export { default as ChevronDownIcon } from './icons/ChevronDownIcon.svelte';
 export { default as ChevronLeftIcon } from './icons/ChevronLeftIcon.svelte';
 export { default as ChevronRightIcon } from './icons/ChevronRightIcon.svelte';
-export { default as ChevronUpIcon } from './icons/ChevronUpIcon.svelte';
 export { default as ChevronsDownIcon } from './icons/ChevronsDownIcon.svelte';
 export { default as ChevronsDownUpIcon } from './icons/ChevronsDownUpIcon.svelte';
 export { default as ChevronsLeftIcon } from './icons/ChevronsLeftIcon.svelte';
@@ -158,6 +155,7 @@ export { default as ChevronsRightIcon } from './icons/ChevronsRightIcon.svelte';
 export { default as ChevronsRightLeftIcon } from './icons/ChevronsRightLeftIcon.svelte';
 export { default as ChevronsUpDownIcon } from './icons/ChevronsUpDownIcon.svelte';
 export { default as ChevronsUpIcon } from './icons/ChevronsUpIcon.svelte';
+export { default as ChevronUpIcon } from './icons/ChevronUpIcon.svelte';
 export { default as ChromeIcon } from './icons/ChromeIcon.svelte';
 export { default as CigaretteOffIcon } from './icons/CigaretteOffIcon.svelte';
 export { default as CircleAlertIcon } from './icons/CircleAlertIcon.svelte';
@@ -302,11 +300,11 @@ export { default as InfinityIcon } from './icons/InfinityIcon.svelte';
 export { default as InfoIcon } from './icons/InfoIcon.svelte';
 export { default as InstagramIcon } from './icons/InstagramIcon.svelte';
 export { default as KanbanIcon } from './icons/KanbanIcon.svelte';
+export { default as KeyboardIcon } from './icons/KeyboardIcon.svelte';
+export { default as KeyboardOffIcon } from './icons/KeyboardOffIcon.svelte';
 export { default as KeyIcon } from './icons/KeyIcon.svelte';
 export { default as KeyRoundIcon } from './icons/KeyRoundIcon.svelte';
 export { default as KeySquareIcon } from './icons/KeySquareIcon.svelte';
-export { default as KeyboardIcon } from './icons/KeyboardIcon.svelte';
-export { default as KeyboardOffIcon } from './icons/KeyboardOffIcon.svelte';
 export { default as LandmarkIcon } from './icons/LandmarkIcon.svelte';
 export { default as LayersIcon } from './icons/LayersIcon.svelte';
 export { default as LayoutDashboardIcon } from './icons/LayoutDashboardIcon.svelte';
@@ -316,8 +314,8 @@ export { default as LayoutPanelTopIcon } from './icons/LayoutPanelTopIcon.svelte
 export { default as LayoutTemplateIcon } from './icons/LayoutTemplateIcon.svelte';
 export { default as LightbulbOffIcon } from './icons/LightbulbOffIcon.svelte';
 export { default as Link2OffIcon } from './icons/Link2OffIcon.svelte';
-export { default as LinkIcon } from './icons/LinkIcon.svelte';
 export { default as LinkedinIcon } from './icons/LinkedinIcon.svelte';
+export { default as LinkIcon } from './icons/LinkIcon.svelte';
 export { default as ListCheckIcon } from './icons/ListCheckIcon.svelte';
 export { default as ListChecksIcon } from './icons/ListChecksIcon.svelte';
 export { default as ListRestartIcon } from './icons/ListRestartIcon.svelte';
@@ -389,12 +387,12 @@ export { default as PanelRightCloseIcon } from './icons/PanelRightCloseIcon.svel
 export { default as PanelRightOpenIcon } from './icons/PanelRightOpenIcon.svelte';
 export { default as PanelTopCloseIcon } from './icons/PanelTopCloseIcon.svelte';
 export { default as PanelTopOpenIcon } from './icons/PanelTopOpenIcon.svelte';
-export { default as PenIcon } from './icons/PenIcon.svelte';
-export { default as PenLineIcon } from './icons/PenLineIcon.svelte';
-export { default as PenOffIcon } from './icons/PenOffIcon.svelte';
 export { default as PencilIcon } from './icons/PencilIcon.svelte';
 export { default as PencilLineIcon } from './icons/PencilLineIcon.svelte';
 export { default as PencilOffIcon } from './icons/PencilOffIcon.svelte';
+export { default as PenIcon } from './icons/PenIcon.svelte';
+export { default as PenLineIcon } from './icons/PenLineIcon.svelte';
+export { default as PenOffIcon } from './icons/PenOffIcon.svelte';
 export { default as PhilippinePesoIcon } from './icons/PhilippinePesoIcon.svelte';
 export { default as PhoneIcon } from './icons/PhoneIcon.svelte';
 export { default as PhoneOffIcon } from './icons/PhoneOffIcon.svelte';
@@ -536,10 +534,10 @@ export { default as UserRoundMinusIcon } from './icons/UserRoundMinusIcon.svelte
 export { default as UserRoundPenIcon } from './icons/UserRoundPenIcon.svelte';
 export { default as UserRoundXIcon } from './icons/UserRoundXIcon.svelte';
 export { default as UserSearchIcon } from './icons/UserSearchIcon.svelte';
-export { default as UserStarIcon } from './icons/UserStarIcon.svelte';
-export { default as UserXIcon } from './icons/UserXIcon.svelte';
 export { default as UsersIcon } from './icons/UsersIcon.svelte';
 export { default as UsersRoundIcon } from './icons/UsersRoundIcon.svelte';
+export { default as UserStarIcon } from './icons/UserStarIcon.svelte';
+export { default as UserXIcon } from './icons/UserXIcon.svelte';
 export { default as VaultIcon } from './icons/VaultIcon.svelte';
 export { default as VibrateIcon } from './icons/VibrateIcon.svelte';
 export { default as VibrateOffIcon } from './icons/VibrateOffIcon.svelte';

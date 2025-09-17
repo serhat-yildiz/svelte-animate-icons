@@ -24,6 +24,22 @@ Thank you for your interest in contributing!
 
 ## How to Contribute
 
+### 🚨 Current Priority: TypeScript Fixes
+
+We need help fixing TypeScript issues to get the library production-ready!
+
+**What we need:**
+- Fix interface export issues (689 errors)
+- Add proper SVG type casting
+- Ensure animation state consistency
+
+**How to help:**
+1. Look for issues labeled `help wanted` or `good first issue`
+2. Pick an icon file to fix
+3. Move interfaces to `<script context="module">`
+4. Add proper type casting for SVG elements
+5. Submit a PR!
+
 ### Adding New Icons
 
 1. Add your SVG icon to `src/lib/icons/`
