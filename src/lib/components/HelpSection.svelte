@@ -117,11 +117,11 @@
         </div>
         <h3>What You Get</h3>
         <ul>
-          <li>✅ Contributor credit</li>
-          <li>✅ Experience with Svelte 5</li>
-          <li>✅ Access to 551 animated icons</li>
-          <li>✅ Help build the Svelte ecosystem</li>
-          <li>✅ Portfolio project</li>
+          <li>Contributor credit</li>
+          <li>Experience with Svelte 5</li>
+          <li>Access to 551 animated icons</li>
+          <li>Help build the Svelte ecosystem</li>
+          <li>Portfolio project</li>
         </ul>
       </div>
 

@@ -276,7 +276,7 @@ Modern browsers that support:
 
 MIT © [Serhat YILDIZ](https://github.com/serhat-yildiz)
 
-## 🤝 Contributing
+## Contributing
 
 We need your help to get this library production-ready! 
 
@@ -289,10 +289,10 @@ We need your help to get this library production-ready!
 4. Submit a PR and get contributor credit!
 
 **What you get:**
-- ✅ Contributor credit
-- ✅ Experience with Svelte 5
-- ✅ Access to 551 animated icons
-- ✅ Help build the Svelte ecosystem!
+- Contributor credit
+- Experience with Svelte 5
+- Access to 551 animated icons
+- Help build the Svelte ecosystem!
 
 Read our [contributing guide](CONTRIBUTING.md) for details.
 
